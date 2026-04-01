@@ -1,69 +1,155 @@
-# Electrobun Starter
+# Piloto
 
-An opinionated starter template for building desktop applications with [Electrobun](https://electrobun.dev/).
+A powerful agentic development environment that makes multi-folder, multi-repo projects first-class in AI-assisted development.
 
-**Note:** Electrobun is NOT Electron. Do not use Electron APIs or patterns. See the [Electrobun docs](https://blackboard.sh/electrobun/docs/) for API reference.
+Modern agentic coding tools assume you're working in a single folder or monorepo. Real codebases don't work that way — separate repos for API and frontend, microservices spread across repositories, shared libraries living in their own homes. **Piloto** bridges that gap by letting you orchestrate multiple AI agents across multiple projects simultaneously, using Git worktrees to keep everything isolated and safe.
 
-## Create a New Project
+> **Status:** Early development (v0.1.0) · [Roadmap](#roadmap)
 
-**Option A — GitHub template** (requires the repo to be marked as a template in Settings):
+## Features
 
-```bash
-gh repo create my-app --template mattgi/electrobun-starter --clone
-cd my-app
-bun run scripts/init.ts myapp
-bun install
+- **Parallel agents with Git worktrees** — Run multiple AI agents side-by-side, each in its own worktree, so changes stay isolated until you're ready to merge.
+- **Multi-project workspaces** — Group related repos into a single workspace and spin up worktrees across all of them for cross-project features.
+- **Dual AI backend support** — Work with both [Codex CLI](https://github.com/openai/codex) and [Claude Code](https://docs.anthropic.com/en/docs/claude-code), with [ACP](https://github.com/anthropics/anthropic-cookbook/tree/main/misc/acp) integration.
+- **Diff view & change preview** — Review agent-generated changes before committing, with a built-in diff viewer.
+- **Integrated terminal** — Powered by [libghostty](https://github.com/ghostty-org/ghostty), embedded directly into the app via Zig FFI.
+- **MCP support** — Connect to [Model Context Protocol](https://modelcontextprotocol.io/) servers for extended tool capabilities.
+- **Skills** — Reusable prompt-based workflows that agents can leverage.
+
+## Tech Stack
+
+| Layer | Technology |
+|---|---|
+| Desktop runtime | [Electrobun](https://electrobun.dev/) (Bun + system WebView + Zig) |
+| Main process | Bun (TypeScript) |
+| UI framework | React 19 + Vite 6 |
+| Styling | Tailwind CSS 4 + shadcn/ui |
+| Native integration | Zig FFI (libghostty terminal) |
+| IPC | Electrobun Typed RPC |
+| State management | Zustand |
+| Database | SQLite (bun:sqlite) |
+| Code editor | Monaco Editor |
+| Linting & formatting | Biome |
+
+### Why Electrobun?
+
+Piloto uses [Electrobun](https://electrobun.dev/) instead of Electron. The deciding factor was its **Zig native layer**, which enables direct Zig↔Zig FFI with libghostty — no C bridge needed. It also ships ~14 MB bundles (vs ~200 MB for Electron), starts in under 50 ms, and uses the system WebView instead of bundling Chromium.
+
+## Architecture
+
+```mermaid
+graph TB
+    subgraph Electrobun["Electrobun Runtime"]
+        direction TB
+        Main["Main Process<br/><small>Bun (TypeScript)</small>"]
+        Zig["Zig Native Layer"]
+        WebView["System WebView"]
+    end
+
+    subgraph UI["UI Layer"]
+        direction TB
+        React["React 19 + Vite 6"]
+        Monaco["Monaco Editor"]
+        DiffView["Diff Viewer"]
+    end
+
+    subgraph Terminal["Terminal"]
+        Ghostty["libghostty<br/><small>Zig FFI</small>"]
+    end
+
+    subgraph Agents["Agent Orchestration"]
+        direction TB
+        Orchestrator["Agent Orchestrator"]
+        Worktrees["Git Worktrees"]
+        Claude["Claude Code"]
+        Codex["Codex CLI"]
+    end
+
+    subgraph Data["Data Layer"]
+        SQLite["SQLite<br/><small>bun:sqlite</small>"]
+        MCP["MCP Servers"]
+    end
+
+    WebView <-->|"Typed RPC"| Main
+    Main --> Zig
+    Zig --> Ghostty
+    WebView --> React
+    React --> Monaco
+    React --> DiffView
+    Main --> Orchestrator
+    Orchestrator --> Worktrees
+    Orchestrator --> Claude
+    Orchestrator --> Codex
+    Main --> SQLite
+    Main --> MCP
 ```
-
-**Option B — degit** (no git history):
-
-```bash
-bunx degit mattgi/electrobun-starter my-app
-cd my-app
-bun run scripts/init.ts myapp
-bun install
-```
-
-The init script renames `product` to your app name across all config files. Pass `--identifier` to customize the bundle ID:
-
-```bash
-bun run scripts/init.ts myapp --identifier com.mycompany.myapp
-```
-
-## What's Included
-
-- **React 19** with TypeScript for the webview UI
-- **Vite 6** for fast development builds with HMR support
-- **Tailwind CSS 4** for styling
-- **shadcn/ui** pre-configured (New York style, neutral base)
-- **Biome** for linting and formatting
-- **Type-safe RPC** between main process and webview via shared schema
-- **Bun** as the runtime and package manager
 
 ## Project Structure
 
 ```
-src/
-  bun/            # Main process (Bun runtime)
-    index.ts      # App entry point, window creation, RPC handlers, menu
-  mainview/       # Webview UI (React + Vite)
-    components/   # React components (including shadcn/ui)
-    lib/          # Utilities (cn(), electrobun RPC client)
-    index.html    # HTML entry point
-    index.tsx     # React root
-    index.css     # Tailwind + theme tokens
-shared/           # Shared types between main and webview
-  rpc.ts          # RPC schema definition (type-safe contract)
+piloto/
+├── src/
+│   ├── bun/              # Main process (Bun runtime)
+│   │   └── index.ts      # App entry point, window creation, RPC handlers
+│   └── mainview/         # WebView UI (React + Vite)
+│       ├── components/   # React components (including shadcn/ui)
+│       ├── lib/          # Utilities and Electrobun RPC client
+│       ├── index.html    # HTML entry point
+│       ├── index.tsx     # React root
+│       └── index.css     # Tailwind + theme tokens
+├── shared/               # Shared types between main process and WebView
+│   └── rpc.ts            # Typed RPC schema (type-safe contract)
+├── scripts/              # Build and setup scripts
+├── electrobun.config.ts  # App metadata, build settings, platform config
+├── vite.config.ts        # Vite build config, dev server, path aliases
+├── biome.json            # Linting and formatting rules
+└── tsconfig.json         # TypeScript configuration
 ```
+
+## Getting Started
+
+### Prerequisites
+
+- [Bun](https://bun.sh/) (v1.0+)
+- macOS, Linux, or Windows
+- Git
+
+### Installation
+
+```bash
+git clone https://github.com/your-username/piloto.git
+cd piloto
+bun install
+```
+
+### Running the App
+
+```bash
+# Build and launch (one-shot)
+bun run start
+
+# Development with file watching (rebuilds on change)
+bun run dev
+
+# Development with Hot Module Replacement
+bun run dev:hmr
+```
+
+When using `dev:hmr`, the Vite dev server runs on port 5173. The main process automatically detects it and loads from there instead of the bundled assets, giving you instant HMR for the UI.
 
 ## Development
 
-### Quick start
+### Commands
 
-```bash
-bun install
-bun run start        # Build webview + launch app (one-shot)
-```
+| Command | Description |
+|---|---|
+| `bun run start` | Build webview + launch app |
+| `bun run dev` | Build + launch with file watching |
+| `bun run dev:hmr` | Vite dev server + app (HMR enabled) |
+| `bun run build:canary` | Pre-release build |
+| `bun run build:stable` | Production release build |
+| `bun run lint` | Check with Biome |
+| `bun run lint:fix` | Auto-fix lint issues |
 
 ### Environment
 
@@ -78,27 +164,6 @@ export DATABASE_URL=./.context/piloto.db
 
 By default, `drizzle.config.ts` falls back to `./.context/piloto.db` when `DATABASE_URL` is not set.
 
-### Development with file watching
-
-```bash
-bun run dev          # Electrobun watches source files, rebuilds + relaunches on change
-```
-
-### Development with Hot Module Replacement
-
-```bash
-bun run dev:hmr      # Runs Vite dev server (port 5173) + Electrobun concurrently
-```
-
-The main process probes `localhost:5173` at startup. If the Vite dev server is running, it loads from there instead of the bundled `views://` assets. This gives you instant HMR for the webview UI without rebuilding the whole app.
-
-### Linting
-
-```bash
-bun run lint         # Check with Biome
-bun run lint:fix     # Auto-fix
-```
-
 ### Database migrations
 
 ```bash
@@ -106,90 +171,66 @@ bun run db:generate  # Generate SQL migrations from schema changes
 bun run db:migrate   # Apply migrations using DATABASE_URL or ./.context/piloto.db
 ```
 
-## Adding UI Components
+### Adding UI Components
 
-This project uses [shadcn/ui](https://ui.shadcn.com/) with the New York style. To add components:
+This project uses [shadcn/ui](https://ui.shadcn.com/) (New York style). To add components:
 
 ```bash
 bunx shadcn@latest add button
 bunx shadcn@latest add dialog
 ```
 
-Components are placed in `src/mainview/components/ui/`. The `cn()` utility is at `src/mainview/lib/utils.ts`.
+Components are placed in `src/mainview/components/ui/`.
 
-## RPC (Main <-> Webview Communication)
+### RPC (Main ↔ WebView)
 
 The type-safe RPC contract lives in `shared/rpc.ts`. Both sides import from it:
-
-- **Main process** (`src/bun/index.ts`): `BrowserView.defineRPC<MainRPC>()` — defines request handlers and message listeners
-- **Webview** (`src/mainview/lib/electrobun.ts`): `Electroview.defineRPC<MainRPC>()` — calls requests and sends messages
-
-To add a new RPC method:
 
 1. Add the type to `shared/rpc.ts` under `bun.requests` or `bun.messages`
 2. Implement the handler in `src/bun/index.ts`
 3. Call it from the webview via `electrobun.rpc.request("methodName", params)`
 
-## Building & Releasing
+## Roadmap
 
-Electrobun uses `--env` to distinguish build channels:
+### MVP
 
-| Channel  | Command                | Purpose                                       |
-| -------- | ---------------------- | --------------------------------------------- |
-| `dev`    | `bun run start`        | Local development build, launches immediately |
-| `canary` | `bun run build:canary` | Pre-release testing build                     |
-| `stable` | `bun run build:stable` | Production release build                      |
+- [x] Project scaffolding with Electrobun
+- [ ] Workspace management (multi-folder projects)
+- [ ] Git worktree orchestration
+- [ ] Parallel agent execution
+- [ ] Claude Code + Codex CLI integration (ACP)
+- [ ] Integrated terminal (libghostty via Zig FFI)
+- [ ] Diff view and change preview
+- [ ] MCP support
+- [ ] Skills support
 
-All build scripts run `vite build` first, then `electrobun build`. The `copy` rules in `electrobun.config.ts` map Vite output into the app bundle:
+### Post-MVP
 
-```
-dist/index.html   → views/mainview/index.html
-dist/assets/      → views/mainview/assets/
-```
+- [ ] Integrated browser with password manager compatibility
+- [ ] Connections with Linear, Sentry, Slack, and more
+- [ ] Dedicated memory per workspace
+- [ ] Sandboxed workspace execution
+- [ ] Mobile companion app
+- [ ] Plugin system
 
-### Release & updates
+## Contributing
 
-Electrobun has a built-in delta update system. Configure the release URL in `electrobun.config.ts`:
+Contributions are welcome! This project is in early development, so things are moving fast.
 
-```ts
-release: {
-  baseUrl: "https://your-cdn.com/releases/",
-}
-```
+1. Fork the repository
+2. Create your feature branch (`git checkout -b feature/amazing-feature`)
+3. Commit your changes (`git commit -m 'Add amazing feature'`)
+4. Push to the branch (`git push origin feature/amazing-feature`)
+5. Open a Pull Request
 
-Then build a stable release:
+Please make sure your code passes `bun run lint` before submitting.
 
-```bash
-bun run build:stable
-```
+## License
 
-This generates the app bundle plus patch files for delta updates. Upload the build output to your `baseUrl` location. The app can check for and apply updates at runtime using the `Updater` API from `electrobun/bun`.
+This project is open source. License TBD.
 
-### macOS code signing and notarization
+## Acknowledgments
 
-In `electrobun.config.ts`, set:
-
-```ts
-mac: {
-  codesign: true,
-  notarize: true,
-  entitlements: { /* ... */ },
-}
-```
-
-See the [Electrobun docs](https://blackboard.sh/electrobun/docs/) for details on certificates and notarization setup.
-
-### Cross-platform
-
-The config includes `mac`, `linux`, and `win` blocks. Set `bundleCEF: true` on each platform to include the Chromium Embedded Framework in the app bundle for distribution (set to `false` during development to save build time).
-
-## Key Config Files
-
-| File                   | Purpose                                                                |
-| ---------------------- | ---------------------------------------------------------------------- |
-| `electrobun.config.ts` | App metadata, build settings, platform config, copy rules, release URL |
-| `vite.config.ts`       | Vite build config, dev server port, path aliases                       |
-| `tsconfig.json`        | TypeScript config covering both `src/` and `shared/`                   |
-| `components.json`      | shadcn/ui CLI configuration                                            |
-| `biome.json`           | Linting and formatting rules                                           |
-| `postcss.config.mjs`   | PostCSS with Tailwind CSS 4 plugin                                     |
+- [Electrobun](https://electrobun.dev/) by [Blackboard](https://blackboard.sh) — the desktop runtime that makes this possible
+- [libghostty](https://github.com/ghostty-org/ghostty) — terminal emulation via Zig
+- [Claude Code](https://docs.anthropic.com/en/docs/claude-code) and [Codex CLI](https://github.com/openai/codex) — the AI backends Piloto orchestrates
