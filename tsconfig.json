@@ -20,6 +20,6 @@
 		},
 		"baseUrl": "."
 	},
-	"include": ["src/**/*", "shared/**/*"],
+	"include": ["src/**/*", "shared/**/*", "electrobun.config.ts"],
 	"exclude": ["node_modules", "dist"]
 }
