@@ -1,5 +1,11 @@
-import { ApplicationMenu, BrowserView, BrowserWindow } from "electrobun/bun";
-import type { MainRPC } from "shared/rpc";
+import { ApplicationMenu, BrowserWindow } from "electrobun/bun";
+import { createRPC } from "./rpc";
+import { createLogger } from "./utils/logger";
+
+// Initialize database on startup
+import "./db/database";
+
+const log = createLogger("app");
 
 // HMR: use Vite dev server if running, otherwise use bundled views
 async function getMainViewUrl(): Promise<string> {
@@ -38,20 +44,7 @@ ApplicationMenu.setApplicationMenu([
 ]);
 
 // Define RPC handlers for webview communication
-const mainRPC = BrowserView.defineRPC<MainRPC>({
-  maxRequestTime: 5000,
-  handlers: {
-    requests: {
-      ping: () => "pong",
-      getGreeting: () => "Greetings from the Bun side!",
-    },
-    messages: {
-      log: ({ msg }) => {
-        console.log("[Webview]:", msg);
-      },
-    },
-  },
-});
+const mainRPC = createRPC();
 
 // Create main window
 const mainWindow = new BrowserWindow({
@@ -68,12 +61,12 @@ const mainWindow = new BrowserWindow({
 
 // Handle window events
 mainWindow.on("close", () => {
-  console.log("Main window closed");
+  log.info("Main window closed");
   process.exit(0);
 });
 
 mainWindow.webview.on("dom-ready", () => {
-  console.log("Webview DOM ready");
+  log.info("Webview DOM ready");
 });
 
-console.log("piloto app started");
+log.info("piloto app started");
