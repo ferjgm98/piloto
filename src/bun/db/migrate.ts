@@ -1,5 +1,7 @@
 import { createHash } from "node:crypto";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
+import type { MigrationMeta } from "drizzle-orm/migrator";
+import type { SQLiteSyncDialect } from "drizzle-orm/sqlite-core";
 
 /**
  * Embedded migrations for environments where filesystem access to migration
@@ -9,7 +11,7 @@ import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
  * 1. Run `bun run db:generate` to create the .sql file
  * 2. Add the SQL content and journal metadata here
  */
-const migrations = [
+const migrations: MigrationMeta[] = [
   {
     sql: [
       `CREATE TABLE IF NOT EXISTS \`agent_sessions\` (
@@ -40,6 +42,11 @@ const migrations = [
   },
 ];
 
+type EmbeddedMigrationDatabase = BunSQLiteDatabase<Record<string, unknown>> & {
+  dialect: Pick<SQLiteSyncDialect, "migrate">;
+  session: Parameters<SQLiteSyncDialect["migrate"]>[1];
+};
+
 // Compute hashes from the SQL content (same algorithm as drizzle-orm's readMigrationFiles)
 for (const m of migrations) {
   const fullSql = m.sql.join("--> statement-breakpoint");
@@ -47,6 +54,8 @@ for (const m of migrations) {
 }
 
 export function runMigrations(db: BunSQLiteDatabase<Record<string, unknown>>) {
-  // @ts-expect-error -- accessing internal dialect.migrate which accepts the same migration array as readMigrationFiles produces
-  db.dialect.migrate(migrations, db.session, {});
+  // Keep using embedded SQL because the bundled app does not ship the migrations
+  // folder required by Drizzle's filesystem-based Bun migrator.
+  const embeddedDb = db as EmbeddedMigrationDatabase;
+  embeddedDb.dialect.migrate(migrations, embeddedDb.session);
 }

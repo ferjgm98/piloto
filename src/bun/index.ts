@@ -1,9 +1,7 @@
 import { ApplicationMenu, BrowserWindow } from "electrobun/bun";
+import { initializeDatabase } from "./db/database";
 import { createRPC } from "./rpc";
 import { createLogger } from "./utils/logger";
-
-// Initialize database on startup
-import "./db/database";
 
 const log = createLogger("app");
 
@@ -20,53 +18,61 @@ async function getMainViewUrl(): Promise<string> {
   return "views://mainview/index.html";
 }
 
-// Application menu
-ApplicationMenu.setApplicationMenu([
-  {
-    submenu: [
-      { label: "About piloto", role: "about" },
-      { type: "separator" },
-      { label: "Quit", role: "quit", accelerator: "q" },
-    ],
-  },
-  {
-    label: "Edit",
-    submenu: [
-      { role: "undo" },
-      { role: "redo" },
-      { type: "separator" },
-      { role: "cut" },
-      { role: "copy" },
-      { role: "paste" },
-      { role: "selectAll" },
-    ],
-  },
-]);
+async function bootstrap(): Promise<void> {
+  try {
+    await initializeDatabase();
+  } catch (error) {
+    const message =
+      error instanceof Error ? (error.stack ?? error.message) : String(error);
+    log.error(`Failed to initialize database: ${message}`);
+    process.exit(1);
+  }
 
-// Define RPC handlers for webview communication
-const mainRPC = createRPC();
+  ApplicationMenu.setApplicationMenu([
+    {
+      submenu: [
+        { label: "About piloto", role: "about" },
+        { type: "separator" },
+        { label: "Quit", role: "quit", accelerator: "q" },
+      ],
+    },
+    {
+      label: "Edit",
+      submenu: [
+        { role: "undo" },
+        { role: "redo" },
+        { type: "separator" },
+        { role: "cut" },
+        { role: "copy" },
+        { role: "paste" },
+        { role: "selectAll" },
+      ],
+    },
+  ]);
 
-// Create main window
-const mainWindow = new BrowserWindow({
-  title: "piloto",
-  url: await getMainViewUrl(),
-  frame: {
-    width: 1200,
-    height: 800,
-    x: 100,
-    y: 100,
-  },
-  rpc: mainRPC,
-});
+  const mainRPC = createRPC();
+  const mainWindow = new BrowserWindow({
+    title: "piloto",
+    url: await getMainViewUrl(),
+    frame: {
+      width: 1200,
+      height: 800,
+      x: 100,
+      y: 100,
+    },
+    rpc: mainRPC,
+  });
 
-// Handle window events
-mainWindow.on("close", () => {
-  log.info("Main window closed");
-  process.exit(0);
-});
+  mainWindow.on("close", () => {
+    log.info("Main window closed");
+    process.exit(0);
+  });
 
-mainWindow.webview.on("dom-ready", () => {
-  log.info("Webview DOM ready");
-});
+  mainWindow.webview.on("dom-ready", () => {
+    log.info("Webview DOM ready");
+  });
 
-log.info("piloto app started");
+  log.info("piloto app started");
+}
+
+await bootstrap();

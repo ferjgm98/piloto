@@ -65,6 +65,19 @@ bun install
 bun run start        # Build webview + launch app (one-shot)
 ```
 
+### Environment
+
+For Drizzle Kit commands such as `bun run db:migrate`, set `DATABASE_URL` to the SQLite database file you want to target.
+
+An example is provided in `.env.example`:
+
+```bash
+cp .env.example .env
+export DATABASE_URL=./.context/piloto.db
+```
+
+By default, `drizzle.config.ts` falls back to `./.context/piloto.db` when `DATABASE_URL` is not set.
+
 ### Development with file watching
 
 ```bash
@@ -84,6 +97,13 @@ The main process probes `localhost:5173` at startup. If the Vite dev server is r
 ```bash
 bun run lint         # Check with Biome
 bun run lint:fix     # Auto-fix
+```
+
+### Database migrations
+
+```bash
+bun run db:generate  # Generate SQL migrations from schema changes
+bun run db:migrate   # Apply migrations using DATABASE_URL or ./.context/piloto.db
 ```
 
 ## Adding UI Components
@@ -114,11 +134,11 @@ To add a new RPC method:
 
 Electrobun uses `--env` to distinguish build channels:
 
-| Channel | Command | Purpose |
-|---|---|---|
-| `dev` | `bun run start` | Local development build, launches immediately |
-| `canary` | `bun run build:canary` | Pre-release testing build |
-| `stable` | `bun run build:stable` | Production release build |
+| Channel  | Command                | Purpose                                       |
+| -------- | ---------------------- | --------------------------------------------- |
+| `dev`    | `bun run start`        | Local development build, launches immediately |
+| `canary` | `bun run build:canary` | Pre-release testing build                     |
+| `stable` | `bun run build:stable` | Production release build                      |
 
 All build scripts run `vite build` first, then `electrobun build`. The `copy` rules in `electrobun.config.ts` map Vite output into the app bundle:
 
@@ -165,11 +185,11 @@ The config includes `mac`, `linux`, and `win` blocks. Set `bundleCEF: true` on e
 
 ## Key Config Files
 
-| File | Purpose |
-|---|---|
+| File                   | Purpose                                                                |
+| ---------------------- | ---------------------------------------------------------------------- |
 | `electrobun.config.ts` | App metadata, build settings, platform config, copy rules, release URL |
-| `vite.config.ts` | Vite build config, dev server port, path aliases |
-| `tsconfig.json` | TypeScript config covering both `src/` and `shared/` |
-| `components.json` | shadcn/ui CLI configuration |
-| `biome.json` | Linting and formatting rules |
-| `postcss.config.mjs` | PostCSS with Tailwind CSS 4 plugin |
+| `vite.config.ts`       | Vite build config, dev server port, path aliases                       |
+| `tsconfig.json`        | TypeScript config covering both `src/` and `shared/`                   |
+| `components.json`      | shadcn/ui CLI configuration                                            |
+| `biome.json`           | Linting and formatting rules                                           |
+| `postcss.config.mjs`   | PostCSS with Tailwind CSS 4 plugin                                     |
