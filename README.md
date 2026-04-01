@@ -151,6 +151,26 @@ When using `dev:hmr`, the Vite dev server runs on port 5173. The main process au
 | `bun run lint` | Check with Biome |
 | `bun run lint:fix` | Auto-fix lint issues |
 
+### Environment
+
+For Drizzle Kit commands such as `bun run db:migrate`, set `DATABASE_URL` to the SQLite database file you want to target.
+
+An example is provided in `.env.example`:
+
+```bash
+cp .env.example .env
+export DATABASE_URL=./.context/piloto.db
+```
+
+By default, `drizzle.config.ts` falls back to `./.context/piloto.db` when `DATABASE_URL` is not set.
+
+### Database migrations
+
+```bash
+bun run db:generate  # Generate SQL migrations from schema changes
+bun run db:migrate   # Apply migrations using DATABASE_URL or ./.context/piloto.db
+```
+
 ### Adding UI Components
 
 This project uses [shadcn/ui](https://ui.shadcn.com/) (New York style). To add components:
