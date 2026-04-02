@@ -1,0 +1,11 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "piloto-dev",
+      "runtimeExecutable": "/Users/ferjgm98/.bun/bin/bun",
+      "runtimeArgs": ["run", "hmr"],
+      "port": 5173
+    }
+  ]
+}

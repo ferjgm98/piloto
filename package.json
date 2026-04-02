@@ -15,7 +15,10 @@
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",
-    "electrobun": "^1.16.0"
+    "electrobun": "^1.16.0",
+    "geist": "^1.7.0",
+    "lucide-react": "^1.7.0",
+    "radix-ui": "^1.4.3"
   },
   "devDependencies": {
     "@biomejs/biome": "^1.9.4",
