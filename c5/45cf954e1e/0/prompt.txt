@@ -3,3 +3,11 @@ should I add .claude, .codex, .cursor, .entire, .factory, .opencode and .qodo to
 ---
 
 should I add .claude, .codex, .cursor, .entire, .factory, .opencode and .qodo to gitignore? these folders werernt added before not sure how they get to be pushed
+
+---
+
+go ahead
+
+---
+
+go ahead
