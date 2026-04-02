@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.5.2",
+  "checkpoint_id": "c545cf954e1e",
+  "session_id": "cabd59cd-bd51-4125-a8a5-5a6d316f1a39",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-02T19:41:04.832636Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".gitignore"
+  ],
+  "agent": "Cursor",
+  "model": "composer-2",
+  "turn_id": "6771807ba719",
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-02T19:41:04.816306Z",
+    "agent_lines": 0,
+    "human_added": 61,
+    "human_modified": 6,
+    "human_removed": 0,
+    "total_committed": 61,
+    "agent_percentage": 0
+  }
+}
