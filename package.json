@@ -10,8 +10,13 @@
     "build:stable": "vite build && electrobun build --env=stable",
     "lint": "biome check .",
     "lint:fix": "biome check --write .",
+    "check": "bun run lint && bunx tsc --noEmit",
+    "check:fix": "biome check --write . && bunx tsc --noEmit",
+    "scaffold:module": "bun scripts/scaffold-module.ts",
+    "scaffold:rpc": "bun scripts/scaffold-rpc.ts",
     "db:generate": "drizzle-kit generate",
-    "db:migrate": "drizzle-kit migrate"
+    "db:migrate": "drizzle-kit migrate",
+    "prepare": "bun scripts/install-hooks.ts"
   },
   "dependencies": {
     "drizzle-orm": "^0.45.2",

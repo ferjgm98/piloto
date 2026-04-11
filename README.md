@@ -139,6 +139,12 @@ When using `dev:hmr`, the Vite dev server runs on port 5173. The main process au
 
 ## Development
 
+> **New here?** Read [`CLAUDE.md`](CLAUDE.md) for the project's rules and
+> conventions (used by both humans and AI agents), and
+> [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) for a narrative walkthrough
+> of adding a feature. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
+> covers the *why* behind the layer boundaries.
+
 ### Commands
 
 | Command | Description |
@@ -150,6 +156,10 @@ When using `dev:hmr`, the Vite dev server runs on port 5173. The main process au
 | `bun run build:stable` | Production release build |
 | `bun run lint` | Check with Biome |
 | `bun run lint:fix` | Auto-fix lint issues |
+| `bun run check` | Biome lint + strict tsc (the canonical pre-commit gate) |
+| `bun run check:fix` | Auto-fix lint + strict tsc |
+| `bun run scaffold:module <name>` | Create a new Bun feature module under `src/bun/modules/` |
+| `bun run scaffold:rpc <module> <method> [query\|mutation\|message]` | Add a new RPC method to an existing module |
 
 ### Environment
 
@@ -184,11 +194,16 @@ Components are placed in `src/mainview/components/ui/`.
 
 ### RPC (Main ↔ WebView)
 
-The type-safe RPC contract lives in `shared/rpc.ts`. Both sides import from it:
+The type-safe RPC contract lives in `shared/rpc.ts`. Handlers live in
+`src/bun/modules/<feature>/<feature>.rpc.ts` (delegating to `.service.ts`)
+and are automatically wrapped with logging + error serialization by
+`wrapHandlers()` in `src/bun/rpc.ts`. Frontend components consume RPC via
+the `useRPCQuery` / `useRPCMutation` / `useRPCSubscription` hooks — never
+`electrobun.rpc.request` directly.
 
-1. Add the type to `shared/rpc.ts` under `bun.requests` or `bun.messages`
-2. Implement the handler in `src/bun/index.ts`
-3. Call it from the webview via `electrobun.rpc.request("methodName", params)`
+Use `bun run scaffold:rpc <module> <method>` to add a new method with the
+correct layout. See [`CLAUDE.md`](CLAUDE.md) for the full contract and
+[`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) for a step-by-step walkthrough.
 
 ## Roadmap
 

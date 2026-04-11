@@ -1,0 +1,19 @@
+#!/usr/bin/env sh
+# Piloto pre-commit hook.
+# Runs `bun run check` (biome lint + strict tsc) before every commit.
+# If anything fails, the commit is aborted.
+#
+# This hook is tracked in version control under .githooks/ and enabled by
+# running `bun install` once (which triggers `bun scripts/install-hooks.ts`
+# via the `prepare` script), setting `core.hooksPath = .githooks`.
+#
+# Bypass only in exceptional cases: `git commit --no-verify`.
+
+set -e
+
+if ! command -v bun >/dev/null 2>&1; then
+  echo "[pre-commit] bun not found in PATH — skipping check"
+  exit 0
+fi
+
+exec bun run check
