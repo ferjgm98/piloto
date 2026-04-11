@@ -1,0 +1,11 @@
+{
+    "[typescript]": {
+        // "editor.defaultFormatter": "oxc.oxc-vscode"
+        "editor.defaultFormatter": "biomejs.biome",
+      },
+      "claudeCode.preferredLocation": "panel",
+      "[typescriptreact]": {
+        // "editor.defaultFormatter": "oxc.oxc-vscode"
+        "editor.defaultFormatter": "biomejs.biome",
+      },
+}

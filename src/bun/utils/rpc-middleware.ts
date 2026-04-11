@@ -5,7 +5,7 @@
 // error serialization. Apply once in the top-level RPC aggregator
 // (src/bun/rpc.ts) so every handler gets the same cross-cutting behavior.
 
-import { ErrorCode as Codes, type ErrorCode, encodeRPCError } from "shared/errors";
+import { ErrorCode as Codes, type ErrorCode, encodeRPCError } from "../../../shared/errors";
 import { AppError, GitError, NotFoundError, ValidationError } from "./errors";
 import { createLogger } from "./logger";
 
