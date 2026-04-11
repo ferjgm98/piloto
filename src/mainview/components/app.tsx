@@ -17,8 +17,7 @@ interface Workspace {
 function RPCErrorDisplay({ error }: { error: RPCClientError }) {
   return (
     <div className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive">
-      <span className="font-mono font-semibold">{error.code}</span>:{" "}
-      {error.message}
+      <span className="font-mono font-semibold">{error.code}</span>: {error.message}
     </div>
   );
 }
@@ -41,9 +40,7 @@ function RPCDemo() {
     mutate: createWorkspace,
     loading: creating,
     error: createError,
-  } = useRPCMutation<Workspace, { name: string; repoPaths: string[] }>(
-    "createWorkspace",
-  );
+  } = useRPCMutation<Workspace, { name: string; repoPaths: string[] }>("createWorkspace");
 
   const handleCreate = async () => {
     const name = `Workspace ${new Date().toLocaleTimeString()}`;
@@ -54,9 +51,7 @@ function RPCDemo() {
   return (
     <div className="space-y-3 rounded-md border border-border bg-card p-4">
       <div>
-        <p className="text-xs text-muted-foreground">
-          getGreeting → useRPCQuery
-        </p>
+        <p className="text-xs text-muted-foreground">getGreeting → useRPCQuery</p>
         <p className="font-mono text-sm text-foreground">
           {greetingLoading ? "Loading…" : greeting}
         </p>
@@ -67,17 +62,13 @@ function RPCDemo() {
 
       <div>
         <div className="mb-2 flex items-center justify-between">
-          <p className="text-xs text-muted-foreground">
-            listWorkspaces → useRPCQuery
-          </p>
+          <p className="text-xs text-muted-foreground">listWorkspaces → useRPCQuery</p>
           <Badge variant="outline" className="text-xs">
             {workspaces?.length ?? 0}
           </Badge>
         </div>
         {wsLoading ? (
-          <p className="font-mono text-xs text-muted-foreground">
-            Loading workspaces…
-          </p>
+          <p className="font-mono text-xs text-muted-foreground">Loading workspaces…</p>
         ) : workspaces && workspaces.length > 0 ? (
           <ul className="space-y-1 font-mono text-xs">
             {workspaces.map((ws) => (
@@ -87,9 +78,7 @@ function RPCDemo() {
             ))}
           </ul>
         ) : (
-          <p className="font-mono text-xs text-muted-foreground">
-            No workspaces yet.
-          </p>
+          <p className="font-mono text-xs text-muted-foreground">No workspaces yet.</p>
         )}
         {wsError && <RPCErrorDisplay error={wsError} />}
       </div>
@@ -97,9 +86,7 @@ function RPCDemo() {
       <Separator />
 
       <div className="space-y-2">
-        <p className="text-xs text-muted-foreground">
-          createWorkspace → useRPCMutation
-        </p>
+        <p className="text-xs text-muted-foreground">createWorkspace → useRPCMutation</p>
         <Button size="sm" onClick={handleCreate} disabled={creating}>
           {creating ? "Creating…" : "Create Workspace"}
         </Button>
@@ -118,9 +105,7 @@ function ColorSwatch({
 }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
-      <div
-        className={`h-12 w-12 rounded-md border border-border ${className}`}
-      />
+      <div className={`h-12 w-12 rounded-md border border-border ${className}`} />
       <span className="text-xs text-muted-foreground">{label}</span>
     </div>
   );
@@ -200,12 +185,9 @@ export function App() {
       <main className="flex-1 overflow-auto p-8">
         <div className="mx-auto max-w-3xl space-y-8">
           <div>
-            <h1 className="text-lg font-semibold text-foreground">
-              Piloto Design System
-            </h1>
+            <h1 className="text-lg font-semibold text-foreground">Piloto Design System</h1>
             <p className="mt-1 text-muted-foreground">
-              Validation demo — amber/gold accent on near-black backgrounds with
-              Geist typography.
+              Validation demo — amber/gold accent on near-black backgrounds with Geist typography.
             </p>
           </div>
 
@@ -250,19 +232,12 @@ export function App() {
           {/* Typography */}
           <Section title="Typography">
             <div className="space-y-3 rounded-md border border-border bg-card p-4">
-              <p className="text-lg font-semibold">
-                Page Title — Geist Sans 18px/600
-              </p>
-              <p className="text-sm font-semibold">
-                Section Heading — 14px/600
-              </p>
+              <p className="text-lg font-semibold">Page Title — Geist Sans 18px/600</p>
+              <p className="text-sm font-semibold">Section Heading — 14px/600</p>
               <p className="text-sm">
-                Body text — 14px/400. The quick brown fox jumps over the lazy
-                dog.
+                Body text — 14px/400. The quick brown fox jumps over the lazy dog.
               </p>
-              <p className="text-xs text-muted-foreground">
-                Small label — 12px/400 muted
-              </p>
+              <p className="text-xs text-muted-foreground">Small label — 12px/400 muted</p>
               <p className="font-mono text-sm">Inline code — Geist Mono 14px</p>
               <p className="font-mono text-xs text-muted-foreground">
                 Terminal output — Geist Mono 12px muted
@@ -311,10 +286,7 @@ export function App() {
           <Section title="Form Elements">
             <div className="max-w-sm space-y-3">
               <Input placeholder="Search workspaces..." />
-              <Textarea
-                placeholder="Describe what you want the agent to do..."
-                rows={3}
-              />
+              <Textarea placeholder="Describe what you want the agent to do..." rows={3} />
             </div>
           </Section>
 
@@ -331,9 +303,7 @@ export function App() {
               <TabsContent value="changes" className="mt-3">
                 <div className="space-y-1.5 rounded-md border border-border bg-card p-3">
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-mono text-diff-add-text">
-                      + src/mainview/index.css
-                    </span>
+                    <span className="font-mono text-diff-add-text">+ src/mainview/index.css</span>
                     <Badge variant="outline" className="text-xs">
                       modified
                     </Badge>
@@ -347,9 +317,7 @@ export function App() {
                     </Badge>
                   </div>
                   <div className="flex items-center justify-between text-sm">
-                    <span className="font-mono text-diff-remove-text">
-                      - src/old-file.ts
-                    </span>
+                    <span className="font-mono text-diff-remove-text">- src/old-file.ts</span>
                     <Badge variant="outline" className="text-xs">
                       deleted
                     </Badge>
@@ -364,9 +332,7 @@ export function App() {
                 </div>
               </TabsContent>
               <TabsContent value="output" className="mt-3">
-                <p className="text-sm text-muted-foreground">
-                  Agent output will appear here.
-                </p>
+                <p className="text-sm text-muted-foreground">Agent output will appear here.</p>
               </TabsContent>
             </Tabs>
           </Section>
@@ -382,9 +348,7 @@ export function App() {
                   Repos
                 </div>
                 <div className="space-y-0.5">
-                  <div className="rounded px-2 py-1 text-xs bg-accent/50 text-foreground">
-                    api/
-                  </div>
+                  <div className="rounded px-2 py-1 text-xs bg-accent/50 text-foreground">api/</div>
                   <div className="rounded px-2 py-1 text-xs text-muted-foreground hover:bg-accent/50">
                     web/
                   </div>
@@ -396,9 +360,7 @@ export function App() {
               {/* Main panel */}
               <div className="flex flex-1 flex-col">
                 <div className="flex items-center gap-2 border-b border-border bg-card px-3 py-2">
-                  <span className="text-xs font-semibold text-foreground">
-                    Diff View
-                  </span>
+                  <span className="text-xs font-semibold text-foreground">Diff View</span>
                   <Badge variant="outline" className="text-xs">
                     3 files
                   </Badge>

@@ -7,23 +7,22 @@ const log = createLogger("app");
 
 // HMR: use Vite dev server if running, otherwise use bundled views
 async function getMainViewUrl(): Promise<string> {
-	try {
-		const response = await fetch("http://localhost:5173");
-		if (response.ok) {
-			return "http://localhost:5173";
-		}
-	} catch {
-		// Vite dev server not running, use bundled views
-	}
-	return "views://mainview/index.html";
+  try {
+    const response = await fetch("http://localhost:5173");
+    if (response.ok) {
+      return "http://localhost:5173";
+    }
+  } catch {
+    // Vite dev server not running, use bundled views
+  }
+  return "views://mainview/index.html";
 }
 
 async function bootstrap(): Promise<void> {
   try {
     await initializeDatabase();
   } catch (error) {
-    const message =
-      error instanceof Error ? (error.stack ?? error.message) : String(error);
+    const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
     log.error(`Failed to initialize database: ${message}`);
     process.exit(1);
   }

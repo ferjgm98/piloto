@@ -14,10 +14,9 @@ export interface UseRPCMutationResult<T, P> {
  * directly so callers can chain (e.g. invalidate a query's refetch) without
  * waiting for React state to flush.
  */
-export function useRPCMutation<
-  T,
-  P extends Record<string, unknown> = Record<string, unknown>,
->(method: string): UseRPCMutationResult<T, P> {
+export function useRPCMutation<T, P extends Record<string, unknown> = Record<string, unknown>>(
+  method: string,
+): UseRPCMutationResult<T, P> {
   const [data, setData] = useState<T>();
   const [error, setError] = useState<RPCClientError>();
   const [loading, setLoading] = useState(false);

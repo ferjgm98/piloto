@@ -1,9 +1,5 @@
 import { runGit } from "../../utils/git";
-import type {
-  Worktree,
-  WorktreeCreateInput,
-  WorktreeRemoveInput,
-} from "./worktree.types";
+import type { Worktree, WorktreeCreateInput, WorktreeRemoveInput } from "./worktree.types";
 
 export async function listWorktrees(repoPath: string): Promise<Worktree[]> {
   const output = await runGit(["worktree", "list", "--porcelain"], repoPath);
@@ -46,20 +42,13 @@ export async function listWorktrees(repoPath: string): Promise<Worktree[]> {
   return worktrees;
 }
 
-export async function createWorktree(
-  input: WorktreeCreateInput,
-): Promise<Worktree> {
-  await runGit(
-    ["worktree", "add", "-b", input.branch, input.path],
-    input.repoPath,
-  );
+export async function createWorktree(input: WorktreeCreateInput): Promise<Worktree> {
+  await runGit(["worktree", "add", "-b", input.branch, input.path], input.repoPath);
   const head = await runGit(["rev-parse", "HEAD"], input.path);
   return { path: input.path, branch: input.branch, head, isMain: false };
 }
 
-export async function removeWorktree(
-  input: WorktreeRemoveInput,
-): Promise<void> {
+export async function removeWorktree(input: WorktreeRemoveInput): Promise<void> {
   const args = ["worktree", "remove", input.path];
   if (input.force) args.push("--force");
   await runGit(args, input.repoPath);

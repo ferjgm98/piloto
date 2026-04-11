@@ -5,11 +5,7 @@
 // error serialization. Apply once in the top-level RPC aggregator
 // (src/bun/rpc.ts) so every handler gets the same cross-cutting behavior.
 
-import {
-  ErrorCode as Codes,
-  type ErrorCode,
-  encodeRPCError,
-} from "shared/errors";
+import { ErrorCode as Codes, type ErrorCode, encodeRPCError } from "shared/errors";
 import { AppError, GitError, NotFoundError, ValidationError } from "./errors";
 import { createLogger } from "./logger";
 
@@ -57,9 +53,7 @@ export function wrapHandler<F extends AnyHandler>(name: string, handler: F) {
   };
 }
 
-export function wrapHandlers<T extends Record<string, AnyHandler>>(
-  handlers: T,
-): T {
+export function wrapHandlers<T extends Record<string, AnyHandler>>(handlers: T): T {
   const wrapped: Record<string, AnyHandler> = {};
   for (const [name, handler] of Object.entries(handlers)) {
     wrapped[name] = wrapHandler(name, handler);

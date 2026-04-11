@@ -1,9 +1,5 @@
 import * as worktreeService from "./worktree.service";
-import type {
-  Worktree,
-  WorktreeCreateInput,
-  WorktreeRemoveInput,
-} from "./worktree.types";
+import type { Worktree, WorktreeCreateInput, WorktreeRemoveInput } from "./worktree.types";
 
 export const worktreeHandlers = {
   requests: {

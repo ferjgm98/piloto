@@ -16,9 +16,7 @@ export function createWorkspace(input: CreateWorkspaceInput): Workspace {
   const now = new Date().toISOString();
 
   db.transaction((tx) => {
-    tx.insert(workspaces)
-      .values({ id, name: input.name, createdAt: now, updatedAt: now })
-      .run();
+    tx.insert(workspaces).values({ id, name: input.name, createdAt: now, updatedAt: now }).run();
 
     for (const path of input.repoPaths) {
       tx.insert(workspaceRepos)
@@ -32,11 +30,7 @@ export function createWorkspace(input: CreateWorkspaceInput): Workspace {
     }
   });
 
-  const workspace = db
-    .select()
-    .from(workspaces)
-    .where(eq(workspaces.id, id))
-    .get();
+  const workspace = db.select().from(workspaces).where(eq(workspaces.id, id)).get();
 
   if (!workspace) {
     throw new NotFoundError("Workspace", id);

@@ -27,10 +27,7 @@ export class RPCClientError extends Error {
 // Electrobun's request object is a Proxy whose keys are RPC method names.
 // We access it dynamically with a typed cast since the method is a runtime
 // string in the client wrapper.
-type RequestProxy = Record<
-  string,
-  (params?: Record<string, unknown>) => Promise<unknown>
->;
+type RequestProxy = Record<string, (params?: Record<string, unknown>) => Promise<unknown>>;
 
 export async function rpcRequest<T>(
   method: string,
@@ -44,10 +41,7 @@ export async function rpcRequest<T>(
   const requestProxy = rpc.request as unknown as RequestProxy;
   const fn = requestProxy[method];
   if (typeof fn !== "function") {
-    throw new RPCClientError(
-      ErrorCode.INTERNAL,
-      `Unknown RPC method: ${method}`,
-    );
+    throw new RPCClientError(ErrorCode.INTERNAL, `Unknown RPC method: ${method}`);
   }
 
   try {
