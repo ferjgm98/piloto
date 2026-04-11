@@ -5,12 +5,13 @@ import { mcpHandlers } from "./modules/mcp/mcp.rpc";
 import { terminalHandlers } from "./modules/terminal/terminal.rpc";
 import { workspaceHandlers } from "./modules/workspace/workspace.rpc";
 import { worktreeHandlers } from "./modules/worktree/worktree.rpc";
+import { wrapHandlers } from "./utils/rpc-middleware";
 
 export function createRPC() {
   return BrowserView.defineRPC<MainRPC>({
     maxRequestTime: 5000,
     handlers: {
-      requests: {
+      requests: wrapHandlers({
         ping: () => "pong",
         getGreeting: () => "Greetings from the Bun side!",
         ...workspaceHandlers.requests,
@@ -18,7 +19,7 @@ export function createRPC() {
         ...agentHandlers.requests,
         ...terminalHandlers.requests,
         ...mcpHandlers.requests,
-      },
+      }),
       messages: {
         log: ({ msg }) => {
           console.log("[Webview]:", msg);
