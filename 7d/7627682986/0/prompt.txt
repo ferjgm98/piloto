@@ -1,0 +1,5 @@
+Why saving the file and running bun run lint:fix format the file differently?
+
+---
+
+Why saving the file and running bun run lint:fix format the file differently?
