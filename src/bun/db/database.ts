@@ -1,27 +1,33 @@
 import { Database } from "bun:sqlite";
 import { mkdirSync } from "node:fs";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import { drizzle } from "drizzle-orm/bun-sqlite";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
-import { Utils } from "electrobun/bun";
 import { createLogger } from "../utils/logger";
 import { runMigrations } from "./migrate";
 import * as relations from "./relations";
 import * as schema from "./schema";
 
 const log = createLogger("database");
-type AppDatabase = BunSQLiteDatabase<typeof schema & typeof relations>;
+export type AppDatabase = BunSQLiteDatabase<typeof schema & typeof relations>;
 
 let db: AppDatabase | undefined;
 
-export async function initializeDatabase(): Promise<AppDatabase> {
+export async function initializeDatabase(options?: { path?: string }): Promise<AppDatabase> {
   if (db) {
     return db;
   }
 
-  const dataDir = Utils.paths.userData;
-  mkdirSync(dataDir, { recursive: true });
-  const dbPath = join(dataDir, "piloto.db");
+  let dbPath = options?.path;
+  if (!dbPath) {
+    const { Utils } = await import("electrobun/bun");
+    dbPath = join(Utils.paths.userData, "piloto.db");
+  }
+
+  if (dbPath !== ":memory:") {
+    const dataDir = dirname(dbPath);
+    mkdirSync(dataDir, { recursive: true });
+  }
 
   const sqlite = new Database(dbPath, { create: true });
   sqlite.run("PRAGMA journal_mode = WAL");

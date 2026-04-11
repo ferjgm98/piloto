@@ -1,7 +1,15 @@
 import { GitError } from "./errors";
 
-export async function runGit(args: string[], cwd: string): Promise<string> {
-  const timeoutMs = 30_000;
+interface RunGitOptions {
+  timeoutMs?: number;
+}
+
+export async function runGit(
+  args: string[],
+  cwd: string,
+  options?: RunGitOptions,
+): Promise<string> {
+  const timeoutMs = options?.timeoutMs ?? 30_000;
   const proc = Bun.spawn(["git", ...args], {
     cwd,
     stdin: "ignore",
