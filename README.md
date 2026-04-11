@@ -4,7 +4,7 @@ A powerful agentic development environment that makes multi-folder, multi-repo p
 
 Modern agentic coding tools assume you're working in a single folder or monorepo. Real codebases don't work that way — separate repos for API and frontend, microservices spread across repositories, shared libraries living in their own homes. **Piloto** bridges that gap by letting you orchestrate multiple AI agents across multiple projects simultaneously, using Git worktrees to keep everything isolated and safe.
 
-> **Status:** Early development (v0.1.0) · [Roadmap](#roadmap)
+> **Status:** Early development (v0.1.0) · Phase 0 complete · Trusted alpha planning in progress · [Roadmap](#roadmap)
 
 ## Features
 
@@ -152,8 +152,8 @@ When using `dev:hmr`, the Vite dev server runs on port 5173. The main process au
 | `bun run start` | Build webview + launch app |
 | `bun run dev` | Build + launch with file watching |
 | `bun run dev:hmr` | Vite dev server + app (HMR enabled) |
-| `bun run build:canary` | Pre-release build |
-| `bun run build:stable` | Production release build |
+| `bun run build:canary` | Continuous internal preview build and default release validation target |
+| `bun run build:stable` | Stable production build for later public releases |
 | `bun run lint` | Check with Biome |
 | `bun run lint:fix` | Auto-fix lint issues |
 | `bun run check` | Biome lint + strict tsc (the canonical pre-commit gate) |
@@ -205,15 +205,72 @@ Use `bun run scaffold:rpc <module> <method>` to add a new method with the
 correct layout. See [`CLAUDE.md`](CLAUDE.md) for the full contract and
 [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) for a step-by-step walkthrough.
 
+## Release Strategy
+
+Piloto is following a staged release ladder instead of waiting for the entire
+original product scope to land before the first external build.
+
+### R0 — Dev Preview
+
+- Founder-only validation from `main`
+- Built and checked continuously with `bun run build:canary`
+- Gated by `bun run check` and local app-launch smoke testing
+
+### R1 — Trusted Alpha
+
+The first real release is a **macOS-only trusted alpha** built around the
+smallest workflow that proves Piloto's thesis:
+
+1. Define a multi-repo workspace
+2. Create linked worktrees across repos
+3. Launch one supported agent backend in that workspace
+4. Stream agent output
+5. Review resulting repo changes with external git/editor tooling
+
+Trusted alpha prioritizes:
+
+- Workspace CRUD and persistence
+- Multi-repo worktree lifecycle
+- One supported backend first (Claude Code)
+- Agent start/stop and output streaming
+- Foundational tests and release smoke scenarios
+- Minimal onboarding, install steps, and known-issues documentation
+
+Trusted alpha explicitly defers embedded terminal, in-app diff review/merge,
+MCP, skills, and most post-MVP ideas until the core workflow has been proven.
+
+### R2 — Public Alpha
+
+- Opens Piloto to a broader external audience
+- Adds stronger onboarding, release packaging, and a path for the second
+  backend or clearly labels it experimental
+- Requires a successful trusted-alpha dogfood cycle without release-blocking
+  data-loss or worktree-corruption issues
+
+### R3 — Beta
+
+- Broadens support toward the original long-term product vision
+- Pulls in richer multi-agent behavior, in-app diff workflows, terminal
+  integration, and selected MCP/skills capabilities
+- Reassesses Linux after trusted alpha; keeps Windows out until runtime and
+  packaging behavior are stable
+
 ## Roadmap
 
-### MVP
+### Trusted Alpha Critical Path
 
 - [x] Project scaffolding with Electrobun
 - [ ] Workspace management (multi-folder projects)
 - [ ] Git worktree orchestration
+- [ ] One supported agent backend (Claude Code first)
+- [ ] Agent output streaming to the UI
+- [ ] Foundational tests and release smoke scenarios
+- [ ] Minimal onboarding, install steps, and known-issues documentation
+
+### Broader Product Roadmap
+
 - [ ] Parallel agent execution
-- [ ] Claude Code + Codex CLI integration (ACP)
+- [ ] Dual backend support (Claude Code + Codex CLI)
 - [ ] Integrated terminal (libghostty via Zig FFI)
 - [ ] Diff view and change preview
 - [ ] MCP support
