@@ -20,7 +20,7 @@ export async function initializeDatabase(options?: { path?: string }): Promise<A
 
   let dbPath = options?.path;
   if (!dbPath) {
-    const { Utils } = require("electrobun/bun") as typeof import("electrobun/bun");
+    const { Utils } = await import("electrobun/bun");
     dbPath = join(Utils.paths.userData, "piloto.db");
   }
 
