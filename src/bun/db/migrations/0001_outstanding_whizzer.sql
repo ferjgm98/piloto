@@ -22,7 +22,7 @@ CREATE TABLE `__new_workspace_repos` (
 	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-INSERT INTO `__new_workspace_repos`("id", "workspace_id", "path", "name", "default_branch", "order") SELECT "id", "workspace_id", "path", "name", "default_branch", "order" FROM `workspace_repos`;--> statement-breakpoint
+INSERT INTO `__new_workspace_repos`("id", "workspace_id", "path", "name", "default_branch", "order") SELECT "id", "workspace_id", "path", NULL, "default_branch", 0 FROM `workspace_repos`;--> statement-breakpoint
 DROP TABLE `workspace_repos`;--> statement-breakpoint
 ALTER TABLE `__new_workspace_repos` RENAME TO `workspace_repos`;--> statement-breakpoint
 ALTER TABLE `workspaces` ADD `description` text;--> statement-breakpoint

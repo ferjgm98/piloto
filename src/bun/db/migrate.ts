@@ -64,7 +64,7 @@ const migrations: MigrationMeta[] = [
 	\`order\` integer DEFAULT 0 NOT NULL,
 	FOREIGN KEY (\`workspace_id\`) REFERENCES \`workspaces\`(\`id\`) ON UPDATE no action ON DELETE cascade
 );`,
-      `INSERT INTO \`__new_workspace_repos\`("id", "workspace_id", "path", "name", "default_branch", "order") SELECT "id", "workspace_id", "path", "name", "default_branch", "order" FROM \`workspace_repos\`;`,
+      `INSERT INTO \`__new_workspace_repos\`("id", "workspace_id", "path", "name", "default_branch", "order") SELECT "id", "workspace_id", "path", NULL, "default_branch", 0 FROM \`workspace_repos\`;`,
       "DROP TABLE `workspace_repos`;",
       "ALTER TABLE `__new_workspace_repos` RENAME TO `workspace_repos`;",
       "ALTER TABLE `workspaces` ADD `description` text;",
