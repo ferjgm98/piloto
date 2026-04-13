@@ -132,10 +132,15 @@ export function updateWorkspace(id: string, input: UpdateWorkspaceInput): Worksp
   }
 
   db.transaction((tx) => {
-    // Always touch the workspace row so $onUpdate bumps updatedAt,
-    // even when only repoPaths changed and no scalar fields were provided.
-    const needsTouch = input.repoPaths !== undefined && Object.keys(updates).length === 0;
-    if (Object.keys(updates).length > 0 || needsTouch) {
+    // When only repoPaths changed and no scalar fields were provided,
+    // explicitly set updatedAt so the workspace row reflects the change.
+    // (Drizzle rejects .set({}) with "No values to set", and $onUpdate
+    // only fires when .set() is called with actual fields.)
+    if (input.repoPaths !== undefined && Object.keys(updates).length === 0) {
+      updates.updatedAt = new Date().toISOString();
+    }
+
+    if (Object.keys(updates).length > 0) {
       tx.update(workspaces).set(updates).where(eq(workspaces.id, id)).run();
     }
 
