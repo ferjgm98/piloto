@@ -1,41 +1,12 @@
+import type { MainRPC } from "shared/rpc";
 import { useRPCMutation } from "./use-rpc-mutation";
 import { useRPCQuery } from "./use-rpc-query";
 
-interface WorkspaceRepo {
-  id: string;
-  workspaceId: string;
-  path: string;
-  name: string | null;
-  defaultBranch: string | null;
-  order: number;
-}
-
-interface WorkspaceWithRepos {
-  id: string;
-  name: string;
-  description: string | null;
-  defaultBranch: string | null;
-  createdAt: string;
-  updatedAt: string;
-  repos: WorkspaceRepo[];
-}
-
-type CreateWorkspaceParams = {
-  name: string;
-  description?: string;
-  defaultBranch?: string;
-  repoPaths: string[];
-};
-
-type UpdateWorkspaceParams = {
-  id: string;
-  input: {
-    name?: string;
-    description?: string;
-    defaultBranch?: string;
-    repoPaths?: string[];
-  };
-};
+// Derive types from the RPC contract so they stay in sync automatically.
+type Requests = MainRPC["bun"]["requests"];
+type WorkspaceWithRepos = Requests["getWorkspace"]["response"];
+type CreateWorkspaceParams = Requests["createWorkspace"]["params"];
+type UpdateWorkspaceParams = Requests["updateWorkspace"]["params"];
 
 export function useWorkspaces() {
   return useRPCQuery<WorkspaceWithRepos[]>("listWorkspaces");
