@@ -1,0 +1,69 @@
+{
+  "cli_version": "0.5.4",
+  "checkpoint_id": "5a77c0fe085f",
+  "session_id": "223fac5c-3170-4651-9037-82315e97044c",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-13T03:52:20.03988Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    "src/mainview/components/app.tsx",
+    "src/mainview/components/home.tsx",
+    "src/mainview/index.css"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-sonnet-4-6",
+  "turn_id": "62b574355db8",
+  "token_usage": {
+    "input_tokens": 42,
+    "cache_creation_tokens": 139818,
+    "cache_read_tokens": 1858106,
+    "output_tokens": 27251,
+    "api_call_count": 32
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-13T03:52:19.806284Z",
+    "agent_lines": 0,
+    "agent_removed": 15,
+    "human_added": 1,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 1,
+    "total_lines_changed": 16,
+    "agent_percentage": 93.75,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 1438,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".playwright-mcp/page-2026-04-12T03-43-00-838Z.yml": 99,
+        ".playwright-mcp/page-2026-04-12T03-43-12-569Z.yml": 41,
+        ".playwright-mcp/page-2026-04-12T03-43-18-344Z.yml": 92,
+        ".playwright-mcp/page-2026-04-12T03-43-28-183Z.yml": 99,
+        ".playwright-mcp/page-2026-04-12T03-44-01-464Z.yml": 41,
+        ".playwright-mcp/page-2026-04-12T03-44-08-758Z.yml": 92,
+        ".playwright-mcp/page-2026-04-12T03-44-15-404Z.yml": 92,
+        ".playwright-mcp/page-2026-04-12T03-44-23-152Z.yml": 92,
+        ".playwright-mcp/page-2026-04-12T03-44-27-865Z.yml": 121,
+        "src/mainview/components/app.tsx": 5,
+        "src/mainview/components/home.tsx": 663,
+        "src/mainview/index.html": 1
+      }
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 1438,
+      "agent_lines_removed": 0
+    }
+  ]
+}
