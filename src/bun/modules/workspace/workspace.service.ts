@@ -1,9 +1,13 @@
 import { randomUUID } from "node:crypto";
 import { basename } from "node:path";
-import { desc, eq } from "drizzle-orm";
+import { asc, desc, eq } from "drizzle-orm";
 import type { BunSQLiteDatabase } from "drizzle-orm/bun-sqlite";
 import { getDb } from "../../db/database";
 import { workspaceRepos, workspaces } from "../../db/schema";
+
+const reposOrdered = {
+  repos: { orderBy: asc(workspaceRepos.order) },
+} as const;
 import { NotFoundError, ValidationError } from "../../utils/errors";
 import type {
   CreateWorkspaceInput,
@@ -58,7 +62,7 @@ export function getWorkspace(id: string): WorkspaceWithRepos {
   const workspace = db.query.workspaces
     .findFirst({
       where: eq(workspaces.id, id),
-      with: { repos: true },
+      with: reposOrdered,
     })
     .sync();
 
@@ -73,7 +77,7 @@ export function listWorkspaces(): WorkspaceWithRepos[] {
   const db = getDb();
   return db.query.workspaces
     .findMany({
-      with: { repos: true },
+      with: reposOrdered,
       orderBy: desc(workspaces.createdAt),
     })
     .sync();
