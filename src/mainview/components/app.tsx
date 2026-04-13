@@ -1,5 +1,6 @@
 import { useRPCMutation, useRPCQuery } from "@/hooks";
 import type { RPCClientError } from "@/lib/rpc-client";
+import { Home } from "./home";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
@@ -127,6 +128,10 @@ function Section({
 }
 
 export function App() {
+  return <Home />;
+}
+
+function DesignSystemDemo() {
   return (
     <div className="flex h-screen overflow-hidden">
       {/* Mock Sidebar */}
