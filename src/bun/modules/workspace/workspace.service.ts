@@ -128,7 +128,10 @@ export function updateWorkspace(id: string, input: UpdateWorkspaceInput): Worksp
   }
 
   db.transaction((tx) => {
-    if (Object.keys(updates).length > 0) {
+    // Always touch the workspace row so $onUpdate bumps updatedAt,
+    // even when only repoPaths changed and no scalar fields were provided.
+    const needsTouch = input.repoPaths !== undefined && Object.keys(updates).length === 0;
+    if (Object.keys(updates).length > 0 || needsTouch) {
       tx.update(workspaces).set(updates).where(eq(workspaces.id, id)).run();
     }
 
