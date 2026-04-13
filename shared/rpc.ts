@@ -16,17 +16,88 @@ export type MainRPC = {
         response: {
           id: string;
           name: string;
+          description: string | null;
+          defaultBranch: string | null;
           createdAt: string;
           updatedAt: string;
+          repos: {
+            id: string;
+            workspaceId: string;
+            path: string;
+            name: string | null;
+            defaultBranch: string | null;
+            order: number;
+          }[];
         }[];
       };
-      createWorkspace: {
-        params: { name: string; repoPaths: string[] };
+      getWorkspace: {
+        params: { id: string };
         response: {
           id: string;
           name: string;
+          description: string | null;
+          defaultBranch: string | null;
           createdAt: string;
           updatedAt: string;
+          repos: {
+            id: string;
+            workspaceId: string;
+            path: string;
+            name: string | null;
+            defaultBranch: string | null;
+            order: number;
+          }[];
+        };
+      };
+      createWorkspace: {
+        params: {
+          name: string;
+          description?: string;
+          defaultBranch?: string;
+          repoPaths: string[];
+        };
+        response: {
+          id: string;
+          name: string;
+          description: string | null;
+          defaultBranch: string | null;
+          createdAt: string;
+          updatedAt: string;
+          repos: {
+            id: string;
+            workspaceId: string;
+            path: string;
+            name: string | null;
+            defaultBranch: string | null;
+            order: number;
+          }[];
+        };
+      };
+      updateWorkspace: {
+        params: {
+          id: string;
+          input: {
+            name?: string;
+            description?: string;
+            defaultBranch?: string;
+            repoPaths?: string[];
+          };
+        };
+        response: {
+          id: string;
+          name: string;
+          description: string | null;
+          defaultBranch: string | null;
+          createdAt: string;
+          updatedAt: string;
+          repos: {
+            id: string;
+            workspaceId: string;
+            path: string;
+            name: string | null;
+            defaultBranch: string | null;
+            order: number;
+          }[];
         };
       };
       deleteWorkspace: {

@@ -40,6 +40,40 @@ const migrations: MigrationMeta[] = [
     folderMillis: 1775050731233,
     hash: "",
   },
+  {
+    sql: [
+      "PRAGMA foreign_keys=OFF;",
+      `CREATE TABLE \`__new_agent_sessions\` (
+	\`id\` text PRIMARY KEY NOT NULL,
+	\`workspace_id\` text NOT NULL,
+	\`backend\` text NOT NULL,
+	\`status\` text DEFAULT 'idle',
+	\`created_at\` text DEFAULT (datetime('now')),
+	FOREIGN KEY (\`workspace_id\`) REFERENCES \`workspaces\`(\`id\`) ON UPDATE no action ON DELETE cascade
+);`,
+      `INSERT INTO \`__new_agent_sessions\`("id", "workspace_id", "backend", "status", "created_at") SELECT "id", "workspace_id", "backend", "status", "created_at" FROM \`agent_sessions\`;`,
+      "DROP TABLE `agent_sessions`;",
+      "ALTER TABLE `__new_agent_sessions` RENAME TO `agent_sessions`;",
+      "PRAGMA foreign_keys=ON;",
+      `CREATE TABLE \`__new_workspace_repos\` (
+	\`id\` text PRIMARY KEY NOT NULL,
+	\`workspace_id\` text NOT NULL,
+	\`path\` text NOT NULL,
+	\`name\` text,
+	\`default_branch\` text DEFAULT 'main',
+	\`order\` integer DEFAULT 0 NOT NULL,
+	FOREIGN KEY (\`workspace_id\`) REFERENCES \`workspaces\`(\`id\`) ON UPDATE no action ON DELETE cascade
+);`,
+      `INSERT INTO \`__new_workspace_repos\`("id", "workspace_id", "path", "name", "default_branch", "order") SELECT "id", "workspace_id", "path", "name", "default_branch", "order" FROM \`workspace_repos\`;`,
+      "DROP TABLE `workspace_repos`;",
+      "ALTER TABLE `__new_workspace_repos` RENAME TO `workspace_repos`;",
+      "ALTER TABLE `workspaces` ADD `description` text;",
+      `ALTER TABLE \`workspaces\` ADD \`default_branch\` text DEFAULT 'main';`,
+    ],
+    bps: true,
+    folderMillis: 1776053032063,
+    hash: "",
+  },
 ];
 
 type EmbeddedMigrationDatabase = BunSQLiteDatabase<Record<string, unknown>> & {
