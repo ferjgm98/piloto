@@ -28,3 +28,23 @@ export class GitError extends AppError {
     this.name = "GitError";
   }
 }
+
+export class WorktreeInUseError extends AppError {
+  constructor(worktreeId: string) {
+    super(
+      `Worktree ${worktreeId} has a running agent session; pass force=true to override`,
+      "WORKTREE_IN_USE",
+    );
+    this.name = "WorktreeInUseError";
+  }
+}
+
+export class UncommittedChangesError extends AppError {
+  constructor(path: string) {
+    super(
+      `Worktree at ${path} has uncommitted changes; pass force=true to override`,
+      "UNCOMMITTED_CHANGES",
+    );
+    this.name = "UncommittedChangesError";
+  }
+}

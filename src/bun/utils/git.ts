@@ -38,3 +38,8 @@ export async function runGit(
 
   return stdout.trim();
 }
+
+export async function hasUncommittedChanges(cwd: string): Promise<boolean> {
+  const output = await runGit(["status", "--porcelain"], cwd);
+  return output.length > 0;
+}

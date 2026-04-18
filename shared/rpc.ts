@@ -3,6 +3,34 @@
 
 import type { RPCSchema } from "electrobun";
 
+export interface ActiveWorktreeDTO {
+  id: string;
+  repoId: string;
+  featureName: string | null;
+  branch: string;
+  path: string;
+  agentSessionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+  repo: {
+    id: string;
+    workspaceId: string;
+    path: string;
+    defaultBranch: string | null;
+  };
+}
+
+export type WorktreeResult =
+  | { repoId: string; ok: true; worktree: ActiveWorktreeDTO }
+  | { repoId: string; ok: false; error: string };
+
+export interface WorktreeStatus {
+  path: string;
+  branch: string;
+  hasUncommittedChanges: boolean;
+  hasRunningAgents: boolean;
+}
+
 export type MainRPC = {
   bun: RPCSchema<{
     requests: {
@@ -56,6 +84,24 @@ export type MainRPC = {
       removeWorktree: {
         params: { repoPath: string; path: string; force?: boolean };
         response: undefined;
+      };
+
+      // Cross-repo tracked worktrees (PIL-19)
+      createWorktreesForFeature: {
+        params: { workspaceId: string; featureName: string; branchName: string };
+        response: WorktreeResult[];
+      };
+      listWorkspaceWorktrees: {
+        params: { workspaceId: string };
+        response: ActiveWorktreeDTO[];
+      };
+      removeTrackedWorktree: {
+        params: { worktreeId: string; force?: boolean };
+        response: undefined;
+      };
+      getWorktreeStatus: {
+        params: { worktreeId: string };
+        response: WorktreeStatus;
       };
 
       // Agent (stub)
