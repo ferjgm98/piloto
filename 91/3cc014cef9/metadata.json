@@ -1,0 +1,25 @@
+{
+  "cli_version": "0.5.5",
+  "checkpoint_id": "913cc014cef9",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/audits/2026-04-13-weekly-audit.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/91/3cc014cef9/0/metadata.json",
+      "transcript": "/91/3cc014cef9/0/full.jsonl",
+      "content_hash": "/91/3cc014cef9/0/content_hash.txt",
+      "prompt": "/91/3cc014cef9/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 20,
+    "cache_creation_tokens": 84200,
+    "cache_read_tokens": 130473,
+    "output_tokens": 1113,
+    "api_call_count": 5
+  }
+}
