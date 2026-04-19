@@ -39,6 +39,13 @@ export class WorktreeInUseError extends AppError {
   }
 }
 
+export class WorktreeAlreadyHasWatcherError extends AppError {
+  constructor(worktreeId: string) {
+    super(`Worktree ${worktreeId} already has an active watcher`, "WORKTREE_ALREADY_HAS_WATCHER");
+    this.name = "WorktreeAlreadyHasWatcherError";
+  }
+}
+
 export class UncommittedChangesError extends AppError {
   constructor(path: string) {
     super(

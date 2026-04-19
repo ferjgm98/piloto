@@ -18,6 +18,7 @@ export interface ActiveWorktreeDTO {
     path: string;
     defaultBranch: string | null;
   };
+  status: WorktreeStatus;
 }
 
 export type WorktreeResult =
@@ -25,10 +26,12 @@ export type WorktreeResult =
   | { repoId: string; ok: false; error: string };
 
 export interface WorktreeStatus {
-  path: string;
-  branch: string;
-  hasUncommittedChanges: boolean;
-  hasRunningAgents: boolean;
+  hasChanges: boolean;
+  changedFiles: number;
+  branchName: string | null;
+  ahead: number;
+  behind: number;
+  lastFetch: string | null;
 }
 
 export type MainRPC = {
@@ -165,6 +168,10 @@ export type MainRPC = {
         params: { workspaceId: string };
         response: ActiveWorktreeDTO[];
       };
+      refreshWorktreeStatus: {
+        params: { worktreeId: string };
+        response: WorktreeStatus;
+      };
       removeTrackedWorktree: {
         params: { worktreeId: string; force?: boolean };
         response: undefined;
@@ -233,6 +240,8 @@ export type MainRPC = {
   }>;
   webview: RPCSchema<{
     requests: Record<string, never>;
-    messages: Record<string, never>;
+    messages: {
+      worktreeStatusChanged: { worktreeId: string; status: WorktreeStatus };
+    };
   }>;
 };
