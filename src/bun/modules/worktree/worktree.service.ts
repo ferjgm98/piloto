@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
 import { basename, resolve } from "node:path";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import { getDb } from "../../db/database";
 import { activeWorktrees, workspaceRepos } from "../../db/schema";
 import {
@@ -77,7 +77,8 @@ export async function removeWorktree(input: WorktreeRemoveInput): Promise<void> 
 
 export function computeWorktreePath(repoPath: string, branch: string): string {
   const repoName = basename(repoPath);
-  const rendered = PATH_TEMPLATE.replace("{repo-name}", repoName).replace("{branch}", branch);
+  const safeBranch = branch.replace(/\//g, "-");
+  const rendered = PATH_TEMPLATE.replace("{repo-name}", repoName).replace("{branch}", safeBranch);
   return resolve(repoPath, rendered);
 }
 
@@ -153,14 +154,22 @@ export function listWorkspaceWorktrees(workspaceId: string): ActiveWorktree[] {
   if (repos.length === 0) return [];
 
   const repoById = new Map(repos.map((r) => [r.id, r]));
+  const rows = db
+    .select()
+    .from(activeWorktrees)
+    .where(
+      inArray(
+        activeWorktrees.repoId,
+        repos.map((r) => r.id),
+      ),
+    )
+    .all();
+
   const flat: ActiveWorktree[] = [];
-  for (const repo of repos) {
-    const rows = db.select().from(activeWorktrees).where(eq(activeWorktrees.repoId, repo.id)).all();
-    for (const row of rows) {
-      const parent = repoById.get(row.repoId);
-      if (!parent) continue;
-      flat.push({ ...row, repo: parent });
-    }
+  for (const row of rows) {
+    const parent = repoById.get(row.repoId);
+    if (!parent) continue;
+    flat.push({ ...row, repo: parent });
   }
   return flat;
 }

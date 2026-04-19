@@ -1,9 +1,96 @@
 {
   "version": "6",
   "dialect": "sqlite",
-  "id": "ea749a59-495b-40f4-a85d-a1a6feef1076",
-  "prevId": "fedbf151-0651-400f-8376-d1ea3ccdfef4",
+  "id": "4b54ac68-36c7-4242-bc7d-603e233e38dd",
+  "prevId": "ea749a59-495b-40f4-a85d-a1a6feef1076",
   "tables": {
+    "active_worktrees": {
+      "name": "active_worktrees",
+      "columns": {
+        "id": {
+          "name": "id",
+          "type": "text",
+          "primaryKey": true,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "repo_id": {
+          "name": "repo_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "feature_name": {
+          "name": "feature_name",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "branch": {
+          "name": "branch",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "path": {
+          "name": "path",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false
+        },
+        "agent_session_id": {
+          "name": "agent_session_id",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": false,
+          "autoincrement": false
+        },
+        "created_at": {
+          "name": "created_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        },
+        "updated_at": {
+          "name": "updated_at",
+          "type": "text",
+          "primaryKey": false,
+          "notNull": true,
+          "autoincrement": false,
+          "default": "(datetime('now'))"
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "active_worktrees_repo_id_workspace_repos_id_fk": {
+          "name": "active_worktrees_repo_id_workspace_repos_id_fk",
+          "tableFrom": "active_worktrees",
+          "tableTo": "workspace_repos",
+          "columnsFrom": ["repo_id"],
+          "columnsTo": ["id"],
+          "onDelete": "cascade",
+          "onUpdate": "no action"
+        },
+        "active_worktrees_agent_session_id_agent_sessions_id_fk": {
+          "name": "active_worktrees_agent_session_id_agent_sessions_id_fk",
+          "tableFrom": "active_worktrees",
+          "tableTo": "agent_sessions",
+          "columnsFrom": ["agent_session_id"],
+          "columnsTo": ["id"],
+          "onDelete": "set null",
+          "onUpdate": "no action"
+        }
+      },
+      "compositePrimaryKeys": {},
+      "uniqueConstraints": {},
+      "checkConstraints": {}
+    },
     "agent_sessions": {
       "name": "agent_sessions",
       "columns": {

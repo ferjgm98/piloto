@@ -12,8 +12,15 @@
     {
       "idx": 1,
       "version": "6",
-      "when": 1776534219926,
-      "tag": "0001_nifty_green_goblin",
+      "when": 1776053032063,
+      "tag": "0001_outstanding_whizzer",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "6",
+      "when": 1776557419471,
+      "tag": "0002_mixed_mulholland_black",
       "breakpoints": true
     }
   ]
