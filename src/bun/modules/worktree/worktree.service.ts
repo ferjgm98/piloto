@@ -1,7 +1,6 @@
 import { randomUUID } from "node:crypto";
-import { watch as watchFs } from "node:fs";
-import { createRequire } from "node:module";
 import { basename, relative, resolve } from "node:path";
+import { subscribe } from "@parcel/watcher";
 import { eq, inArray } from "drizzle-orm";
 import { getDb } from "../../db/database";
 import { activeWorktrees, workspaceRepos } from "../../db/schema";
@@ -37,7 +36,6 @@ const FEATURE_NAME_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
 const PATH_TEMPLATE = "../{repo-name}-worktrees/{branch}";
 const WATCH_DEBOUNCE_MS = 100;
 const log = createLogger("worktree");
-const require = createRequire(import.meta.url);
 
 type WorktreeStatusListener = (payload: {
   worktreeId: string;
@@ -67,141 +65,6 @@ const WATCHER_IGNORE_PATTERNS = [
 ];
 
 let worktreeStatusListener: WorktreeStatusListener | null = null;
-
-type ParcelWatcherModule = {
-  subscribe: (
-    dir: string,
-    fn: (
-      error: Error | null,
-      events: { path: string; type: "create" | "update" | "delete" }[],
-    ) => void,
-    opts?: { ignore?: string[] },
-  ) => Promise<{ unsubscribe: () => Promise<void> }>;
-};
-
-type ParcelWatcherBinding = {
-  subscribe: (
-    dir: string,
-    fn: (
-      error: Error | null,
-      events: { path: string; type: "create" | "update" | "delete" }[],
-    ) => void,
-    opts?: Record<string, unknown>,
-  ) => Promise<void>;
-  unsubscribe: (
-    dir: string,
-    fn: (
-      error: Error | null,
-      events: { path: string; type: "create" | "update" | "delete" }[],
-    ) => void,
-    opts?: Record<string, unknown>,
-  ) => Promise<void>;
-};
-
-function wrapParcelWatcherBinding(moduleName: string): ParcelWatcherModule {
-  const binding = require(moduleName) as ParcelWatcherBinding;
-
-  return {
-    async subscribe(dir, fn) {
-      const resolvedDir = resolve(dir);
-      await binding.subscribe(resolvedDir, fn, {});
-
-      return {
-        unsubscribe() {
-          return binding.unsubscribe(resolvedDir, fn, {});
-        },
-      };
-    },
-  };
-}
-
-function createFsWatcherFallback(): ParcelWatcherModule {
-  return {
-    async subscribe(dir, fn) {
-      const resolvedDir = resolve(dir);
-      const fallbackWatcher = watchFs(
-        resolvedDir,
-        {
-          persistent: false,
-          recursive: process.platform === "darwin" || process.platform === "win32",
-        },
-        (_eventType, filename) => {
-          const filePath =
-            typeof filename === "string" && filename.length > 0
-              ? resolve(resolvedDir, filename)
-              : resolvedDir;
-
-          fn(null, [{ path: filePath, type: "update" }]);
-        },
-      );
-
-      return {
-        async unsubscribe() {
-          fallbackWatcher.close();
-        },
-      };
-    },
-  };
-}
-
-function loadParcelWatcher(): ParcelWatcherModule {
-  try {
-    if (process.platform === "darwin") {
-      if (process.arch === "arm64") {
-        return wrapParcelWatcherBinding("@parcel/watcher-darwin-arm64");
-      }
-      if (process.arch === "x64") {
-        return wrapParcelWatcherBinding("@parcel/watcher-darwin-x64");
-      }
-    }
-
-    if (process.platform === "win32") {
-      if (process.arch === "arm64") {
-        return wrapParcelWatcherBinding("@parcel/watcher-win32-arm64");
-      }
-      if (process.arch === "ia32") {
-        return wrapParcelWatcherBinding("@parcel/watcher-win32-ia32");
-      }
-      if (process.arch === "x64") {
-        return wrapParcelWatcherBinding("@parcel/watcher-win32-x64");
-      }
-    }
-
-    if (process.platform === "linux") {
-      const { familySync, MUSL } = require("detect-libc") as {
-        familySync: () => string | null;
-        MUSL: string;
-      };
-      const libc = familySync();
-      const suffix = libc === MUSL ? "musl" : "glibc";
-
-      if (process.arch === "arm") {
-        return wrapParcelWatcherBinding(`@parcel/watcher-linux-arm-${suffix}`);
-      }
-      if (process.arch === "arm64") {
-        return wrapParcelWatcherBinding(`@parcel/watcher-linux-arm64-${suffix}`);
-      }
-      if (process.arch === "x64") {
-        return wrapParcelWatcherBinding(`@parcel/watcher-linux-x64-${suffix}`);
-      }
-    }
-
-    if (process.platform === "android" && process.arch === "arm64") {
-      return wrapParcelWatcherBinding("@parcel/watcher-android-arm64");
-    }
-
-    if (process.platform === "freebsd" && process.arch === "x64") {
-      return wrapParcelWatcherBinding("@parcel/watcher-freebsd-x64");
-    }
-  } catch (error) {
-    const message = error instanceof Error ? error.message : String(error);
-    log.warn(`parcel watcher unavailable, falling back to fs.watch: ${message}`);
-  }
-
-  return createFsWatcherFallback();
-}
-
-const watcher = loadParcelWatcher();
 
 export async function listWorktrees(repoPath: string): Promise<Worktree[]> {
   const output = await runGit(["worktree", "list", "--porcelain"], repoPath);
@@ -346,38 +209,46 @@ export async function createWatcher(worktreeId: string, worktreePath: string): P
     throw new WorktreeAlreadyHasWatcherError(worktreeId);
   }
 
-  const subscription = await watcher.subscribe(
-    worktreePath,
-    (error, events) => {
-      if (error) {
-        log.error(`watcher error for ${worktreeId}: ${error.message}`);
-        return;
-      }
-
-      const hasRelevantEvents = events.some((event) => {
-        return toFileChangeEvent(worktreePath, event) !== null;
-      });
-
-      if (!hasRelevantEvents) return;
-      queueStatusRefresh(worktreeId);
-    },
-    { ignore: WATCHER_IGNORE_PATTERNS },
-  );
-
   const handle: WatcherEntry = {
     worktreeId,
     timeoutId: null,
-    unsubscribe: async () => {
+    unsubscribe: async () => {},
+  };
+  watcherRegistry.set(worktreeId, handle);
+
+  try {
+    const resolvedPath = resolve(worktreePath);
+    const subscription = await subscribe(
+      resolvedPath,
+      (error, events) => {
+        if (error) {
+          log.error(`watcher error for ${worktreeId}: ${error.message}`);
+          return;
+        }
+
+        const hasRelevantEvents = events.some((event) => {
+          return toFileChangeEvent(resolvedPath, event) !== null;
+        });
+
+        if (!hasRelevantEvents) return;
+        queueStatusRefresh(worktreeId);
+      },
+      { ignore: WATCHER_IGNORE_PATTERNS },
+    );
+
+    handle.unsubscribe = async () => {
       if (handle.timeoutId !== null) {
         clearTimeout(handle.timeoutId);
         handle.timeoutId = null;
       }
       await subscription.unsubscribe();
-    },
-  };
+    };
 
-  watcherRegistry.set(worktreeId, handle);
-  return handle;
+    return handle;
+  } catch (error) {
+    watcherRegistry.delete(worktreeId);
+    throw error;
+  }
 }
 
 export async function destroyWatcher(worktreeId: string): Promise<void> {

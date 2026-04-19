@@ -394,4 +394,64 @@ describe("worktree.service (tracked)", () => {
 
     await removeTrackedWorktree(worktreeId, true);
   });
+
+  test("watcher ignores changes under node_modules", async () => {
+    const canonical = realpathSync(repoPath);
+    const wtPath = join(rootDir, "wt-ignore");
+    await createWorktree({ repoPath: canonical, branch: "feature/ignore", path: wtPath });
+
+    const resolvedPath = realpathSync(wtPath);
+    const worktreeId = randomUUID();
+    insertActiveWorktree(getDb(), {
+      id: worktreeId,
+      repoId,
+      branch: "feature/ignore",
+      featureName: "ignore",
+      path: resolvedPath,
+    });
+
+    let notifyCount = 0;
+    setWorktreeStatusNotifier(() => {
+      notifyCount += 1;
+    });
+
+    await createWatcher(worktreeId, resolvedPath);
+
+    mkdirSync(join(resolvedPath, "node_modules", "pkg"), { recursive: true });
+    writeFileSync(join(resolvedPath, "node_modules", "pkg", "index.js"), "noop\n");
+
+    await new Promise((r) => setTimeout(r, 400));
+    expect(notifyCount).toBe(0);
+
+    writeFileSync(join(resolvedPath, "tracked.txt"), "hi\n");
+    await new Promise((r) => setTimeout(r, 400));
+    expect(notifyCount).toBeGreaterThan(0);
+
+    await destroyWatcher(worktreeId);
+    await removeWorktree({ repoPath: canonical, path: resolvedPath, force: true });
+  });
+
+  test("concurrent createWatcher calls for the same id reject all but one", async () => {
+    const canonical = realpathSync(repoPath);
+    const wtPath = join(rootDir, "wt-concurrent");
+    await createWorktree({ repoPath: canonical, branch: "feature/concurrent", path: wtPath });
+
+    const worktreeId = randomUUID();
+    const results = await Promise.allSettled([
+      createWatcher(worktreeId, wtPath),
+      createWatcher(worktreeId, wtPath),
+      createWatcher(worktreeId, wtPath),
+    ]);
+
+    const fulfilled = results.filter((r) => r.status === "fulfilled");
+    const rejected = results.filter((r) => r.status === "rejected");
+    expect(fulfilled).toHaveLength(1);
+    expect(rejected).toHaveLength(2);
+    for (const r of rejected) {
+      expect((r as PromiseRejectedResult).reason).toBeInstanceOf(WorktreeAlreadyHasWatcherError);
+    }
+
+    await destroyWatcher(worktreeId);
+    await removeWorktree({ repoPath: canonical, path: wtPath, force: true });
+  });
 });

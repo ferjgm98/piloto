@@ -16,7 +16,7 @@ function formatLastFetch(lastFetch: string | null): string {
 }
 
 function getRepoLabel(worktree: ActiveWorktreeDTO): string {
-  const parts = worktree.repo.path.split("/");
+  const parts = worktree.repo.path.split(/[\\/]/);
   return parts[parts.length - 1] || worktree.repo.path;
 }
 
@@ -128,17 +128,20 @@ export function WorktreeDashboard({
 
   async function handleRefresh(worktreeId: string) {
     setRefreshingId(worktreeId);
-    const status = await refreshStatus({ worktreeId });
-    if (status) {
-      startTransition(() => {
-        setWorktrees((current) =>
-          current.map((worktree) =>
-            worktree.id === worktreeId ? { ...worktree, status } : worktree,
-          ),
-        );
-      });
+    try {
+      const status = await refreshStatus({ worktreeId });
+      if (status) {
+        startTransition(() => {
+          setWorktrees((current) =>
+            current.map((worktree) =>
+              worktree.id === worktreeId ? { ...worktree, status } : worktree,
+            ),
+          );
+        });
+      }
+    } finally {
+      setRefreshingId(null);
     }
-    setRefreshingId(null);
   }
 
   if (loading && data === undefined) {
