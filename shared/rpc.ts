@@ -157,7 +157,6 @@ export type MainRPC = {
         response: undefined;
       };
 
-      // Cross-repo tracked worktrees (PIL-19)
       createWorktreesForFeature: {
         params: { workspaceId: string; featureName: string; branchName: string };
         response: WorktreeResult[];

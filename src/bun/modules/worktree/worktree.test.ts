@@ -21,6 +21,42 @@ function git(args: string[], cwd: string) {
   execFileSync("git", args, { cwd, stdio: "pipe" });
 }
 
+function initGitRepo(repoPath: string) {
+  mkdirSync(repoPath, { recursive: true });
+  git(["init"], repoPath);
+  git(["config", "user.name", "Piloto Tests"], repoPath);
+  git(["config", "user.email", "piloto@example.com"], repoPath);
+  writeFileSync(join(repoPath, "README.md"), "# Piloto\n");
+  git(["add", "README.md"], repoPath);
+  git(["commit", "-m", "initial commit"], repoPath);
+  git(["branch", "-m", "main"], repoPath);
+}
+
+type TrackedInsert = {
+  id: string;
+  repoId: string;
+  branch: string;
+  featureName: string;
+  path: string;
+  agentSessionId?: string | null;
+};
+
+function insertActiveWorktree(db: ReturnType<typeof getDb>, input: TrackedInsert) {
+  const now = new Date().toISOString();
+  db.insert(activeWorktrees)
+    .values({
+      id: input.id,
+      repoId: input.repoId,
+      featureName: input.featureName,
+      branch: input.branch,
+      path: input.path,
+      agentSessionId: input.agentSessionId ?? null,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .run();
+}
+
 describe("worktree.service", () => {
   let rootDir: string;
   let repoPath: string;
@@ -28,16 +64,7 @@ describe("worktree.service", () => {
   beforeEach(() => {
     rootDir = mkdtempSync(join(tmpdir(), "piloto-worktree-test-"));
     repoPath = join(rootDir, "repo");
-    mkdirSync(repoPath, { recursive: true });
-
-    git(["init"], repoPath);
-    git(["config", "user.name", "Piloto Tests"], repoPath);
-    git(["config", "user.email", "piloto@example.com"], repoPath);
-
-    writeFileSync(join(repoPath, "README.md"), "# Piloto\n");
-    git(["add", "README.md"], repoPath);
-    git(["commit", "-m", "initial commit"], repoPath);
-    git(["branch", "-m", "main"], repoPath);
+    initGitRepo(repoPath);
   });
 
   afterEach(() => {
@@ -96,15 +123,7 @@ describe("worktree.service (tracked)", () => {
 
     rootDir = mkdtempSync(join(tmpdir(), "piloto-tracked-test-"));
     repoPath = join(rootDir, "repo");
-    mkdirSync(repoPath, { recursive: true });
-
-    git(["init"], repoPath);
-    git(["config", "user.name", "Piloto Tests"], repoPath);
-    git(["config", "user.email", "piloto@example.com"], repoPath);
-    writeFileSync(join(repoPath, "README.md"), "# Piloto\n");
-    git(["add", "README.md"], repoPath);
-    git(["commit", "-m", "initial commit"], repoPath);
-    git(["branch", "-m", "main"], repoPath);
+    initGitRepo(repoPath);
 
     const db = getDb();
     workspaceId = randomUUID();
@@ -130,19 +149,14 @@ describe("worktree.service (tracked)", () => {
       .values({ id: sessionId, workspaceId, backend: "codex", status: "idle" })
       .run();
     const worktreeId = randomUUID();
-    const now = new Date().toISOString();
-    db.insert(activeWorktrees)
-      .values({
-        id: worktreeId,
-        repoId,
-        featureName: "inuse",
-        branch: "feature/inuse",
-        path: wtPath,
-        agentSessionId: sessionId,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .run();
+    insertActiveWorktree(db, {
+      id: worktreeId,
+      repoId,
+      branch: "feature/inuse",
+      featureName: "inuse",
+      path: wtPath,
+      agentSessionId: sessionId,
+    });
 
     await expect(removeTrackedWorktree(worktreeId, false)).rejects.toBeInstanceOf(
       WorktreeInUseError,
@@ -159,19 +173,13 @@ describe("worktree.service (tracked)", () => {
 
     const db = getDb();
     const worktreeId = randomUUID();
-    const now = new Date().toISOString();
-    db.insert(activeWorktrees)
-      .values({
-        id: worktreeId,
-        repoId,
-        featureName: "dirty",
-        branch: "feature/dirty",
-        path: wtPath,
-        agentSessionId: null,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .run();
+    insertActiveWorktree(db, {
+      id: worktreeId,
+      repoId,
+      branch: "feature/dirty",
+      featureName: "dirty",
+      path: wtPath,
+    });
 
     await expect(removeTrackedWorktree(worktreeId, false)).rejects.toBeInstanceOf(
       UncommittedChangesError,
@@ -192,19 +200,14 @@ describe("worktree.service (tracked)", () => {
       .values({ id: sessionId, workspaceId, backend: "codex", status: "idle" })
       .run();
     const worktreeId = randomUUID();
-    const now = new Date().toISOString();
-    db.insert(activeWorktrees)
-      .values({
-        id: worktreeId,
-        repoId,
-        featureName: "force",
-        branch: "feature/force",
-        path: wtPath,
-        agentSessionId: sessionId,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .run();
+    insertActiveWorktree(db, {
+      id: worktreeId,
+      repoId,
+      branch: "feature/force",
+      featureName: "force",
+      path: wtPath,
+      agentSessionId: sessionId,
+    });
 
     await removeTrackedWorktree(worktreeId, true);
 

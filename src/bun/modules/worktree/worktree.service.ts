@@ -105,41 +105,34 @@ export async function createWorktreesForFeature(
   }
 
   const settled = await Promise.allSettled(
-    repos.map(async (repo) => {
+    repos.map(async (repo): Promise<ActiveWorktree> => {
       const path = computeWorktreePath(repo.path, branchName);
       await createWorktree({ repoPath: repo.path, branch: branchName, path });
       const id = randomUUID();
       const now = new Date().toISOString();
-      db.insert(activeWorktrees)
-        .values({
-          id,
-          repoId: repo.id,
-          featureName,
-          branch: branchName,
-          path,
-          agentSessionId: null,
-          createdAt: now,
-          updatedAt: now,
-        })
-        .run();
-      const row = db.select().from(activeWorktrees).where(eq(activeWorktrees.id, id)).get();
-      if (!row) throw new NotFoundError("ActiveWorktree", id);
-      const worktree: ActiveWorktree = { ...row, repo };
-      return worktree;
+      const row = {
+        id,
+        repoId: repo.id,
+        featureName,
+        branch: branchName,
+        path,
+        agentSessionId: null,
+        createdAt: now,
+        updatedAt: now,
+      };
+      db.insert(activeWorktrees).values(row).run();
+      return { ...row, repo };
     }),
   );
 
   return settled.map((result, idx): WorktreeResult => {
-    const repo = repos[idx];
-    if (!repo) {
-      return { repoId: "", ok: false, error: "missing repo for result" };
-    }
+    const { id: repoId } = repos[idx] as (typeof repos)[number];
     if (result.status === "fulfilled") {
-      return { repoId: repo.id, ok: true, worktree: result.value };
+      return { repoId, ok: true, worktree: result.value };
     }
     const reason = result.reason;
     const message = reason instanceof Error ? reason.message : String(reason);
-    return { repoId: repo.id, ok: false, error: message };
+    return { repoId, ok: false, error: message };
   });
 }
 
