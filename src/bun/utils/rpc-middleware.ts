@@ -6,7 +6,14 @@
 // (src/bun/rpc.ts) so every handler gets the same cross-cutting behavior.
 
 import { ErrorCode as Codes, type ErrorCode, encodeRPCError } from "../../../shared/errors";
-import { AppError, GitError, NotFoundError, ValidationError } from "./errors";
+import {
+  AppError,
+  GitError,
+  NotFoundError,
+  UncommittedChangesError,
+  ValidationError,
+  WorktreeInUseError,
+} from "./errors";
 import { createLogger } from "./logger";
 
 const log = createLogger("rpc");
@@ -18,6 +25,8 @@ function mapErrorCode(err: unknown): ErrorCode {
   if (err instanceof NotFoundError) return Codes.NOT_FOUND;
   if (err instanceof ValidationError) return Codes.VALIDATION;
   if (err instanceof GitError) return Codes.GIT_ERROR;
+  if (err instanceof WorktreeInUseError) return Codes.WORKTREE_IN_USE;
+  if (err instanceof UncommittedChangesError) return Codes.UNCOMMITTED_CHANGES;
   return Codes.INTERNAL;
 }
 

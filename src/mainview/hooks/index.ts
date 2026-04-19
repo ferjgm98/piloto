@@ -4,9 +4,18 @@ export { useRPCQuery } from "./use-rpc-query";
 export type { UseRPCQueryResult } from "./use-rpc-query";
 export { useRPCSubscription } from "./use-rpc-subscription";
 export {
-  useWorkspaces,
-  useWorkspace,
   useCreateWorkspace,
-  useUpdateWorkspace,
   useDeleteWorkspace,
+  useUpdateWorkspace,
+  useWorkspace,
+  useWorkspaces,
 } from "./use-workspaces";
+export {
+  useCreateWorktreesForFeature,
+  useRemoveTrackedWorktree,
+  useWorkspaceWorktrees,
+} from "./use-worktrees";
+export type {
+  CreateWorktreesForFeatureInput,
+  RemoveTrackedWorktreeInput,
+} from "./use-worktrees";

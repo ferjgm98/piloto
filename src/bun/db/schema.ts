@@ -33,3 +33,18 @@ export const agentSessions = sqliteTable("agent_sessions", {
   status: text("status").default("idle"),
   createdAt: text("created_at").default(sql`(datetime('now'))`),
 });
+
+export const activeWorktrees = sqliteTable("active_worktrees", {
+  id: text("id").primaryKey(),
+  repoId: text("repo_id")
+    .notNull()
+    .references(() => workspaceRepos.id, { onDelete: "cascade" }),
+  featureName: text("feature_name"),
+  branch: text("branch").notNull(),
+  path: text("path").notNull(),
+  agentSessionId: text("agent_session_id").references(() => agentSessions.id, {
+    onDelete: "set null",
+  }),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at").notNull().default(sql`(datetime('now'))`),
+});
