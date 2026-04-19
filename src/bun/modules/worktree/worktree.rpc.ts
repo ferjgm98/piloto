@@ -1,3 +1,4 @@
+import type { ActiveWorktreeDTO, WorktreeResult as WorktreeResultDTO } from "shared/rpc";
 import * as worktreeService from "./worktree.service";
 import type {
   ActiveWorktree,
@@ -7,6 +8,32 @@ import type {
   WorktreeResult,
   WorktreeStatus,
 } from "./worktree.types";
+
+function toActiveWorktreeDTO(wt: ActiveWorktree): ActiveWorktreeDTO {
+  return {
+    id: wt.id,
+    repoId: wt.repoId,
+    featureName: wt.featureName,
+    branch: wt.branch,
+    path: wt.path,
+    agentSessionId: wt.agentSessionId,
+    createdAt: wt.createdAt,
+    updatedAt: wt.updatedAt,
+    repo: {
+      id: wt.repo.id,
+      workspaceId: wt.repo.workspaceId,
+      path: wt.repo.path,
+      defaultBranch: wt.repo.defaultBranch,
+    },
+  };
+}
+
+function toWorktreeResultDTO(result: WorktreeResult): WorktreeResultDTO {
+  if (result.ok) {
+    return { repoId: result.repoId, ok: true, worktree: toActiveWorktreeDTO(result.worktree) };
+  }
+  return { repoId: result.repoId, ok: false, error: result.error };
+}
 
 export const worktreeHandlers = {
   requests: {
@@ -24,17 +51,19 @@ export const worktreeHandlers = {
       workspaceId: string;
       featureName: string;
       branchName: string;
-    }): Promise<WorktreeResult[]> => {
-      return worktreeService.createWorktreesForFeature(
+    }): Promise<WorktreeResultDTO[]> => {
+      const results = await worktreeService.createWorktreesForFeature(
         params.workspaceId,
         params.featureName,
         params.branchName,
       );
+      return results.map(toWorktreeResultDTO);
     },
     listWorkspaceWorktrees: async (params: {
       workspaceId: string;
-    }): Promise<ActiveWorktree[]> => {
-      return worktreeService.listWorkspaceWorktrees(params.workspaceId);
+    }): Promise<ActiveWorktreeDTO[]> => {
+      const worktrees = worktreeService.listWorkspaceWorktrees(params.workspaceId);
+      return worktrees.map(toActiveWorktreeDTO);
     },
     removeTrackedWorktree: async (params: {
       worktreeId: string;

@@ -1,6 +1,3 @@
-import type { InferSelectModel } from "drizzle-orm";
-import type { activeWorktrees, workspaceRepos } from "../../db/schema";
-
 export interface Worktree {
   path: string;
   branch: string;
@@ -20,8 +17,26 @@ export interface WorktreeRemoveInput {
   force?: boolean;
 }
 
-export type WorkspaceRepo = InferSelectModel<typeof workspaceRepos>;
-export type ActiveWorktreeRow = InferSelectModel<typeof activeWorktrees>;
+export interface WorkspaceRepo {
+  id: string;
+  workspaceId: string;
+  path: string;
+  name: string | null;
+  defaultBranch: string | null;
+  order: number;
+}
+
+export interface ActiveWorktreeRow {
+  id: string;
+  repoId: string;
+  featureName: string | null;
+  branch: string;
+  path: string;
+  agentSessionId: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export type ActiveWorktree = ActiveWorktreeRow & { repo: WorkspaceRepo };
 
 export type WorktreeResult =
