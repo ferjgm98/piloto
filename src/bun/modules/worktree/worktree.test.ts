@@ -7,14 +7,24 @@ import { join } from "node:path";
 import { eq } from "drizzle-orm";
 import { getDb, initializeDatabase } from "../../db/database";
 import { activeWorktrees, agentSessions, workspaceRepos, workspaces } from "../../db/schema";
-import { UncommittedChangesError, WorktreeInUseError } from "../../utils/errors";
+import {
+  UncommittedChangesError,
+  WorktreeAlreadyHasWatcherError,
+  WorktreeInUseError,
+} from "../../utils/errors";
 import { resetTestDb } from "../../utils/test-setup";
 import {
   computeWorktreePath,
+  createWatcher,
   createWorktree,
+  destroyWatcher,
+  getWorktreeStatus,
+  listWorkspaceWorktrees,
   listWorktrees,
+  refreshWorktreeStatus,
   removeTrackedWorktree,
   removeWorktree,
+  setWorktreeStatusNotifier,
 } from "./worktree.service";
 
 function git(args: string[], cwd: string) {
@@ -30,6 +40,11 @@ function initGitRepo(repoPath: string) {
   git(["add", "README.md"], repoPath);
   git(["commit", "-m", "initial commit"], repoPath);
   git(["branch", "-m", "main"], repoPath);
+}
+
+function initBareGitRepo(repoPath: string) {
+  mkdirSync(repoPath, { recursive: true });
+  git(["init", "--bare"], repoPath);
 }
 
 type TrackedInsert = {
@@ -69,6 +84,7 @@ describe("worktree.service", () => {
 
   afterEach(() => {
     rmSync(rootDir, { recursive: true, force: true });
+    setWorktreeStatusNotifier(null);
   });
 
   test("listWorktrees includes the main worktree", async () => {
@@ -213,5 +229,169 @@ describe("worktree.service (tracked)", () => {
 
     const after = db.select().from(activeWorktrees).where(eq(activeWorktrees.id, worktreeId)).get();
     expect(after).toBeUndefined();
+  });
+
+  test("getWorktreeStatus returns dirty state and changed file count", async () => {
+    const canonical = realpathSync(repoPath);
+    const wtPath = join(rootDir, "wt-status");
+    await createWorktree({ repoPath: canonical, branch: "feature/status", path: wtPath });
+    writeFileSync(join(wtPath, "dirty.txt"), "dirty\n");
+
+    const db = getDb();
+    const worktreeId = randomUUID();
+    insertActiveWorktree(db, {
+      id: worktreeId,
+      repoId,
+      branch: "feature/status",
+      featureName: "status",
+      path: wtPath,
+    });
+
+    const status = await getWorktreeStatus(worktreeId);
+
+    expect(status.hasChanges).toBe(true);
+    expect(status.changedFiles).toBe(1);
+    expect(status.branchName).toBe("feature/status");
+    expect(status.ahead).toBe(0);
+    expect(status.behind).toBe(0);
+    expect(status.lastFetch).toBeNull();
+
+    await removeWorktree({ repoPath: canonical, path: wtPath, force: true });
+  });
+
+  test("getWorktreeStatus returns ahead, behind, and lastFetch when upstream exists", async () => {
+    const canonical = realpathSync(repoPath);
+    const remotePath = join(rootDir, "remote.git");
+    initBareGitRepo(remotePath);
+
+    git(["remote", "add", "origin", remotePath], canonical);
+    git(["push", "-u", "origin", "main"], canonical);
+
+    const wtPath = join(rootDir, "wt-sync");
+    await createWorktree({ repoPath: canonical, branch: "feature/sync", path: wtPath });
+    git(["push", "-u", "origin", "feature/sync"], wtPath);
+
+    const db = getDb();
+    const worktreeId = randomUUID();
+    insertActiveWorktree(db, {
+      id: worktreeId,
+      repoId,
+      branch: "feature/sync",
+      featureName: "sync",
+      path: wtPath,
+    });
+
+    writeFileSync(join(wtPath, "local.txt"), "local\n");
+    git(["add", "local.txt"], wtPath);
+    git(["commit", "-m", "local change"], wtPath);
+
+    const clonePath = join(rootDir, "remote-clone");
+    git(["clone", remotePath, clonePath], rootDir);
+    git(["config", "user.name", "Piloto Tests"], clonePath);
+    git(["config", "user.email", "piloto@example.com"], clonePath);
+    git(["checkout", "feature/sync"], clonePath);
+    writeFileSync(join(clonePath, "remote.txt"), "remote\n");
+    git(["add", "remote.txt"], clonePath);
+    git(["commit", "-m", "remote change"], clonePath);
+    git(["push", "origin", "feature/sync"], clonePath);
+
+    git(["fetch", "origin"], wtPath);
+
+    const status = await getWorktreeStatus(worktreeId);
+
+    expect(status.hasChanges).toBe(false);
+    expect(status.changedFiles).toBe(0);
+    expect(status.branchName).toBe("feature/sync");
+    expect(status.ahead).toBe(1);
+    expect(status.behind).toBe(1);
+    expect(status.lastFetch).toBeInstanceOf(Date);
+
+    await removeWorktree({ repoPath: canonical, path: wtPath, force: true });
+  });
+
+  test("refreshWorktreeStatus emits through the notifier", async () => {
+    const canonical = realpathSync(repoPath);
+    const wtPath = join(rootDir, "wt-refresh");
+    await createWorktree({ repoPath: canonical, branch: "feature/refresh", path: wtPath });
+
+    const db = getDb();
+    const worktreeId = randomUUID();
+    insertActiveWorktree(db, {
+      id: worktreeId,
+      repoId,
+      branch: "feature/refresh",
+      featureName: "refresh",
+      path: wtPath,
+    });
+
+    let payload:
+      | {
+          worktreeId: string;
+          statusChanged: boolean;
+        }
+      | undefined;
+
+    setWorktreeStatusNotifier(({ worktreeId: changedId, status }) => {
+      payload = {
+        worktreeId: changedId,
+        statusChanged: status.hasChanges,
+      };
+    });
+
+    writeFileSync(join(wtPath, "dirty.txt"), "dirty\n");
+    const status = await refreshWorktreeStatus(worktreeId);
+
+    expect(status.hasChanges).toBe(true);
+    expect(payload).toEqual({
+      worktreeId,
+      statusChanged: true,
+    });
+
+    await removeWorktree({ repoPath: canonical, path: wtPath, force: true });
+  });
+
+  test("createWatcher rejects duplicate watchers and destroyWatcher allows re-creation", async () => {
+    const canonical = realpathSync(repoPath);
+    const wtPath = join(rootDir, "wt-watch");
+    await createWorktree({ repoPath: canonical, branch: "feature/watch", path: wtPath });
+
+    const worktreeId = randomUUID();
+    await createWatcher(worktreeId, wtPath);
+
+    await expect(createWatcher(worktreeId, wtPath)).rejects.toBeInstanceOf(
+      WorktreeAlreadyHasWatcherError,
+    );
+
+    await destroyWatcher(worktreeId);
+    await createWatcher(worktreeId, wtPath);
+    await destroyWatcher(worktreeId);
+
+    await removeWorktree({ repoPath: canonical, path: wtPath, force: true });
+  });
+
+  test("listWorkspaceWorktrees returns tracked worktrees with embedded status", async () => {
+    const canonical = realpathSync(repoPath);
+    const wtPath = join(rootDir, "wt-list");
+    await createWorktree({ repoPath: canonical, branch: "feature/list", path: wtPath });
+    writeFileSync(join(wtPath, "dirty.txt"), "dirty\n");
+
+    const db = getDb();
+    const worktreeId = randomUUID();
+    insertActiveWorktree(db, {
+      id: worktreeId,
+      repoId,
+      branch: "feature/list",
+      featureName: "list",
+      path: wtPath,
+    });
+
+    const worktrees = await listWorkspaceWorktrees(workspaceId);
+
+    expect(worktrees).toHaveLength(1);
+    expect(worktrees[0]?.status.hasChanges).toBe(true);
+    expect(worktrees[0]?.status.changedFiles).toBe(1);
+    expect(worktrees[0]?.repo.id).toBe(repoId);
+
+    await removeTrackedWorktree(worktreeId, true);
   });
 });

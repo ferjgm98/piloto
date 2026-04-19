@@ -18,6 +18,7 @@ const expectedRequestKeys = {
   removeWorktree: true,
   createWorktreesForFeature: true,
   listWorkspaceWorktrees: true,
+  refreshWorktreeStatus: true,
   removeTrackedWorktree: true,
   getWorktreeStatus: true,
   listAgentSessions: true,

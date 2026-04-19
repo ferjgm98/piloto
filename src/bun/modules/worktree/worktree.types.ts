@@ -44,8 +44,22 @@ export type WorktreeResult =
   | { repoId: string; ok: false; error: string };
 
 export interface WorktreeStatus {
+  hasChanges: boolean;
+  changedFiles: number;
+  branchName: string | null;
+  ahead: number;
+  behind: number;
+  lastFetch: Date | null;
+}
+
+export type WorktreeWithStatus = ActiveWorktree & { status: WorktreeStatus };
+
+export interface FileChangeEvent {
   path: string;
-  branch: string;
-  hasUncommittedChanges: boolean;
-  hasRunningAgents: boolean;
+  type: "created" | "modified" | "deleted";
+}
+
+export interface Watcher {
+  worktreeId: string;
+  unsubscribe: () => Promise<void> | void;
 }

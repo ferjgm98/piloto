@@ -1,15 +1,31 @@
-import type { ActiveWorktreeDTO, WorktreeResult as WorktreeResultDTO } from "shared/rpc";
+import type {
+  ActiveWorktreeDTO,
+  WorktreeResult as WorktreeResultDTO,
+  WorktreeStatus as WorktreeStatusDTO,
+} from "shared/rpc";
 import * as worktreeService from "./worktree.service";
 import type {
   ActiveWorktree,
+  WorktreeStatus as DomainWorktreeStatus,
   Worktree,
   WorktreeCreateInput,
   WorktreeRemoveInput,
   WorktreeResult,
-  WorktreeStatus,
+  WorktreeWithStatus,
 } from "./worktree.types";
 
-function toActiveWorktreeDTO(wt: ActiveWorktree): ActiveWorktreeDTO {
+function toWorktreeStatusDTO(status: DomainWorktreeStatus): WorktreeStatusDTO {
+  return {
+    hasChanges: status.hasChanges,
+    changedFiles: status.changedFiles,
+    branchName: status.branchName,
+    ahead: status.ahead,
+    behind: status.behind,
+    lastFetch: status.lastFetch?.toISOString() ?? null,
+  };
+}
+
+function toActiveWorktreeDTO(wt: WorktreeWithStatus): ActiveWorktreeDTO {
   return {
     id: wt.id,
     repoId: wt.repoId,
@@ -25,12 +41,38 @@ function toActiveWorktreeDTO(wt: ActiveWorktree): ActiveWorktreeDTO {
       path: wt.repo.path,
       defaultBranch: wt.repo.defaultBranch,
     },
+    status: toWorktreeStatusDTO(wt.status),
   };
 }
 
-function toWorktreeResultDTO(result: WorktreeResult): WorktreeResultDTO {
+async function toTrackedWorktreeDTO(wt: ActiveWorktree): Promise<ActiveWorktreeDTO> {
+  const status = await worktreeService.getWorktreeStatus(wt.id);
+  return {
+    id: wt.id,
+    repoId: wt.repoId,
+    featureName: wt.featureName,
+    branch: wt.branch,
+    path: wt.path,
+    agentSessionId: wt.agentSessionId,
+    createdAt: wt.createdAt,
+    updatedAt: wt.updatedAt,
+    repo: {
+      id: wt.repo.id,
+      workspaceId: wt.repo.workspaceId,
+      path: wt.repo.path,
+      defaultBranch: wt.repo.defaultBranch,
+    },
+    status: toWorktreeStatusDTO(status),
+  };
+}
+
+async function toWorktreeResultDTO(result: WorktreeResult): Promise<WorktreeResultDTO> {
   if (result.ok) {
-    return { repoId: result.repoId, ok: true, worktree: toActiveWorktreeDTO(result.worktree) };
+    return {
+      repoId: result.repoId,
+      ok: true,
+      worktree: await toTrackedWorktreeDTO(result.worktree),
+    };
   }
   return { repoId: result.repoId, ok: false, error: result.error };
 }
@@ -57,13 +99,17 @@ export const worktreeHandlers = {
         params.featureName,
         params.branchName,
       );
-      return results.map(toWorktreeResultDTO);
+      return Promise.all(results.map(toWorktreeResultDTO));
     },
     listWorkspaceWorktrees: async (params: {
       workspaceId: string;
     }): Promise<ActiveWorktreeDTO[]> => {
-      const worktrees = worktreeService.listWorkspaceWorktrees(params.workspaceId);
+      const worktrees = await worktreeService.listWorkspaceWorktrees(params.workspaceId);
       return worktrees.map(toActiveWorktreeDTO);
+    },
+    refreshWorktreeStatus: async (params: { worktreeId: string }): Promise<WorktreeStatusDTO> => {
+      const status = await worktreeService.refreshWorktreeStatus(params.worktreeId);
+      return toWorktreeStatusDTO(status);
     },
     removeTrackedWorktree: async (params: {
       worktreeId: string;
@@ -72,8 +118,9 @@ export const worktreeHandlers = {
       await worktreeService.removeTrackedWorktree(params.worktreeId, params.force);
       return undefined;
     },
-    getWorktreeStatus: async (params: { worktreeId: string }): Promise<WorktreeStatus> => {
-      return worktreeService.getWorktreeStatus(params.worktreeId);
+    getWorktreeStatus: async (params: { worktreeId: string }): Promise<WorktreeStatusDTO> => {
+      const status = await worktreeService.getWorktreeStatus(params.worktreeId);
+      return toWorktreeStatusDTO(status);
     },
   },
   messages: {},

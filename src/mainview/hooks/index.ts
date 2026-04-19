@@ -12,10 +12,12 @@ export {
 } from "./use-workspaces";
 export {
   useCreateWorktreesForFeature,
+  useRefreshWorktreeStatus,
   useRemoveTrackedWorktree,
   useWorkspaceWorktrees,
 } from "./use-worktrees";
 export type {
   CreateWorktreesForFeatureInput,
+  RefreshWorktreeStatusInput,
   RemoveTrackedWorktreeInput,
 } from "./use-worktrees";
