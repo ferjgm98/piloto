@@ -1,0 +1,30 @@
+{
+  "cli_version": "0.5.5",
+  "checkpoint_id": "374239745731",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 7,
+  "files_touched": [
+    "CLAUDE.md",
+    "bun.lock",
+    "docs/adr/0001-file-system-watcher.md",
+    "package.json",
+    "src/bun/modules/worktree/worktree.service.ts",
+    "src/bun/modules/worktree/worktree.types.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/37/4239745731/0/metadata.json",
+      "transcript": "/37/4239745731/0/full.jsonl",
+      "content_hash": "/37/4239745731/0/content_hash.txt",
+      "prompt": "/37/4239745731/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 238,
+    "cache_creation_tokens": 598728,
+    "cache_read_tokens": 9131051,
+    "output_tokens": 57252,
+    "api_call_count": 103
+  }
+}
