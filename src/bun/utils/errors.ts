@@ -55,3 +55,17 @@ export class UncommittedChangesError extends AppError {
     this.name = "UncommittedChangesError";
   }
 }
+
+export class AgentBinaryNotFoundError extends AppError {
+  constructor(binary: string) {
+    super(`Agent binary "${binary}" not found on PATH`, "AGENT_BINARY_NOT_FOUND");
+    this.name = "AgentBinaryNotFoundError";
+  }
+}
+
+export class ConfigurationError extends AppError {
+  constructor(message: string) {
+    super(message, "CONFIGURATION_ERROR");
+    this.name = "ConfigurationError";
+  }
+}

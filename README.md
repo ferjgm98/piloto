@@ -18,18 +18,18 @@ Modern agentic coding tools assume you're working in a single folder or monorepo
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Desktop runtime | [Electrobun](https://electrobun.dev/) (Bun + system WebView + Zig) |
-| Main process | Bun (TypeScript) |
-| UI framework | React 19 + Vite 6 |
-| Styling | Tailwind CSS 4 + shadcn/ui |
-| Native integration | Zig FFI (libghostty terminal) |
-| IPC | Electrobun Typed RPC |
-| State management | Zustand |
-| Database | SQLite (bun:sqlite) |
-| Code editor | Monaco Editor |
-| Linting & formatting | Biome |
+| Layer                | Technology                                                         |
+| -------------------- | ------------------------------------------------------------------ |
+| Desktop runtime      | [Electrobun](https://electrobun.dev/) (Bun + system WebView + Zig) |
+| Main process         | Bun (TypeScript)                                                   |
+| UI framework         | React 19 + Vite 6                                                  |
+| Styling              | Tailwind CSS 4 + shadcn/ui                                         |
+| Native integration   | Zig FFI (libghostty terminal)                                      |
+| IPC                  | Electrobun Typed RPC                                               |
+| State management     | Zustand                                                            |
+| Database             | SQLite (bun:sqlite)                                                |
+| Code editor          | Monaco Editor                                                      |
+| Linting & formatting | Biome                                                              |
 
 ### Why Electrobun?
 
@@ -147,23 +147,23 @@ When using `dev:hmr`, the Vite dev server runs on port 5173. The main process au
 > conventions (used by both humans and AI agents), and
 > [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) for a narrative walkthrough
 > of adding a feature. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-> covers the *why* behind the layer boundaries.
+> covers the _why_ behind the layer boundaries.
 
 ### Commands
 
-| Command | Description |
-|---|---|
-| `bun run start` | Build webview + launch app |
-| `bun run dev` | Build + launch with file watching |
-| `bun run dev:hmr` | Vite dev server + app (HMR enabled) |
-| `bun run build:canary` | Continuous internal preview build and default release validation target |
-| `bun run build:stable` | Stable production build for later public releases |
-| `bun run lint` | Check with Biome |
-| `bun run lint:fix` | Auto-fix lint issues |
-| `bun run check` | Biome lint + strict tsc (the canonical pre-commit gate) |
-| `bun run check:fix` | Auto-fix lint + strict tsc |
-| `bun run scaffold:module <name>` | Create a new Bun feature module under `src/bun/modules/` |
-| `bun run scaffold:rpc <module> <method> [query\|mutation\|message]` | Add a new RPC method to an existing module |
+| Command                                                             | Description                                                             |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `bun run start`                                                     | Build webview + launch app                                              |
+| `bun run dev`                                                       | Build + launch with file watching                                       |
+| `bun run dev:hmr`                                                   | Vite dev server + app (HMR enabled)                                     |
+| `bun run build:canary`                                              | Continuous internal preview build and default release validation target |
+| `bun run build:stable`                                              | Stable production build for later public releases                       |
+| `bun run lint`                                                      | Check with Biome                                                        |
+| `bun run lint:fix`                                                  | Auto-fix lint issues                                                    |
+| `bun run check`                                                     | Biome lint + strict tsc (the canonical pre-commit gate)                 |
+| `bun run check:fix`                                                 | Auto-fix lint + strict tsc                                              |
+| `bun run scaffold:module <name>`                                    | Create a new Bun feature module under `src/bun/modules/`                |
+| `bun run scaffold:rpc <module> <method> [query\|mutation\|message]` | Add a new RPC method to an existing module                              |
 
 ### Environment
 

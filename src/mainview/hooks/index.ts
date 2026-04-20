@@ -3,6 +3,8 @@ export type { UseRPCMutationResult } from "./use-rpc-mutation";
 export { useRPCQuery } from "./use-rpc-query";
 export type { UseRPCQueryResult } from "./use-rpc-query";
 export { useRPCSubscription } from "./use-rpc-subscription";
+export { useAgentOutput, useAgents, useStartAgent, useStopAgent } from "./use-agents";
+export type { StartAgentInput, StopAgentInput } from "./use-agents";
 export {
   useCreateWorkspace,
   useDeleteWorkspace,

@@ -19,6 +19,11 @@ export const agentSessionsRelations = relations(agentSessions, ({ one }) => ({
     fields: [agentSessions.workspaceId],
     references: [workspaces.id],
   }),
+  worktree: one(activeWorktrees, {
+    fields: [agentSessions.worktreeId],
+    references: [activeWorktrees.id],
+    relationName: "agentSessionWorktree",
+  }),
 }));
 
 export const activeWorktreesRelations = relations(activeWorktrees, ({ one }) => ({

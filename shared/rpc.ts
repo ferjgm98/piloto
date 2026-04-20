@@ -34,6 +34,28 @@ export interface WorktreeStatus {
   lastFetch: string | null;
 }
 
+export type AgentBackendName = "claude" | "codex";
+export type AgentStatus = "idle" | "running" | "stopped" | "error";
+
+export interface AgentSessionDTO {
+  id: string;
+  workspaceId: string;
+  worktreeId: string | null;
+  backend: AgentBackendName;
+  status: AgentStatus;
+  prompt: string | null;
+  errorMessage: string | null;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export type AgentUpdateDTO =
+  | { kind: "message"; text: string }
+  | { kind: "thought"; text: string }
+  | { kind: "tool_call"; toolCallId: string; title: string; toolKind: string; status: string }
+  | { kind: "tool_call_update"; toolCallId: string; status: string; title: string | null }
+  | { kind: "plan"; entries: { content: string; status: string; priority: string }[] };
+
 export type MainRPC = {
   bun: RPCSchema<{
     requests: {
@@ -181,20 +203,27 @@ export type MainRPC = {
         response: WorktreeStatus;
       };
 
-      // Agent (stub)
+      // Agent
       listAgentSessions: {
-        params: Record<string, never>;
-        response: {
-          id: string;
-          workspaceId: string;
-          backend: string;
-          status: "idle" | "running" | "stopped" | "error";
-          createdAt: string;
-        }[];
+        params: { workspaceId: string };
+        response: AgentSessionDTO[];
+      };
+      getAgentSession: {
+        params: { sessionId: string };
+        response: AgentSessionDTO;
       };
       startAgent: {
-        params: { workspaceId: string; backend: string };
-        response: null;
+        params: {
+          workspaceId: string;
+          worktreeId?: string;
+          backend: AgentBackendName;
+          prompt?: string;
+        };
+        response: { sessionId: string };
+      };
+      stopAgent: {
+        params: { sessionId: string };
+        response: { success: boolean };
       };
 
       // Terminal (stub)
@@ -234,7 +263,6 @@ export type MainRPC = {
     };
     messages: {
       log: { msg: string };
-      agentOutput: { sessionId: string; text: string };
       terminalOutput: { terminalId: string; text: string };
     };
   }>;
@@ -242,6 +270,8 @@ export type MainRPC = {
     requests: Record<string, never>;
     messages: {
       worktreeStatusChanged: { worktreeId: string; status: WorktreeStatus };
+      agentOutput: { sessionId: string; chunk: AgentUpdateDTO };
+      agentStatusChange: { sessionId: string; status: AgentStatus; error?: string };
     };
   }>;
 };
