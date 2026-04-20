@@ -10,7 +10,7 @@ Modern agentic coding tools assume you're working in a single folder or monorepo
 
 - **Parallel agents with Git worktrees** — Run multiple AI agents side-by-side, each in its own worktree, so changes stay isolated until you're ready to merge.
 - **Multi-project workspaces** — Group related repos into a single workspace and spin up worktrees across all of them for cross-project features.
-- **Dual AI backend support** — Work with both [Codex CLI](https://github.com/openai/codex) and [Claude Code](https://docs.anthropic.com/en/docs/claude-code), with [ACP](https://github.com/anthropics/anthropic-cookbook/tree/main/misc/acp) integration.
+- **Dual AI backend support** — Drive [Claude Code](https://docs.anthropic.com/en/docs/claude-code) via its native `stream-json` protocol and [Codex CLI](https://github.com/openai/codex) via `codex app-server` JSON-RPC. ACP (via [`@zed-industries/agent-client-protocol`](https://github.com/zed-industries/agent-client-protocol)) is reserved for future third-party agents — see [ADR 0002](docs/adr/0002-agent-protocol-choice.md).
 - **Diff view & change preview** — Review agent-generated changes before committing, with a built-in diff viewer.
 - **Integrated terminal** — Powered by [libghostty](https://github.com/ghostty-org/ghostty), embedded directly into the app via Zig FFI.
 - **MCP support** — Connect to [Model Context Protocol](https://modelcontextprotocol.io/) servers for extended tool capabilities.
@@ -113,6 +113,10 @@ piloto/
 - [Bun](https://bun.sh/) (v1.0+)
 - macOS, Linux, or Windows
 - Git
+- To launch agents: the `claude` and/or `codex` CLIs on `PATH`, each logged in
+  via its own `login` flow (Piloto delegates authentication to the CLI instead
+  of reading API keys). Override the resolved binaries with `PILOTO_CLAUDE_BIN`
+  / `PILOTO_CODEX_BIN`. See [ADR 0002](docs/adr/0002-agent-protocol-choice.md).
 
 ### Installation
 
