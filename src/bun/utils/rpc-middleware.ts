@@ -7,7 +7,9 @@
 
 import { ErrorCode as Codes, type ErrorCode, encodeRPCError } from "../../../shared/errors";
 import {
+  AgentBinaryNotFoundError,
   AppError,
+  ConfigurationError,
   GitError,
   NotFoundError,
   UncommittedChangesError,
@@ -29,6 +31,8 @@ function mapErrorCode(err: unknown): ErrorCode {
   if (err instanceof WorktreeInUseError) return Codes.WORKTREE_IN_USE;
   if (err instanceof WorktreeAlreadyHasWatcherError) return Codes.WORKTREE_ALREADY_HAS_WATCHER;
   if (err instanceof UncommittedChangesError) return Codes.UNCOMMITTED_CHANGES;
+  if (err instanceof AgentBinaryNotFoundError) return Codes.AGENT_BINARY_NOT_FOUND;
+  if (err instanceof ConfigurationError) return Codes.CONFIGURATION_ERROR;
   return Codes.INTERNAL;
 }
 

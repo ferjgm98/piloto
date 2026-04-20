@@ -1,6 +1,6 @@
 import { BrowserView } from "electrobun/bun";
 import type { MainRPC } from "shared/rpc";
-import { agentHandlers } from "./modules/agent/agent.rpc";
+import { setAgentStatusNotifier, setAgentUpdateNotifier } from "./modules/agent/agent.service";
 import { terminalHandlers } from "./modules/terminal/terminal.rpc";
 import { setWorktreeStatusNotifier } from "./modules/worktree/worktree.service";
 import { requestHandlers } from "./rpc-handlers";
@@ -15,7 +15,6 @@ export function createRPC() {
         log: ({ msg }) => {
           console.log("[Webview]:", msg);
         },
-        ...agentHandlers.messages,
         ...terminalHandlers.messages,
       },
     },
@@ -33,6 +32,14 @@ export function createRPC() {
         lastFetch: status.lastFetch?.toISOString() ?? null,
       },
     });
+  });
+
+  setAgentUpdateNotifier(({ sessionId, chunk }) => {
+    rpc.send.agentOutput({ sessionId, chunk });
+  });
+
+  setAgentStatusNotifier(({ sessionId, status, error }) => {
+    rpc.send.agentStatusChange({ sessionId, status, error });
   });
 
   return rpc;

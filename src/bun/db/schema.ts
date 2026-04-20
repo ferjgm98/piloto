@@ -29,9 +29,18 @@ export const agentSessions = sqliteTable("agent_sessions", {
   workspaceId: text("workspace_id")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
-  backend: text("backend").notNull(),
-  status: text("status").default("idle"),
-  createdAt: text("created_at").default(sql`(datetime('now'))`),
+  worktreeId: text("worktree_id"),
+  backend: text("backend", { enum: ["claude", "codex"] }).notNull(),
+  status: text("status", { enum: ["idle", "running", "stopped", "error"] })
+    .notNull()
+    .default("idle"),
+  prompt: text("prompt"),
+  errorMessage: text("error_message"),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`)
+    .$onUpdate(() => new Date().toISOString()),
 });
 
 export const activeWorktrees = sqliteTable("active_worktrees", {

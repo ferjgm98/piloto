@@ -113,6 +113,9 @@ piloto/
 - [Bun](https://bun.sh/) (v1.0+)
 - macOS, Linux, or Windows
 - Git
+- To launch agents: the `claude-code-acp` and/or `codex` CLI on `PATH`, plus
+  `ANTHROPIC_API_KEY` and/or `OPENAI_API_KEY` in the environment. Override the
+  resolved binaries with `PILOTO_CLAUDE_ACP_BIN` / `PILOTO_CODEX_ACP_BIN`.
 
 ### Installation
 
