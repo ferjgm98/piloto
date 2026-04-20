@@ -34,6 +34,7 @@ interface RegistryEntry {
   backend: AgentBackend;
   workspaceId: string;
   worktreeId: string | null;
+  stopping: boolean;
 }
 
 const registry = new Map<string, RegistryEntry>();
@@ -90,11 +91,23 @@ function resolveWorkingDir(input: StartAgentInput): string {
   return firstRepo.path;
 }
 
+function handleBackendExit(sessionId: string, code: number | null): void {
+  const entry = registry.get(sessionId);
+  if (!entry || entry.stopping) return;
+  entry.stopping = true;
+  setWorktreeAgentBinding(entry.worktreeId, null);
+  const status: AgentStatus = code === 0 ? "stopped" : "error";
+  const message = code === 0 ? undefined : `agent process exited with code ${code}`;
+  updateSessionStatus(sessionId, status, message);
+  registry.delete(sessionId);
+}
+
 function instantiateBackend(backend: AgentBackendName, sessionId: string): AgentBackend {
+  const onExit = ({ code }: { code: number | null }) => handleBackendExit(sessionId, code);
   if (backend === "claude") {
-    return createClaudeBackend({ sessionId });
+    return createClaudeBackend({ sessionId, onExit });
   }
-  return createCodexBackend({ sessionId });
+  return createCodexBackend({ sessionId, onExit });
 }
 
 export async function startAgent(input: StartAgentInput): Promise<{ sessionId: string }> {
@@ -139,6 +152,7 @@ export async function startAgent(input: StartAgentInput): Promise<{ sessionId: s
     backend,
     workspaceId: input.workspaceId,
     worktreeId: input.worktreeId ?? null,
+    stopping: false,
   });
   setWorktreeAgentBinding(input.worktreeId ?? null, sessionId);
   statusListener?.({ sessionId, status: "running" });
@@ -152,9 +166,14 @@ export async function stopAgent(sessionId: string): Promise<{ success: boolean }
     const db = getDb();
     const row = db.select().from(agentSessions).where(eq(agentSessions.id, sessionId)).get();
     if (!row) throw new NotFoundError("AgentSession", sessionId);
+    if (row.status === "running") {
+      setWorktreeAgentBinding(row.worktreeId, null);
+      updateSessionStatus(sessionId, "stopped");
+    }
     return { success: true };
   }
 
+  entry.stopping = true;
   try {
     await entry.backend.stop();
   } catch (err) {

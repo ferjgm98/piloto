@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import type { AgentBackendName, AgentSessionDTO, AgentStatus, AgentUpdateDTO } from "shared/rpc";
 import { type UseRPCMutationResult, useRPCMutation } from "./use-rpc-mutation";
 import { type UseRPCQueryResult, useRPCQuery } from "./use-rpc-query";
@@ -37,6 +37,11 @@ export function useStopAgent(): UseRPCMutationResult<{ success: boolean }, StopA
 
 export function useAgentOutput(sessionId: string | null): AgentUpdateDTO[] {
   const [chunks, setChunks] = useState<AgentUpdateDTO[]>([]);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: reset chunks when session changes
+  useEffect(() => {
+    setChunks([]);
+  }, [sessionId]);
 
   const onOutput = useCallback(
     (payload: { sessionId: string; chunk: AgentUpdateDTO }) => {

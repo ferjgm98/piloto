@@ -12,14 +12,9 @@ export interface AgentBackend {
   onUpdate(cb: (update: AgentUpdateDTO) => void): void;
 }
 
-export interface ClaudeConfig {
-  sessionId: string;
-  binaryPath?: string;
-}
-
-export interface CodexConfig {
-  sessionId: string;
-  binaryPath?: string;
+export interface AgentBackendExitInfo {
+  code: number | null;
+  signal: string | null;
 }
 
 export interface StartAgentInput {

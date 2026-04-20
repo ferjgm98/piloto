@@ -1,12 +1,13 @@
 import type { AgentUpdateDTO } from "shared/rpc";
 import { AgentBinaryNotFoundError } from "../../../utils/errors";
 import { createLogger } from "../../../utils/logger";
-import type { AgentBackend } from "../agent.types";
+import type { AgentBackend, AgentBackendExitInfo } from "../agent.types";
 import { type LineStreamHandle, spawnLineStream } from "./jsonrpc-stdio";
 
 export interface ClaudeBackendConfig {
   sessionId: string;
   binaryPath?: string;
+  onExit?: (info: AgentBackendExitInfo) => void;
 }
 
 interface StreamJsonTextBlock {
@@ -126,6 +127,7 @@ export function createClaudeBackend(config: ClaudeBackendConfig): AgentBackend {
         onStderr: (chunk) => log.debug(`claude stderr: ${chunk.trimEnd()}`),
         onExit: (code, signal) => {
           log.info(`claude process exited code=${code} signal=${signal}`);
+          config.onExit?.({ code, signal });
         },
       });
 

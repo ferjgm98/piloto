@@ -1,12 +1,13 @@
 import type { AgentUpdateDTO } from "shared/rpc";
 import { AgentBinaryNotFoundError } from "../../../utils/errors";
 import { createLogger } from "../../../utils/logger";
-import type { AgentBackend } from "../agent.types";
+import type { AgentBackend, AgentBackendExitInfo } from "../agent.types";
 import { type JsonRpcPeer, connectJsonRpc } from "./jsonrpc-stdio";
 
 export interface CodexBackendConfig {
   sessionId: string;
   binaryPath?: string;
+  onExit?: (info: AgentBackendExitInfo) => void;
 }
 
 interface CodexThreadStartResult {
@@ -85,6 +86,7 @@ export function createCodexBackend(config: CodexBackendConfig): AgentBackend {
         onStderr: (chunk) => log.debug(`codex stderr: ${chunk.trimEnd()}`),
         onExit: (code, signal) => {
           log.info(`codex process exited code=${code} signal=${signal}`);
+          config.onExit?.({ code, signal });
         },
       });
       peer.onNotification(handleNotification);

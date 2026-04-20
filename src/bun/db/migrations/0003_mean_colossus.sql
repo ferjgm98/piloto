@@ -12,7 +12,7 @@ CREATE TABLE `__new_agent_sessions` (
 	FOREIGN KEY (`workspace_id`) REFERENCES `workspaces`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-INSERT INTO `__new_agent_sessions`("id", "workspace_id", "worktree_id", "backend", "status", "prompt", "error_message", "created_at", "updated_at") SELECT "id", "workspace_id", "worktree_id", "backend", "status", "prompt", "error_message", "created_at", "updated_at" FROM `agent_sessions`;--> statement-breakpoint
+INSERT INTO `__new_agent_sessions`("id", "workspace_id", "worktree_id", "backend", "status", "prompt", "error_message", "created_at", "updated_at") SELECT "id", "workspace_id", NULL, "backend", COALESCE("status", 'idle'), NULL, NULL, "created_at", "created_at" FROM `agent_sessions`;--> statement-breakpoint
 DROP TABLE `agent_sessions`;--> statement-breakpoint
 ALTER TABLE `__new_agent_sessions` RENAME TO `agent_sessions`;--> statement-breakpoint
 PRAGMA foreign_keys=ON;

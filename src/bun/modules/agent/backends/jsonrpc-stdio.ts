@@ -156,11 +156,11 @@ export function connectJsonRpc(opts: JsonRpcPeerOptions): JsonRpcPeer {
       const id = nextId++;
       return new Promise<T>((resolve, reject) => {
         pending.set(id, { resolve: resolve as (v: unknown) => void, reject });
-        stream.writeLine(JSON.stringify({ id, method, params }));
+        stream.writeLine(JSON.stringify({ jsonrpc: "2.0", id, method, params }));
       });
     },
     notify(method: string, params?: unknown): void {
-      stream.writeLine(JSON.stringify({ method, params }));
+      stream.writeLine(JSON.stringify({ jsonrpc: "2.0", method, params }));
     },
     onNotification(cb) {
       notificationCb = cb;
