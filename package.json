@@ -20,7 +20,6 @@
     "prepare": "bun scripts/install-hooks.ts"
   },
   "dependencies": {
-    "@parcel/watcher": "^2.5.1",
     "drizzle-orm": "^0.45.2",
     "electrobun": "^1.16.0",
     "geist": "^1.7.0",

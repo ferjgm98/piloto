@@ -30,10 +30,12 @@ main process exclusively through the typed RPC contract.
 
 ## Directory rules
 
-- `src/bun/modules/<feature>/` — every feature folder has exactly three files:
+- `src/bun/modules/<feature>/` — every feature folder has exactly three
+  source files (tests don't count against the three):
   - `<feature>.types.ts` — domain types. No imports from other modules.
   - `<feature>.service.ts` — pure business logic. Throws `AppError` subclasses.
   - `<feature>.rpc.ts` — exports `const <feature>Handlers = { requests, messages }`.
+  - `<feature>.test.ts` — colocated unit tests (optional, zero or more).
 - `src/bun/utils/` — shared utilities (`logger.ts`, `errors.ts`, `rpc-middleware.ts`, `git.ts`).
 - `src/bun/db/` — database setup and Drizzle schema.
 - `src/mainview/components/` — React components. shadcn/ui primitives live under `ui/`.

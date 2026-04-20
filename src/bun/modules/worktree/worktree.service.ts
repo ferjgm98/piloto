@@ -1,6 +1,6 @@
 import { randomUUID } from "node:crypto";
+import { watch } from "node:fs";
 import { basename, relative, resolve } from "node:path";
-import { subscribe } from "@parcel/watcher";
 import { eq, inArray } from "drizzle-orm";
 import { getDb } from "../../db/database";
 import { activeWorktrees, workspaceRepos } from "../../db/schema";
@@ -22,7 +22,6 @@ import {
 import { createLogger } from "../../utils/logger";
 import type {
   ActiveWorktree,
-  FileChangeEvent,
   Watcher,
   Worktree,
   WorktreeCreateInput,
@@ -47,22 +46,6 @@ type WatcherEntry = Watcher & {
 };
 
 const watcherRegistry = new Map<string, WatcherEntry>();
-const WATCHER_IGNORE_PATTERNS = [
-  ".git",
-  ".git/**",
-  "**/.git/**",
-  "node_modules",
-  "node_modules/**",
-  "**/node_modules/**",
-  ".DS_Store",
-  "**/.DS_Store",
-  "build",
-  "build/**",
-  "**/build/**",
-  "dist",
-  "dist/**",
-  "**/dist/**",
-];
 
 let worktreeStatusListener: WorktreeStatusListener | null = null;
 
@@ -192,18 +175,6 @@ function queueStatusRefresh(worktreeId: string): void {
   }, WATCH_DEBOUNCE_MS);
 }
 
-function toFileChangeEvent(
-  worktreePath: string,
-  event: { path: string; type: "create" | "update" | "delete" },
-): FileChangeEvent | null {
-  if (shouldIgnoreFileEvent(worktreePath, event.path)) return null;
-
-  return {
-    path: event.path,
-    type: event.type === "create" ? "created" : event.type === "update" ? "modified" : "deleted",
-  };
-}
-
 export async function createWatcher(worktreeId: string, worktreePath: string): Promise<Watcher> {
   if (watcherRegistry.has(worktreeId)) {
     throw new WorktreeAlreadyHasWatcherError(worktreeId);
@@ -218,30 +189,23 @@ export async function createWatcher(worktreeId: string, worktreePath: string): P
 
   try {
     const resolvedPath = resolve(worktreePath);
-    const subscription = await subscribe(
-      resolvedPath,
-      (error, events) => {
-        if (error) {
-          log.error(`watcher error for ${worktreeId}: ${error.message}`);
-          return;
-        }
+    const fsWatcher = watch(resolvedPath, { recursive: true }, (_event, filename) => {
+      if (!filename) return;
+      const absolute = resolve(resolvedPath, filename.toString());
+      if (shouldIgnoreFileEvent(resolvedPath, absolute)) return;
+      queueStatusRefresh(worktreeId);
+    });
 
-        const hasRelevantEvents = events.some((event) => {
-          return toFileChangeEvent(resolvedPath, event) !== null;
-        });
-
-        if (!hasRelevantEvents) return;
-        queueStatusRefresh(worktreeId);
-      },
-      { ignore: WATCHER_IGNORE_PATTERNS },
-    );
+    fsWatcher.on("error", (error) => {
+      log.error(`watcher error for ${worktreeId}: ${error.message}`);
+    });
 
     handle.unsubscribe = async () => {
       if (handle.timeoutId !== null) {
         clearTimeout(handle.timeoutId);
         handle.timeoutId = null;
       }
-      await subscription.unsubscribe();
+      fsWatcher.close();
     };
 
     return handle;

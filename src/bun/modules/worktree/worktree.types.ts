@@ -54,11 +54,6 @@ export interface WorktreeStatus {
 
 export type WorktreeWithStatus = ActiveWorktree & { status: WorktreeStatus };
 
-export interface FileChangeEvent {
-  path: string;
-  type: "created" | "modified" | "deleted";
-}
-
 export interface Watcher {
   worktreeId: string;
   unsubscribe: () => Promise<void> | void;
