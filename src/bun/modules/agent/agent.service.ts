@@ -11,7 +11,8 @@ import type {
   AgentStatusChange,
   StartAgentInput,
 } from "./agent.types";
-import { createAcpBackend } from "./backends/acp-backend";
+import { createClaudeBackend } from "./backends/claude.backend";
+import { createCodexBackend } from "./backends/codex.backend";
 
 const log = createLogger("agent");
 
@@ -89,24 +90,11 @@ function resolveWorkingDir(input: StartAgentInput): string {
   return firstRepo.path;
 }
 
-function instantiateBackend(backend: AgentBackendName): AgentBackend {
+function instantiateBackend(backend: AgentBackendName, sessionId: string): AgentBackend {
   if (backend === "claude") {
-    return createAcpBackend({
-      name: "claude",
-      defaultBinary: "claude-code-acp",
-      binaryEnvOverride: "PILOTO_CLAUDE_ACP_BIN",
-      apiKeyEnvVar: "ANTHROPIC_API_KEY",
-      apiKey: process.env.ANTHROPIC_API_KEY ?? "",
-    });
+    return createClaudeBackend({ sessionId });
   }
-  return createAcpBackend({
-    name: "codex",
-    defaultBinary: "codex",
-    defaultArgs: ["acp"],
-    binaryEnvOverride: "PILOTO_CODEX_ACP_BIN",
-    apiKeyEnvVar: "OPENAI_API_KEY",
-    apiKey: process.env.OPENAI_API_KEY ?? "",
-  });
+  return createCodexBackend({ sessionId });
 }
 
 export async function startAgent(input: StartAgentInput): Promise<{ sessionId: string }> {
@@ -135,7 +123,7 @@ export async function startAgent(input: StartAgentInput): Promise<{ sessionId: s
 
   let backend: AgentBackend;
   try {
-    backend = instantiateBackend(input.backend);
+    backend = instantiateBackend(input.backend, sessionId);
     backend.onUpdate((update) => {
       updateListener?.({ sessionId, chunk: update });
     });

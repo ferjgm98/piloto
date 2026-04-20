@@ -20,7 +20,6 @@
     "prepare": "bun scripts/install-hooks.ts"
   },
   "dependencies": {
-    "@zed-industries/agent-client-protocol": "^0.4.5",
     "drizzle-orm": "^0.45.2",
     "electrobun": "^1.16.0",
     "geist": "^1.7.0",

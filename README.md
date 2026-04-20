@@ -10,7 +10,7 @@ Modern agentic coding tools assume you're working in a single folder or monorepo
 
 - **Parallel agents with Git worktrees** — Run multiple AI agents side-by-side, each in its own worktree, so changes stay isolated until you're ready to merge.
 - **Multi-project workspaces** — Group related repos into a single workspace and spin up worktrees across all of them for cross-project features.
-- **Dual AI backend support** — Work with both [Codex CLI](https://github.com/openai/codex) and [Claude Code](https://docs.anthropic.com/en/docs/claude-code), with [ACP](https://github.com/anthropics/anthropic-cookbook/tree/main/misc/acp) integration.
+- **Dual AI backend support** — Drive both [Claude Code](https://docs.anthropic.com/en/docs/claude-code) (native `stream-json` protocol) and [Codex CLI](https://github.com/openai/codex) (native `app-server` JSON-RPC). ACP is reserved for future third-party agents — see [ADR 0002](docs/adr/0002-agent-protocol-choice.md).
 - **Diff view & change preview** — Review agent-generated changes before committing, with a built-in diff viewer.
 - **Integrated terminal** — Powered by [libghostty](https://github.com/ghostty-org/ghostty), embedded directly into the app via Zig FFI.
 - **MCP support** — Connect to [Model Context Protocol](https://modelcontextprotocol.io/) servers for extended tool capabilities.
@@ -18,18 +18,18 @@ Modern agentic coding tools assume you're working in a single folder or monorepo
 
 ## Tech Stack
 
-| Layer | Technology |
-|---|---|
-| Desktop runtime | [Electrobun](https://electrobun.dev/) (Bun + system WebView + Zig) |
-| Main process | Bun (TypeScript) |
-| UI framework | React 19 + Vite 6 |
-| Styling | Tailwind CSS 4 + shadcn/ui |
-| Native integration | Zig FFI (libghostty terminal) |
-| IPC | Electrobun Typed RPC |
-| State management | Zustand |
-| Database | SQLite (bun:sqlite) |
-| Code editor | Monaco Editor |
-| Linting & formatting | Biome |
+| Layer                | Technology                                                         |
+| -------------------- | ------------------------------------------------------------------ |
+| Desktop runtime      | [Electrobun](https://electrobun.dev/) (Bun + system WebView + Zig) |
+| Main process         | Bun (TypeScript)                                                   |
+| UI framework         | React 19 + Vite 6                                                  |
+| Styling              | Tailwind CSS 4 + shadcn/ui                                         |
+| Native integration   | Zig FFI (libghostty terminal)                                      |
+| IPC                  | Electrobun Typed RPC                                               |
+| State management     | Zustand                                                            |
+| Database             | SQLite (bun:sqlite)                                                |
+| Code editor          | Monaco Editor                                                      |
+| Linting & formatting | Biome                                                              |
 
 ### Why Electrobun?
 
@@ -113,9 +113,10 @@ piloto/
 - [Bun](https://bun.sh/) (v1.0+)
 - macOS, Linux, or Windows
 - Git
-- To launch agents: the `claude-code-acp` and/or `codex` CLI on `PATH`, plus
-  `ANTHROPIC_API_KEY` and/or `OPENAI_API_KEY` in the environment. Override the
-  resolved binaries with `PILOTO_CLAUDE_ACP_BIN` / `PILOTO_CODEX_ACP_BIN`.
+- To launch agents: the `claude` and/or `codex` CLIs on `PATH`, each logged in
+  via its own `login` flow (Piloto delegates authentication to the CLI instead
+  of reading API keys). Override the resolved binaries with `PILOTO_CLAUDE_BIN`
+  / `PILOTO_CODEX_BIN`.
 
 ### Installation
 
@@ -146,23 +147,23 @@ When using `dev:hmr`, the Vite dev server runs on port 5173. The main process au
 > conventions (used by both humans and AI agents), and
 > [`docs/DEVELOPMENT.md`](docs/DEVELOPMENT.md) for a narrative walkthrough
 > of adding a feature. [`docs/ARCHITECTURE.md`](docs/ARCHITECTURE.md)
-> covers the *why* behind the layer boundaries.
+> covers the _why_ behind the layer boundaries.
 
 ### Commands
 
-| Command | Description |
-|---|---|
-| `bun run start` | Build webview + launch app |
-| `bun run dev` | Build + launch with file watching |
-| `bun run dev:hmr` | Vite dev server + app (HMR enabled) |
-| `bun run build:canary` | Continuous internal preview build and default release validation target |
-| `bun run build:stable` | Stable production build for later public releases |
-| `bun run lint` | Check with Biome |
-| `bun run lint:fix` | Auto-fix lint issues |
-| `bun run check` | Biome lint + strict tsc (the canonical pre-commit gate) |
-| `bun run check:fix` | Auto-fix lint + strict tsc |
-| `bun run scaffold:module <name>` | Create a new Bun feature module under `src/bun/modules/` |
-| `bun run scaffold:rpc <module> <method> [query\|mutation\|message]` | Add a new RPC method to an existing module |
+| Command                                                             | Description                                                             |
+| ------------------------------------------------------------------- | ----------------------------------------------------------------------- |
+| `bun run start`                                                     | Build webview + launch app                                              |
+| `bun run dev`                                                       | Build + launch with file watching                                       |
+| `bun run dev:hmr`                                                   | Vite dev server + app (HMR enabled)                                     |
+| `bun run build:canary`                                              | Continuous internal preview build and default release validation target |
+| `bun run build:stable`                                              | Stable production build for later public releases                       |
+| `bun run lint`                                                      | Check with Biome                                                        |
+| `bun run lint:fix`                                                  | Auto-fix lint issues                                                    |
+| `bun run check`                                                     | Biome lint + strict tsc (the canonical pre-commit gate)                 |
+| `bun run check:fix`                                                 | Auto-fix lint + strict tsc                                              |
+| `bun run scaffold:module <name>`                                    | Create a new Bun feature module under `src/bun/modules/`                |
+| `bun run scaffold:rpc <module> <method> [query\|mutation\|message]` | Add a new RPC method to an existing module                              |
 
 ### Environment
 

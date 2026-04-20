@@ -13,12 +13,12 @@ export interface AgentBackend {
 }
 
 export interface ClaudeConfig {
-  apiKey: string;
+  sessionId: string;
   binaryPath?: string;
 }
 
 export interface CodexConfig {
-  apiKey: string;
+  sessionId: string;
   binaryPath?: string;
 }
 
