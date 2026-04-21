@@ -1,0 +1,48 @@
+{
+  "cli_version": "0.5.5",
+  "checkpoint_id": "87e93cbffdf1",
+  "session_id": "672d756a-c413-404b-8631-c16a06d76409",
+  "strategy": "manual-commit",
+  "created_at": "2026-04-21T02:43:03.745729Z",
+  "branch": "feat/PIL-22-codex-backend-tests",
+  "checkpoints_count": 0,
+  "files_touched": [
+    "src/bun/modules/agent/agent.test.ts"
+  ],
+  "agent": "Claude Code",
+  "model": "",
+  "turn_id": "0110fbee9a96",
+  "checkpoint_transcript_start": 140,
+  "transcript_lines_at_start": 140,
+  "token_usage": {
+    "input_tokens": 18,
+    "cache_creation_tokens": 10230,
+    "cache_read_tokens": 694571,
+    "output_tokens": 3688,
+    "api_call_count": 8
+  },
+  "session_metrics": {
+    "turn_count": 6
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-04-21T02:43:03.738026Z",
+    "agent_lines": 7,
+    "agent_removed": 2,
+    "human_added": 0,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 7,
+    "total_lines_changed": 9,
+    "agent_percentage": 100,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
