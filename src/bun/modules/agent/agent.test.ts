@@ -15,6 +15,11 @@ import {
 } from "./agent.service";
 import { createCodexBackend, mapCodexNotification } from "./backends/codex.backend";
 
+function restoreEnv(key: string, original: string | undefined): void {
+  if (original === undefined) Reflect.deleteProperty(process.env, key);
+  else process.env[key] = original;
+}
+
 function seedWorkspaceWithRepo(): { workspaceId: string; repoId: string } {
   const workspaceId = randomUUID();
   const repoId = randomUUID();
@@ -111,8 +116,8 @@ describe("agent.service", () => {
       });
 
       afterEach(() => {
-        process.env.PILOTO_CODEX_BIN = originalBin;
-        process.env.LOG_LEVEL = originalLogLevel;
+        restoreEnv("PILOTO_CODEX_BIN", originalBin);
+        restoreEnv("LOG_LEVEL", originalLogLevel);
       });
 
       test("throws AgentBinaryNotFoundError", async () => {
