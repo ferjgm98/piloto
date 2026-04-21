@@ -1,11 +1,11 @@
-import { afterEach, beforeEach, describe, expect, test } from "bun:test";
+import { afterEach, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import type { AgentUpdateDTO } from "shared/rpc";
 import { getDb, initializeDatabase } from "../../db/database";
 import { agentSessions, workspaceRepos, workspaces } from "../../db/schema";
 import { AgentBinaryNotFoundError, NotFoundError, ValidationError } from "../../utils/errors";
-import { createTestDb, resetTestDb } from "../../utils/test-setup";
+import { resetTestDb } from "../../utils/test-setup";
 import {
   getAgentSession,
   listAgentSessions,
@@ -17,37 +17,12 @@ import {
 import { createCodexBackend } from "./backends/codex.backend";
 
 describe("agent.service", () => {
-  let db: ReturnType<typeof createTestDb>;
-  let workspaceId: string;
-  let repoId: string;
+  beforeAll(async () => {
+    await initializeDatabase({ path: ":memory:" });
+  });
 
   beforeEach(() => {
-    db = createTestDb();
-    // Create test workspace
-    workspaceId = randomUUID();
-    db.insert(workspaces)
-      .values({
-        id: workspaceId,
-        name: "Test Workspace",
-        description: null,
-        defaultBranch: "main",
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-      })
-      .run();
-
-    // Create test repo
-    repoId = randomUUID();
-    db.insert(workspaceRepos)
-      .values({
-        id: repoId,
-        workspaceId,
-        path: "/tmp/test-repo",
-        name: "test-repo",
-        defaultBranch: "main",
-        order: 0,
-      })
-      .run();
+    resetTestDb(getDb());
   });
 
   afterEach(() => {
@@ -57,6 +32,33 @@ describe("agent.service", () => {
 
   describe("startAgent", () => {
     test("throws ValidationError for unsupported backend", async () => {
+      // Create workspace with a repo
+      const workspaceId = randomUUID();
+      const repoId = randomUUID();
+      const db = getDb();
+
+      db.insert(workspaces)
+        .values({
+          id: workspaceId,
+          name: "Test Workspace",
+          description: null,
+          defaultBranch: "main",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .run();
+
+      db.insert(workspaceRepos)
+        .values({
+          id: repoId,
+          workspaceId,
+          path: "/tmp/test-repo",
+          name: "test-repo",
+          defaultBranch: "main",
+          order: 0,
+        })
+        .run();
+
       try {
         await startAgent({
           workspaceId,
@@ -75,6 +77,33 @@ describe("agent.service", () => {
       const originalEnv = process.env.PILOTO_CODEX_BIN;
       process.env.PILOTO_CODEX_BIN = "nonexistent-codex-binary-12345";
 
+      // Create workspace with a repo
+      const workspaceId = randomUUID();
+      const repoId = randomUUID();
+      const db = getDb();
+
+      db.insert(workspaces)
+        .values({
+          id: workspaceId,
+          name: "Test Workspace",
+          description: null,
+          defaultBranch: "main",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .run();
+
+      db.insert(workspaceRepos)
+        .values({
+          id: repoId,
+          workspaceId,
+          path: "/tmp/test-repo",
+          name: "test-repo",
+          defaultBranch: "main",
+          order: 0,
+        })
+        .run();
+
       try {
         await startAgent({
           workspaceId,
@@ -90,14 +119,39 @@ describe("agent.service", () => {
       }
     });
 
-    test("creates agent session in database for codex backend", async () => {
-      // This test would require the actual codex binary
-      // For unit testing, we verify the database interaction is correct
+    test("creates agent session record in database", async () => {
+      // Create workspace with a repo
+      const workspaceId = randomUUID();
+      const repoId = randomUUID();
+      const db = getDb();
+
+      db.insert(workspaces)
+        .values({
+          id: workspaceId,
+          name: "Test Workspace",
+          description: null,
+          defaultBranch: "main",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .run();
+
+      db.insert(workspaceRepos)
+        .values({
+          id: repoId,
+          workspaceId,
+          path: "/tmp/test-repo",
+          name: "test-repo",
+          defaultBranch: "main",
+          order: 0,
+        })
+        .run();
+
       const beforeCount = db.select().from(agentSessions).all().length;
       expect(beforeCount).toBe(0);
 
       // We can't actually start the agent without the binary,
-      // but we verified the binary check works above
+      // but we verified the binary check works in the previous test
     });
   });
 
@@ -112,8 +166,35 @@ describe("agent.service", () => {
       }
     });
 
-    test("stops agent session and updates database", async () => {
-      // Insert a mock running session
+    test("stops orphaned agent session and updates database", async () => {
+      // Create workspace with repo
+      const workspaceId = randomUUID();
+      const repoId = randomUUID();
+      const db = getDb();
+
+      db.insert(workspaces)
+        .values({
+          id: workspaceId,
+          name: "Test Workspace",
+          description: null,
+          defaultBranch: "main",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .run();
+
+      db.insert(workspaceRepos)
+        .values({
+          id: repoId,
+          workspaceId,
+          path: "/tmp/test-repo",
+          name: "test-repo",
+          defaultBranch: "main",
+          order: 0,
+        })
+        .run();
+
+      // Insert a mock running session (orphaned - not in registry)
       const sessionId = randomUUID();
       db.insert(agentSessions)
         .values({
@@ -139,11 +220,53 @@ describe("agent.service", () => {
 
   describe("listAgentSessions", () => {
     test("returns empty array when no sessions exist", () => {
+      // Create workspace first
+      const workspaceId = randomUUID();
+      const db = getDb();
+
+      db.insert(workspaces)
+        .values({
+          id: workspaceId,
+          name: "Test Workspace",
+          description: null,
+          defaultBranch: "main",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .run();
+
       const sessions = listAgentSessions(workspaceId);
       expect(sessions).toEqual([]);
     });
 
     test("returns sessions for workspace", () => {
+      // Create workspace with repo
+      const workspaceId = randomUUID();
+      const repoId = randomUUID();
+      const db = getDb();
+
+      db.insert(workspaces)
+        .values({
+          id: workspaceId,
+          name: "Test Workspace",
+          description: null,
+          defaultBranch: "main",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .run();
+
+      db.insert(workspaceRepos)
+        .values({
+          id: repoId,
+          workspaceId,
+          path: "/tmp/test-repo",
+          name: "test-repo",
+          defaultBranch: "main",
+          order: 0,
+        })
+        .run();
+
       const sessionId = randomUUID();
       db.insert(agentSessions)
         .values({
@@ -167,12 +290,15 @@ describe("agent.service", () => {
     });
 
     test("filters by workspaceId", () => {
-      // Create another workspace
-      const otherWorkspaceId = randomUUID();
+      // Create two workspaces with repos
+      const workspaceId1 = randomUUID();
+      const workspaceId2 = randomUUID();
+      const db = getDb();
+
       db.insert(workspaces)
         .values({
-          id: otherWorkspaceId,
-          name: "Other Workspace",
+          id: workspaceId1,
+          name: "Workspace 1",
           description: null,
           defaultBranch: "main",
           createdAt: new Date().toISOString(),
@@ -180,14 +306,34 @@ describe("agent.service", () => {
         })
         .run();
 
-      // Add repo to other workspace
-      const otherRepoId = randomUUID();
+      db.insert(workspaces)
+        .values({
+          id: workspaceId2,
+          name: "Workspace 2",
+          description: null,
+          defaultBranch: "main",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .run();
+
       db.insert(workspaceRepos)
         .values({
-          id: otherRepoId,
-          workspaceId: otherWorkspaceId,
-          path: "/tmp/other-repo",
-          name: "other-repo",
+          id: randomUUID(),
+          workspaceId: workspaceId1,
+          path: "/tmp/repo1",
+          name: "repo1",
+          defaultBranch: "main",
+          order: 0,
+        })
+        .run();
+
+      db.insert(workspaceRepos)
+        .values({
+          id: randomUUID(),
+          workspaceId: workspaceId2,
+          path: "/tmp/repo2",
+          name: "repo2",
           defaultBranch: "main",
           order: 0,
         })
@@ -200,7 +346,7 @@ describe("agent.service", () => {
       db.insert(agentSessions)
         .values({
           id: sessionId1,
-          workspaceId,
+          workspaceId: workspaceId1,
           worktreeId: null,
           backend: "codex",
           status: "running",
@@ -214,7 +360,7 @@ describe("agent.service", () => {
       db.insert(agentSessions)
         .values({
           id: sessionId2,
-          workspaceId: otherWorkspaceId,
+          workspaceId: workspaceId2,
           worktreeId: null,
           backend: "claude",
           status: "running",
@@ -225,7 +371,7 @@ describe("agent.service", () => {
         })
         .run();
 
-      const sessions = listAgentSessions(workspaceId);
+      const sessions = listAgentSessions(workspaceId1);
       expect(sessions).toHaveLength(1);
       expect(sessions[0].id).toBe(sessionId1);
       expect(sessions[0].backend).toBe("codex");
@@ -234,6 +380,33 @@ describe("agent.service", () => {
 
   describe("getAgentSession", () => {
     test("returns session by id", () => {
+      // Create workspace with repo
+      const workspaceId = randomUUID();
+      const repoId = randomUUID();
+      const db = getDb();
+
+      db.insert(workspaces)
+        .values({
+          id: workspaceId,
+          name: "Test Workspace",
+          description: null,
+          defaultBranch: "main",
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        })
+        .run();
+
+      db.insert(workspaceRepos)
+        .values({
+          id: repoId,
+          workspaceId,
+          path: "/tmp/test-repo",
+          name: "test-repo",
+          defaultBranch: "main",
+          order: 0,
+        })
+        .run();
+
       const sessionId = randomUUID();
       db.insert(agentSessions)
         .values({
