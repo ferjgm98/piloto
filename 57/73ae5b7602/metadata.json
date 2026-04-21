@@ -1,0 +1,27 @@
+{
+  "cli_version": "0.5.5",
+  "checkpoint_id": "5773ae5b7602",
+  "strategy": "manual-commit",
+  "branch": "feat/PIL-22-codex-backend-tests",
+  "checkpoints_count": 5,
+  "files_touched": [
+    "src/bun/modules/agent/agent.test.ts",
+    "src/bun/modules/agent/backends/codex.backend.ts",
+    "src/bun/utils/logger.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/57/73ae5b7602/0/metadata.json",
+      "transcript": "/57/73ae5b7602/0/full.jsonl",
+      "content_hash": "/57/73ae5b7602/0/content_hash.txt",
+      "prompt": "/57/73ae5b7602/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 81,
+    "cache_creation_tokens": 173064,
+    "cache_read_tokens": 2196962,
+    "output_tokens": 16987,
+    "api_call_count": 36
+  }
+}
