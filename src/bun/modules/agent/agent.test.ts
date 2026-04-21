@@ -1,7 +1,6 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
-import type { AgentUpdateDTO } from "shared/rpc";
 import { getDb, initializeDatabase } from "../../db/database";
 import { agentSessions, workspaceRepos, workspaces } from "../../db/schema";
 import { AgentBinaryNotFoundError, NotFoundError, ValidationError } from "../../utils/errors";
@@ -14,7 +13,65 @@ import {
   startAgent,
   stopAgent,
 } from "./agent.service";
-import { createCodexBackend } from "./backends/codex.backend";
+import { createCodexBackend, mapCodexNotification } from "./backends/codex.backend";
+
+function seedWorkspaceWithRepo(): { workspaceId: string; repoId: string } {
+  const workspaceId = randomUUID();
+  const repoId = randomUUID();
+  const db = getDb();
+  const now = new Date().toISOString();
+
+  db.insert(workspaces)
+    .values({
+      id: workspaceId,
+      name: "Test Workspace",
+      description: null,
+      defaultBranch: "main",
+      createdAt: now,
+      updatedAt: now,
+    })
+    .run();
+
+  db.insert(workspaceRepos)
+    .values({
+      id: repoId,
+      workspaceId,
+      path: "/tmp/test-repo",
+      name: "test-repo",
+      defaultBranch: "main",
+      order: 0,
+    })
+    .run();
+
+  return { workspaceId, repoId };
+}
+
+function seedSession(
+  workspaceId: string,
+  overrides: Partial<{
+    backend: "claude" | "codex";
+    status: "running" | "stopped" | "error";
+    prompt: string;
+  }> = {},
+): string {
+  const sessionId = randomUUID();
+  const now = new Date().toISOString();
+  getDb()
+    .insert(agentSessions)
+    .values({
+      id: sessionId,
+      workspaceId,
+      worktreeId: null,
+      backend: overrides.backend ?? "codex",
+      status: overrides.status ?? "running",
+      prompt: overrides.prompt ?? "test",
+      errorMessage: null,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .run();
+  return sessionId;
+}
 
 describe("agent.service", () => {
   beforeAll(async () => {
@@ -32,255 +89,89 @@ describe("agent.service", () => {
 
   describe("startAgent", () => {
     test("throws ValidationError for unsupported backend", async () => {
-      // Create workspace with a repo
-      const workspaceId = randomUUID();
-      const repoId = randomUUID();
-      const db = getDb();
-
-      db.insert(workspaces)
-        .values({
-          id: workspaceId,
-          name: "Test Workspace",
-          description: null,
-          defaultBranch: "main",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
-
-      db.insert(workspaceRepos)
-        .values({
-          id: repoId,
-          workspaceId,
-          path: "/tmp/test-repo",
-          name: "test-repo",
-          defaultBranch: "main",
-          order: 0,
-        })
-        .run();
-
-      try {
-        await startAgent({
-          workspaceId,
-          backend: "unsupported" as "claude",
-          prompt: "test",
-        });
-        expect(false).toBe(true); // Should not reach here
-      } catch (err) {
-        expect(err).toBeInstanceOf(ValidationError);
-        expect((err as Error).message).toContain("Unsupported agent backend");
-      }
+      const { workspaceId } = seedWorkspaceWithRepo();
+      const call = startAgent({
+        workspaceId,
+        backend: "unsupported" as "claude",
+        prompt: "test",
+      });
+      await expect(call).rejects.toBeInstanceOf(ValidationError);
+      await expect(call).rejects.toThrow(/Unsupported agent backend/);
     });
 
-    test("throws AgentBinaryNotFoundError when codex binary is not found", async () => {
-      // Set a non-existent binary path
-      const originalEnv = process.env.PILOTO_CODEX_BIN;
-      process.env.PILOTO_CODEX_BIN = "nonexistent-codex-binary-12345";
+    describe("with missing codex binary", () => {
+      let originalBin: string | undefined;
+      let originalLogLevel: string | undefined;
 
-      // Create workspace with a repo
-      const workspaceId = randomUUID();
-      const repoId = randomUUID();
-      const db = getDb();
+      beforeEach(() => {
+        originalBin = process.env.PILOTO_CODEX_BIN;
+        originalLogLevel = process.env.LOG_LEVEL;
+        process.env.PILOTO_CODEX_BIN = "nonexistent-codex-binary-12345";
+        process.env.LOG_LEVEL = "silent";
+      });
 
-      db.insert(workspaces)
-        .values({
-          id: workspaceId,
-          name: "Test Workspace",
-          description: null,
-          defaultBranch: "main",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
+      afterEach(() => {
+        process.env.PILOTO_CODEX_BIN = originalBin;
+        process.env.LOG_LEVEL = originalLogLevel;
+      });
 
-      db.insert(workspaceRepos)
-        .values({
-          id: repoId,
-          workspaceId,
-          path: "/tmp/test-repo",
-          name: "test-repo",
-          defaultBranch: "main",
-          order: 0,
-        })
-        .run();
+      test("throws AgentBinaryNotFoundError", async () => {
+        const { workspaceId } = seedWorkspaceWithRepo();
+        const call = startAgent({ workspaceId, backend: "codex", prompt: "test prompt" });
+        await expect(call).rejects.toBeInstanceOf(AgentBinaryNotFoundError);
+        await expect(call).rejects.toThrow(/nonexistent-codex-binary-12345/);
+      });
 
-      try {
-        await startAgent({
-          workspaceId,
-          backend: "codex",
-          prompt: "test prompt",
-        });
-        expect(false).toBe(true); // Should not reach here
-      } catch (err) {
-        expect(err).toBeInstanceOf(AgentBinaryNotFoundError);
-        expect((err as Error).message).toContain("nonexistent-codex-binary-12345");
-      } finally {
-        process.env.PILOTO_CODEX_BIN = originalEnv;
-      }
-    });
+      test("persists a session row marked as error when start fails", async () => {
+        const { workspaceId } = seedWorkspaceWithRepo();
+        const db = getDb();
+        expect(db.select().from(agentSessions).all().length).toBe(0);
 
-    test("creates agent session record in database", async () => {
-      // Create workspace with a repo
-      const workspaceId = randomUUID();
-      const repoId = randomUUID();
-      const db = getDb();
+        await expect(
+          startAgent({ workspaceId, backend: "codex", prompt: "test prompt" }),
+        ).rejects.toBeInstanceOf(AgentBinaryNotFoundError);
 
-      db.insert(workspaces)
-        .values({
-          id: workspaceId,
-          name: "Test Workspace",
-          description: null,
-          defaultBranch: "main",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
-
-      db.insert(workspaceRepos)
-        .values({
-          id: repoId,
-          workspaceId,
-          path: "/tmp/test-repo",
-          name: "test-repo",
-          defaultBranch: "main",
-          order: 0,
-        })
-        .run();
-
-      const beforeCount = db.select().from(agentSessions).all().length;
-      expect(beforeCount).toBe(0);
-
-      // We can't actually start the agent without the binary,
-      // but we verified the binary check works in the previous test
+        const rows = db.select().from(agentSessions).all();
+        expect(rows).toHaveLength(1);
+        expect(rows[0].workspaceId).toBe(workspaceId);
+        expect(rows[0].backend).toBe("codex");
+        expect(rows[0].status).toBe("error");
+        expect(rows[0].errorMessage).toContain("nonexistent-codex-binary-12345");
+      });
     });
   });
 
   describe("stopAgent", () => {
     test("throws NotFoundError for non-existent session", async () => {
-      try {
-        await stopAgent("non-existent-session-id");
-        expect(false).toBe(true); // Should not reach here
-      } catch (err) {
-        expect(err).toBeInstanceOf(NotFoundError);
-        expect((err as Error).message).toContain("AgentSession not found");
-      }
+      await expect(stopAgent("non-existent-session-id")).rejects.toBeInstanceOf(NotFoundError);
+      await expect(stopAgent("non-existent-session-id")).rejects.toThrow(/AgentSession not found/);
     });
 
     test("stops orphaned agent session and updates database", async () => {
-      // Create workspace with repo
-      const workspaceId = randomUUID();
-      const repoId = randomUUID();
-      const db = getDb();
-
-      db.insert(workspaces)
-        .values({
-          id: workspaceId,
-          name: "Test Workspace",
-          description: null,
-          defaultBranch: "main",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
-
-      db.insert(workspaceRepos)
-        .values({
-          id: repoId,
-          workspaceId,
-          path: "/tmp/test-repo",
-          name: "test-repo",
-          defaultBranch: "main",
-          order: 0,
-        })
-        .run();
-
-      // Insert a mock running session (orphaned - not in registry)
-      const sessionId = randomUUID();
-      db.insert(agentSessions)
-        .values({
-          id: sessionId,
-          workspaceId,
-          worktreeId: null,
-          backend: "codex",
-          status: "running",
-          prompt: "test",
-          errorMessage: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
+      const { workspaceId } = seedWorkspaceWithRepo();
+      const sessionId = seedSession(workspaceId, { status: "running" });
 
       const result = await stopAgent(sessionId);
       expect(result.success).toBe(true);
 
-      const session = db.select().from(agentSessions).where(eq(agentSessions.id, sessionId)).get();
+      const session = getDb()
+        .select()
+        .from(agentSessions)
+        .where(eq(agentSessions.id, sessionId))
+        .get();
       expect(session?.status).toBe("stopped");
     });
   });
 
   describe("listAgentSessions", () => {
     test("returns empty array when no sessions exist", () => {
-      // Create workspace first
-      const workspaceId = randomUUID();
-      const db = getDb();
-
-      db.insert(workspaces)
-        .values({
-          id: workspaceId,
-          name: "Test Workspace",
-          description: null,
-          defaultBranch: "main",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
-
-      const sessions = listAgentSessions(workspaceId);
-      expect(sessions).toEqual([]);
+      const { workspaceId } = seedWorkspaceWithRepo();
+      expect(listAgentSessions(workspaceId)).toEqual([]);
     });
 
     test("returns sessions for workspace", () => {
-      // Create workspace with repo
-      const workspaceId = randomUUID();
-      const repoId = randomUUID();
-      const db = getDb();
-
-      db.insert(workspaces)
-        .values({
-          id: workspaceId,
-          name: "Test Workspace",
-          description: null,
-          defaultBranch: "main",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
-
-      db.insert(workspaceRepos)
-        .values({
-          id: repoId,
-          workspaceId,
-          path: "/tmp/test-repo",
-          name: "test-repo",
-          defaultBranch: "main",
-          order: 0,
-        })
-        .run();
-
-      const sessionId = randomUUID();
-      db.insert(agentSessions)
-        .values({
-          id: sessionId,
-          workspaceId,
-          worktreeId: null,
-          backend: "codex",
-          status: "running",
-          prompt: "test prompt",
-          errorMessage: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
+      const { workspaceId } = seedWorkspaceWithRepo();
+      const sessionId = seedSession(workspaceId, { prompt: "test prompt" });
 
       const sessions = listAgentSessions(workspaceId);
       expect(sessions).toHaveLength(1);
@@ -290,86 +181,11 @@ describe("agent.service", () => {
     });
 
     test("filters by workspaceId", () => {
-      // Create two workspaces with repos
-      const workspaceId1 = randomUUID();
-      const workspaceId2 = randomUUID();
-      const db = getDb();
+      const { workspaceId: workspaceId1 } = seedWorkspaceWithRepo();
+      const { workspaceId: workspaceId2 } = seedWorkspaceWithRepo();
 
-      db.insert(workspaces)
-        .values({
-          id: workspaceId1,
-          name: "Workspace 1",
-          description: null,
-          defaultBranch: "main",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
-
-      db.insert(workspaces)
-        .values({
-          id: workspaceId2,
-          name: "Workspace 2",
-          description: null,
-          defaultBranch: "main",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
-
-      db.insert(workspaceRepos)
-        .values({
-          id: randomUUID(),
-          workspaceId: workspaceId1,
-          path: "/tmp/repo1",
-          name: "repo1",
-          defaultBranch: "main",
-          order: 0,
-        })
-        .run();
-
-      db.insert(workspaceRepos)
-        .values({
-          id: randomUUID(),
-          workspaceId: workspaceId2,
-          path: "/tmp/repo2",
-          name: "repo2",
-          defaultBranch: "main",
-          order: 0,
-        })
-        .run();
-
-      // Create sessions in both workspaces
-      const sessionId1 = randomUUID();
-      const sessionId2 = randomUUID();
-
-      db.insert(agentSessions)
-        .values({
-          id: sessionId1,
-          workspaceId: workspaceId1,
-          worktreeId: null,
-          backend: "codex",
-          status: "running",
-          prompt: "test1",
-          errorMessage: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
-
-      db.insert(agentSessions)
-        .values({
-          id: sessionId2,
-          workspaceId: workspaceId2,
-          worktreeId: null,
-          backend: "claude",
-          status: "running",
-          prompt: "test2",
-          errorMessage: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
+      const sessionId1 = seedSession(workspaceId1, { backend: "codex", prompt: "test1" });
+      seedSession(workspaceId2, { backend: "claude", prompt: "test2" });
 
       const sessions = listAgentSessions(workspaceId1);
       expect(sessions).toHaveLength(1);
@@ -380,47 +196,8 @@ describe("agent.service", () => {
 
   describe("getAgentSession", () => {
     test("returns session by id", () => {
-      // Create workspace with repo
-      const workspaceId = randomUUID();
-      const repoId = randomUUID();
-      const db = getDb();
-
-      db.insert(workspaces)
-        .values({
-          id: workspaceId,
-          name: "Test Workspace",
-          description: null,
-          defaultBranch: "main",
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
-
-      db.insert(workspaceRepos)
-        .values({
-          id: repoId,
-          workspaceId,
-          path: "/tmp/test-repo",
-          name: "test-repo",
-          defaultBranch: "main",
-          order: 0,
-        })
-        .run();
-
-      const sessionId = randomUUID();
-      db.insert(agentSessions)
-        .values({
-          id: sessionId,
-          workspaceId,
-          worktreeId: null,
-          backend: "codex",
-          status: "running",
-          prompt: "test prompt",
-          errorMessage: null,
-          createdAt: new Date().toISOString(),
-          updatedAt: new Date().toISOString(),
-        })
-        .run();
+      const { workspaceId } = seedWorkspaceWithRepo();
+      const sessionId = seedSession(workspaceId, { prompt: "test prompt" });
 
       const session = getAgentSession(sessionId);
       expect(session.id).toBe(sessionId);
@@ -430,112 +207,100 @@ describe("agent.service", () => {
     });
 
     test("throws NotFoundError for non-existent session", () => {
-      try {
-        getAgentSession("non-existent-id");
-        expect(false).toBe(true); // Should not reach here
-      } catch (err) {
-        expect(err).toBeInstanceOf(NotFoundError);
-        expect((err as Error).message).toContain("AgentSession not found");
-      }
+      expect(() => getAgentSession("non-existent-id")).toThrow(NotFoundError);
+      expect(() => getAgentSession("non-existent-id")).toThrow(/AgentSession not found/);
     });
   });
 });
 
 describe("codex.backend", () => {
   describe("createCodexBackend", () => {
-    test("creates backend with correct name", () => {
+    test("returns an AgentBackend shape", () => {
       const backend = createCodexBackend({ sessionId: randomUUID() });
       expect(backend.name).toBe("codex");
-    });
-
-    test("has required methods", () => {
-      const backend = createCodexBackend({ sessionId: randomUUID() });
       expect(typeof backend.start).toBe("function");
       expect(typeof backend.sendPrompt).toBe("function");
       expect(typeof backend.stop).toBe("function");
       expect(typeof backend.onUpdate).toBe("function");
     });
 
-    test("emits updates via onUpdate callback", async () => {
-      const sessionId = randomUUID();
-      const backend = createCodexBackend({ sessionId });
-
-      const updates: AgentUpdateDTO[] = [];
-      backend.onUpdate((update) => {
-        updates.push(update);
-      });
-
-      // The backend should be able to receive updates
-      // Actual message emission would require a running codex process
-      expect(backend.onUpdate).toBeDefined();
-    });
-
-    test("respects custom binary path from config", async () => {
-      // This verifies the binary path resolution logic
-      // We can't test actual spawning without the binary installed
-      const customPath = "/custom/path/to/codex";
-      const backend = createCodexBackend({
-        sessionId: randomUUID(),
-        binaryPath: customPath,
-      });
-
-      expect(backend.name).toBe("codex");
-    });
-
-    test("calls onExit callback when process exits", async () => {
-      let exitCalled = false;
-      let exitCode: number | null = null;
-
-      const backend = createCodexBackend({
-        sessionId: randomUUID(),
-        onExit: (info) => {
-          exitCalled = true;
-          exitCode = info.code;
-        },
-      });
-
-      // We can't actually test process exit without running codex
-      // But we verify the callback is configured
-      expect(backend.name).toBe("codex");
-    });
-  });
-
-  describe("Codex protocol mapping", () => {
-    test("maps item/started notification to tool_call", async () => {
-      // This tests the notification handling logic
-      // The actual mapping is tested via the backend's internal handleNotification
+    test("sendPrompt before start rejects", async () => {
       const backend = createCodexBackend({ sessionId: randomUUID() });
-      expect(backend.name).toBe("codex");
+      await expect(backend.sendPrompt("hi")).rejects.toThrow(/not started/);
     });
 
-    test("maps item/agentMessage/delta to message", async () => {
+    test("stop before start is a no-op", async () => {
       const backend = createCodexBackend({ sessionId: randomUUID() });
-      expect(backend.name).toBe("codex");
-    });
-
-    test("maps item/completed to tool_call_update", async () => {
-      const backend = createCodexBackend({ sessionId: randomUUID() });
-      expect(backend.name).toBe("codex");
+      await expect(backend.stop()).resolves.toBeUndefined();
     });
   });
 });
 
-describe("AgentBackend interface compliance", () => {
-  test("codex backend implements AgentBackend", () => {
-    const backend = createCodexBackend({ sessionId: randomUUID() });
+describe("mapCodexNotification", () => {
+  test("item/started with a tool itemType maps to tool_call", () => {
+    const update = mapCodexNotification("item/started", {
+      itemId: "item-1",
+      itemType: "exec",
+      title: "run ls",
+    });
+    expect(update).toEqual({
+      kind: "tool_call",
+      toolCallId: "item-1",
+      title: "run ls",
+      toolKind: "exec",
+      status: "in_progress",
+    });
+  });
 
-    // Verify all required properties exist
-    expect(backend.name).toBeDefined();
-    expect(backend.start).toBeDefined();
-    expect(backend.sendPrompt).toBeDefined();
-    expect(backend.stop).toBeDefined();
-    expect(backend.onUpdate).toBeDefined();
+  test("item/started falls back to itemType for title when title is absent", () => {
+    const update = mapCodexNotification("item/started", {
+      itemId: "item-2",
+      itemType: "read",
+    });
+    expect(update).toMatchObject({ kind: "tool_call", title: "read", toolKind: "read" });
+  });
 
-    // Verify types
-    expect(typeof backend.name).toBe("string");
-    expect(typeof backend.start).toBe("function");
-    expect(typeof backend.sendPrompt).toBe("function");
-    expect(typeof backend.stop).toBe("function");
-    expect(typeof backend.onUpdate).toBe("function");
+  test("item/started with itemType=agentMessage returns null", () => {
+    expect(
+      mapCodexNotification("item/started", {
+        itemId: "item-3",
+        itemType: "agentMessage",
+      }),
+    ).toBeNull();
+  });
+
+  test("item/agentMessage/delta maps to message", () => {
+    const update = mapCodexNotification("item/agentMessage/delta", { delta: "Hello" });
+    expect(update).toEqual({ kind: "message", text: "Hello" });
+  });
+
+  test("item/agentMessage/delta with empty delta returns null", () => {
+    expect(mapCodexNotification("item/agentMessage/delta", { delta: "" })).toBeNull();
+  });
+
+  test("item/completed with a tool itemType maps to tool_call_update", () => {
+    const update = mapCodexNotification("item/completed", {
+      itemId: "item-4",
+      itemType: "exec",
+    });
+    expect(update).toEqual({
+      kind: "tool_call_update",
+      toolCallId: "item-4",
+      status: "completed",
+      title: null,
+    });
+  });
+
+  test("item/completed with itemType=agentMessage returns null", () => {
+    expect(
+      mapCodexNotification("item/completed", {
+        itemId: "item-5",
+        itemType: "agentMessage",
+      }),
+    ).toBeNull();
+  });
+
+  test("unknown method returns null", () => {
+    expect(mapCodexNotification("some/other/method", {})).toBeNull();
   });
 });

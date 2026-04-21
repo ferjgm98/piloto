@@ -27,6 +27,36 @@ interface CodexItemCompletedParams {
   itemType: string;
 }
 
+export function mapCodexNotification(method: string, params: unknown): AgentUpdateDTO | null {
+  const p = (params ?? {}) as Record<string, unknown>;
+  if (method === "item/started") {
+    const ev = p as unknown as CodexItemStartedParams;
+    if (ev.itemType && ev.itemType !== "agentMessage") {
+      return {
+        kind: "tool_call",
+        toolCallId: ev.itemId,
+        title: ev.title ?? ev.itemType,
+        toolKind: ev.itemType,
+        status: "in_progress",
+      };
+    }
+  } else if (method === "item/agentMessage/delta") {
+    const ev = p as unknown as CodexAgentMessageDeltaParams;
+    if (ev.delta) return { kind: "message", text: ev.delta };
+  } else if (method === "item/completed") {
+    const ev = p as unknown as CodexItemCompletedParams;
+    if (ev.itemType && ev.itemType !== "agentMessage") {
+      return {
+        kind: "tool_call_update",
+        toolCallId: ev.itemId,
+        status: "completed",
+        title: null,
+      };
+    }
+  }
+  return null;
+}
+
 export function createCodexBackend(config: CodexBackendConfig): AgentBackend {
   const log = createLogger("codex-backend");
   const binaryName = config.binaryPath ?? process.env.PILOTO_CODEX_BIN ?? "codex";
@@ -35,37 +65,9 @@ export function createCodexBackend(config: CodexBackendConfig): AgentBackend {
   let threadId: string | null = null;
   let onUpdateCb: ((update: AgentUpdateDTO) => void) | null = null;
 
-  function emit(update: AgentUpdateDTO): void {
-    onUpdateCb?.(update);
-  }
-
   function handleNotification(method: string, params: unknown): void {
-    const p = (params ?? {}) as Record<string, unknown>;
-    if (method === "item/started") {
-      const ev = p as unknown as CodexItemStartedParams;
-      if (ev.itemType && ev.itemType !== "agentMessage") {
-        emit({
-          kind: "tool_call",
-          toolCallId: ev.itemId,
-          title: ev.title ?? ev.itemType,
-          toolKind: ev.itemType,
-          status: "in_progress",
-        });
-      }
-    } else if (method === "item/agentMessage/delta") {
-      const ev = p as unknown as CodexAgentMessageDeltaParams;
-      if (ev.delta) emit({ kind: "message", text: ev.delta });
-    } else if (method === "item/completed") {
-      const ev = p as unknown as CodexItemCompletedParams;
-      if (ev.itemType && ev.itemType !== "agentMessage") {
-        emit({
-          kind: "tool_call_update",
-          toolCallId: ev.itemId,
-          status: "completed",
-          title: null,
-        });
-      }
-    }
+    const update = mapCodexNotification(method, params);
+    if (update) onUpdateCb?.(update);
   }
 
   async function startTurn(prompt: string): Promise<void> {
