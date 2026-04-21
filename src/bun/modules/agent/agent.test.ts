@@ -1,20 +1,20 @@
-import { describe, expect, test, beforeEach, afterEach } from "bun:test";
+import { afterEach, beforeEach, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { AgentUpdateDTO } from "shared/rpc";
 import { getDb, initializeDatabase } from "../../db/database";
-import { agentSessions, workspaces, workspaceRepos } from "../../db/schema";
-import { AgentBinaryNotFoundError, ValidationError, NotFoundError } from "../../utils/errors";
+import { agentSessions, workspaceRepos, workspaces } from "../../db/schema";
+import { AgentBinaryNotFoundError, NotFoundError, ValidationError } from "../../utils/errors";
 import { createTestDb, resetTestDb } from "../../utils/test-setup";
 import {
+  getAgentSession,
+  listAgentSessions,
+  setAgentStatusNotifier,
+  setAgentUpdateNotifier,
   startAgent,
   stopAgent,
-  listAgentSessions,
-  getAgentSession,
-  setAgentUpdateNotifier,
-  setAgentStatusNotifier,
 } from "./agent.service";
 import { createCodexBackend } from "./backends/codex.backend";
-import type { AgentUpdateDTO } from "shared/rpc";
 
 describe("agent.service", () => {
   let db: ReturnType<typeof createTestDb>;
