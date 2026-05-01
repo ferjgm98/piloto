@@ -3,10 +3,14 @@
   "checkpoint_id": "140e9c924ba0",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 4,
+  "checkpoints_count": 6,
   "files_touched": [
     ".githooks/post-rewrite",
-    "CLAUDE.md"
+    "CLAUDE.md",
+    "docs/agents/domain.md",
+    "docs/agents/issue-tracker.md",
+    "docs/agents/triage-labels.md",
+    "docs/audits/2026-04-27-weekly-audit.md"
   ],
   "sessions": [
     {
@@ -20,6 +24,12 @@
       "transcript": "/14/0e9c924ba0/1/full.jsonl",
       "content_hash": "/14/0e9c924ba0/1/content_hash.txt",
       "prompt": "/14/0e9c924ba0/1/prompt.txt"
+    },
+    {
+      "metadata": "/14/0e9c924ba0/2/metadata.json",
+      "transcript": "/14/0e9c924ba0/2/full.jsonl",
+      "content_hash": "/14/0e9c924ba0/2/content_hash.txt",
+      "prompt": "/14/0e9c924ba0/2/prompt.txt"
     }
   ],
   "token_usage": {
