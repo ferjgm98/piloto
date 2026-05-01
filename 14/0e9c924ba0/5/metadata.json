@@ -1,0 +1,58 @@
+{
+  "cli_version": "0.5.6",
+  "checkpoint_id": "140e9c924ba0",
+  "session_id": "e66a71d5-2a26-4081-b08b-2f3a751eb14f",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-01T18:04:41.169302Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "CLAUDE.md",
+    "docs/agents/domain.md",
+    "docs/agents/issue-tracker.md",
+    "docs/agents/triage-labels.md"
+  ],
+  "agent": "Claude Code",
+  "model": "claude-opus-4-7",
+  "turn_id": "8b2ef5ab4015",
+  "token_usage": {
+    "input_tokens": 46,
+    "cache_creation_tokens": 94694,
+    "cache_read_tokens": 674734,
+    "output_tokens": 6999,
+    "api_call_count": 17
+  },
+  "session_metrics": {
+    "turn_count": 5
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-01T18:04:41.165972Z",
+    "agent_lines": 109,
+    "agent_removed": 0,
+    "human_added": 196,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 305,
+    "total_lines_changed": 305,
+    "agent_percentage": 35.73770491803279,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 314,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".bg-shell/manifest.json": 1,
+        ".githooks/post-rewrite": 4,
+        ".gsd/CODEBASE.md": 153,
+        ".gsd/notifications.jsonl": 1,
+        ".gsd/runtime/write-gate-state.json": 5,
+        ".mcp.json": 18,
+        "docs/audits/2026-04-27-weekly-audit.md": 132
+      }
+    }
+  ]
+}

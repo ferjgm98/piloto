@@ -3,7 +3,7 @@
   "checkpoint_id": "140e9c924ba0",
   "strategy": "manual-commit",
   "branch": "main",
-  "checkpoints_count": 9,
+  "checkpoints_count": 10,
   "files_touched": [
     ".githooks/post-rewrite",
     "CLAUDE.md",
@@ -43,13 +43,19 @@
       "transcript": "/14/0e9c924ba0/4/full.jsonl",
       "content_hash": "/14/0e9c924ba0/4/content_hash.txt",
       "prompt": "/14/0e9c924ba0/4/prompt.txt"
+    },
+    {
+      "metadata": "/14/0e9c924ba0/5/metadata.json",
+      "transcript": "/14/0e9c924ba0/5/full.jsonl",
+      "content_hash": "/14/0e9c924ba0/5/content_hash.txt",
+      "prompt": "/14/0e9c924ba0/5/prompt.txt"
     }
   ],
   "token_usage": {
-    "input_tokens": 62,
-    "cache_creation_tokens": 281174,
-    "cache_read_tokens": 4030009,
-    "output_tokens": 45944,
-    "api_call_count": 34
+    "input_tokens": 108,
+    "cache_creation_tokens": 375868,
+    "cache_read_tokens": 4704743,
+    "output_tokens": 52943,
+    "api_call_count": 51
   }
 }

@@ -1,0 +1,22 @@
+/setup-matt-pocock-skills
+
+---
+
+Go ahead with GH
+
+---
+
+sorry, my mistake i'm tracking issues using linear
+
+---
+
+Yes, you can actually check the linear issue using the mcp, project is piloto, and key is PIL. Current flow is we have a spec for each project in both notion (you can also check using mcp) and is linked to an issue
+
+---
+
+1. you decide, we are still into Piloto MVP, still half way milestones, so we can do a quick deep dive over what's done/what's missing and decide
+2. yes, mcp is good
+3. I'd like to keep that flow, but I'm open to proposals
+
+B
+any of them works for me, please you decide
