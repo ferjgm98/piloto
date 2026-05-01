@@ -1,0 +1,9 @@
+what is this project about?
+
+---
+
+can you do a deep dive so I understand better the architecture?
+
+---
+
+is good, do you see any thing we could improve?
