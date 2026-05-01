@@ -1,0 +1,71 @@
+{
+  "cli_version": "0.5.6",
+  "checkpoint_id": "140e9c924ba0",
+  "session_id": "9e78891d-b6d9-49c2-a559-e3d31103392b",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-01T18:04:37.964339Z",
+  "branch": "main",
+  "checkpoints_count": 2,
+  "files_touched": [
+    ".githooks/post-rewrite",
+    "CLAUDE.md",
+    "docs/agents/domain.md",
+    "docs/agents/issue-tracker.md",
+    "docs/agents/triage-labels.md",
+    "docs/audits/2026-04-27-weekly-audit.md"
+  ],
+  "agent": "Factory AI Droid",
+  "model": "Kimi-k2.5-Turbo-0",
+  "turn_id": "704516b108cd",
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 0,
+    "api_call_count": 0
+  },
+  "session_metrics": {
+    "turn_count": 2
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-01T18:04:37.962849Z",
+    "agent_lines": 0,
+    "agent_removed": 0,
+    "human_added": 196,
+    "human_modified": 0,
+    "human_removed": 0,
+    "total_committed": 196,
+    "total_lines_changed": 196,
+    "agent_percentage": 0,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 423,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        ".bg-shell/manifest.json": 1,
+        ".githooks/post-rewrite": 4,
+        ".gsd/CODEBASE.md": 153,
+        ".gsd/notifications.jsonl": 1,
+        ".gsd/runtime/write-gate-state.json": 5,
+        ".mcp.json": 18,
+        "CLAUDE.md": 14,
+        "docs/agents/domain.md": 44,
+        "docs/agents/issue-tracker.md": 32,
+        "docs/agents/triage-labels.md": 19,
+        "docs/audits/2026-04-27-weekly-audit.md": 132
+      }
+    },
+    {
+      "checkpoint_number": 2,
+      "user_lines_added": 0,
+      "user_lines_removed": 0,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0
+    }
+  ]
+}
