@@ -166,3 +166,17 @@ radius or reverse prior decisions.
 - `docs/ARCHITECTURE.md` — why the layers are the way they are.
 - `docs/DEVELOPMENT.md` — setup, narrative walkthrough for adding a feature, debugging tips, common pitfalls.
 - `README.md` — product description and tech stack summary.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in Linear, team `PIL` (Piloto). Skills use the Linear MCP for create/list/update; Notion specs are linked from Epic-level issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`) created lazily in Linear on first use. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo: `CONTEXT.md` (lazy) and `docs/adr/` at the root. See `docs/agents/domain.md`.
