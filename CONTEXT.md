@@ -88,8 +88,14 @@ part of the same change. Used to group worktrees in
 
 **Worktree status** — the computed snapshot of a worktree:
 `changedFiles`, `ahead`, `behind`, `branchName`, `lastFetch`, `hasChanges`.
-Type lives in `shared/rpc.ts:WorktreeStatus`. Pushed live via the FS
-watcher (PIL-20).
+Type lives in `shared/rpc.ts:WorktreeStatus`. Pushed live via the
+**Status watcher** (PIL-20).
+
+**Status watcher** — deep module that owns `node:fs.watch`, debounce, and
+the ignore predicate behind a small interface (`startWatching`,
+`stopWatching`, `subscribe`, `notify`, `shutdown`). Lives at
+`src/bun/modules/worktree/status-watcher/`. Sole emitter of live
+`Worktree status` updates; rationale + tradeoffs in ADR 0001.
 
 **Pre-remove check** — refusal to remove a worktree when it has a running
 agent or uncommitted changes. Inspired by worktrunk; in

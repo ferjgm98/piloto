@@ -7,24 +7,19 @@ import { join } from "node:path";
 import { eq } from "drizzle-orm";
 import { getDb, initializeDatabase } from "../../db/database";
 import { activeWorktrees, agentSessions, workspaceRepos, workspaces } from "../../db/schema";
-import {
-  UncommittedChangesError,
-  WorktreeAlreadyHasWatcherError,
-  WorktreeInUseError,
-} from "../../utils/errors";
+import { UncommittedChangesError, WorktreeInUseError } from "../../utils/errors";
 import { resetTestDb } from "../../utils/test-setup";
 import {
   computeWorktreePath,
-  createWatcher,
   createWorktree,
-  destroyWatcher,
   getWorktreeStatus,
   listWorkspaceWorktrees,
   listWorktrees,
   refreshWorktreeStatus,
   removeTrackedWorktree,
   removeWorktree,
-  setWorktreeStatusNotifier,
+  shutdownWorktreeStatusWatcher,
+  subscribeWorktreeStatus,
 } from "./worktree.service";
 
 function git(args: string[], cwd: string) {
@@ -82,9 +77,9 @@ describe("worktree.service", () => {
     initGitRepo(repoPath);
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    await shutdownWorktreeStatusWatcher();
     rmSync(rootDir, { recursive: true, force: true });
-    setWorktreeStatusNotifier(null);
   });
 
   test("listWorktrees includes the main worktree", async () => {
@@ -150,7 +145,8 @@ describe("worktree.service (tracked)", () => {
       .run();
   });
 
-  afterEach(() => {
+  afterEach(async () => {
+    await shutdownWorktreeStatusWatcher();
     rmSync(rootDir, { recursive: true, force: true });
   });
 
@@ -309,7 +305,7 @@ describe("worktree.service (tracked)", () => {
     await removeWorktree({ repoPath: canonical, path: wtPath, force: true });
   });
 
-  test("refreshWorktreeStatus emits through the notifier", async () => {
+  test("refreshWorktreeStatus emits through subscribers", async () => {
     const canonical = realpathSync(repoPath);
     const wtPath = join(rootDir, "wt-refresh");
     await createWorktree({ repoPath: canonical, branch: "feature/refresh", path: wtPath });
@@ -324,48 +320,21 @@ describe("worktree.service (tracked)", () => {
       path: wtPath,
     });
 
-    let payload:
-      | {
-          worktreeId: string;
-          statusChanged: boolean;
-        }
-      | undefined;
-
-    setWorktreeStatusNotifier(({ worktreeId: changedId, status }) => {
-      payload = {
-        worktreeId: changedId,
-        statusChanged: status.hasChanges,
-      };
+    const events: Array<{ worktreeId: string; statusChanged: boolean }> = [];
+    const unsubscribe = subscribeWorktreeStatus(({ worktreeId: changedId, status }) => {
+      events.push({ worktreeId: changedId, statusChanged: status.hasChanges });
     });
 
     writeFileSync(join(wtPath, "dirty.txt"), "dirty\n");
     const status = await refreshWorktreeStatus(worktreeId);
 
     expect(status.hasChanges).toBe(true);
-    expect(payload).toEqual({
+    expect(events).toContainEqual({
       worktreeId,
       statusChanged: true,
     });
 
-    await removeWorktree({ repoPath: canonical, path: wtPath, force: true });
-  });
-
-  test("createWatcher rejects duplicate watchers and destroyWatcher allows re-creation", async () => {
-    const canonical = realpathSync(repoPath);
-    const wtPath = join(rootDir, "wt-watch");
-    await createWorktree({ repoPath: canonical, branch: "feature/watch", path: wtPath });
-
-    const worktreeId = randomUUID();
-    await createWatcher(worktreeId, wtPath);
-
-    await expect(createWatcher(worktreeId, wtPath)).rejects.toBeInstanceOf(
-      WorktreeAlreadyHasWatcherError,
-    );
-
-    await destroyWatcher(worktreeId);
-    await createWatcher(worktreeId, wtPath);
-    await destroyWatcher(worktreeId);
-
+    unsubscribe();
     await removeWorktree({ repoPath: canonical, path: wtPath, force: true });
   });
 
@@ -393,65 +362,5 @@ describe("worktree.service (tracked)", () => {
     expect(worktrees[0]?.repo.id).toBe(repoId);
 
     await removeTrackedWorktree(worktreeId, true);
-  });
-
-  test("watcher ignores changes under node_modules", async () => {
-    const canonical = realpathSync(repoPath);
-    const wtPath = join(rootDir, "wt-ignore");
-    await createWorktree({ repoPath: canonical, branch: "feature/ignore", path: wtPath });
-
-    const resolvedPath = realpathSync(wtPath);
-    const worktreeId = randomUUID();
-    insertActiveWorktree(getDb(), {
-      id: worktreeId,
-      repoId,
-      branch: "feature/ignore",
-      featureName: "ignore",
-      path: resolvedPath,
-    });
-
-    let notifyCount = 0;
-    setWorktreeStatusNotifier(() => {
-      notifyCount += 1;
-    });
-
-    await createWatcher(worktreeId, resolvedPath);
-
-    mkdirSync(join(resolvedPath, "node_modules", "pkg"), { recursive: true });
-    writeFileSync(join(resolvedPath, "node_modules", "pkg", "index.js"), "noop\n");
-
-    await new Promise((r) => setTimeout(r, 400));
-    expect(notifyCount).toBe(0);
-
-    writeFileSync(join(resolvedPath, "tracked.txt"), "hi\n");
-    await new Promise((r) => setTimeout(r, 400));
-    expect(notifyCount).toBeGreaterThan(0);
-
-    await destroyWatcher(worktreeId);
-    await removeWorktree({ repoPath: canonical, path: resolvedPath, force: true });
-  });
-
-  test("concurrent createWatcher calls for the same id reject all but one", async () => {
-    const canonical = realpathSync(repoPath);
-    const wtPath = join(rootDir, "wt-concurrent");
-    await createWorktree({ repoPath: canonical, branch: "feature/concurrent", path: wtPath });
-
-    const worktreeId = randomUUID();
-    const results = await Promise.allSettled([
-      createWatcher(worktreeId, wtPath),
-      createWatcher(worktreeId, wtPath),
-      createWatcher(worktreeId, wtPath),
-    ]);
-
-    const fulfilled = results.filter((r) => r.status === "fulfilled");
-    const rejected = results.filter((r) => r.status === "rejected");
-    expect(fulfilled).toHaveLength(1);
-    expect(rejected).toHaveLength(2);
-    for (const r of rejected) {
-      expect((r as PromiseRejectedResult).reason).toBeInstanceOf(WorktreeAlreadyHasWatcherError);
-    }
-
-    await destroyWatcher(worktreeId);
-    await removeWorktree({ repoPath: canonical, path: wtPath, force: true });
   });
 });

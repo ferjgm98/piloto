@@ -1,6 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { watch } from "node:fs";
-import { basename, relative, resolve } from "node:path";
+import { basename, resolve } from "node:path";
 import { eq, inArray } from "drizzle-orm";
 import { getDb } from "../../db/database";
 import { activeWorktrees, workspaceRepos } from "../../db/schema";
@@ -8,7 +7,6 @@ import {
   NotFoundError,
   UncommittedChangesError,
   ValidationError,
-  WorktreeAlreadyHasWatcherError,
   WorktreeInUseError,
 } from "../../utils/errors";
 import {
@@ -19,10 +17,13 @@ import {
   hasUncommittedChanges,
   runGit,
 } from "../../utils/git";
-import { createLogger } from "../../utils/logger";
+import { createStatusWatcher } from "./status-watcher/status-watcher.service";
+import type {
+  StatusWatcherSubscriber,
+  StatusWatcher as WorktreeStatusWatcher,
+} from "./status-watcher/status-watcher.types";
 import type {
   ActiveWorktree,
-  Watcher,
   Worktree,
   WorktreeCreateInput,
   WorktreeRemoveInput,
@@ -33,21 +34,36 @@ import type {
 
 const FEATURE_NAME_RE = /^[a-z0-9][a-z0-9-]{0,63}$/;
 const PATH_TEMPLATE = "../{repo-name}-worktrees/{branch}";
-const WATCH_DEBOUNCE_MS = 100;
-const log = createLogger("worktree");
 
-type WorktreeStatusListener = (payload: {
-  worktreeId: string;
-  status: WorktreeStatus;
-}) => void;
+async function computeStatusForPath(worktreePath: string): Promise<WorktreeStatus> {
+  const [changedFiles, branchName, aheadBehind, lastFetch] = await Promise.all([
+    getChangedFilesCount(worktreePath),
+    getCurrentBranchName(worktreePath),
+    getAheadBehind(worktreePath),
+    getLastFetchTime(worktreePath),
+  ]);
 
-type WatcherEntry = Watcher & {
-  timeoutId: ReturnType<typeof setTimeout> | null;
-};
+  return {
+    hasChanges: changedFiles > 0,
+    changedFiles,
+    branchName,
+    ahead: aheadBehind.ahead,
+    behind: aheadBehind.behind,
+    lastFetch,
+  };
+}
 
-const watcherRegistry = new Map<string, WatcherEntry>();
+const statusWatcher: WorktreeStatusWatcher = createStatusWatcher({
+  computeStatus: computeStatusForPath,
+});
 
-let worktreeStatusListener: WorktreeStatusListener | null = null;
+export function subscribeWorktreeStatus(listener: StatusWatcherSubscriber): () => void {
+  return statusWatcher.subscribe(listener);
+}
+
+export async function shutdownWorktreeStatusWatcher(): Promise<void> {
+  await statusWatcher.shutdown();
+}
 
 export async function listWorktrees(repoPath: string): Promise<Worktree[]> {
   const output = await runGit(["worktree", "list", "--porcelain"], repoPath);
@@ -109,129 +125,11 @@ export function computeWorktreePath(repoPath: string, branch: string): string {
   return resolve(repoPath, rendered);
 }
 
-export function setWorktreeStatusNotifier(listener: WorktreeStatusListener | null): void {
-  worktreeStatusListener = listener;
-}
-
-function shouldIgnoreFileEvent(worktreePath: string, eventPath: string): boolean {
-  const relativePath = relative(worktreePath, eventPath);
-  if (relativePath.startsWith("..")) return true;
-
-  const normalized = relativePath.replaceAll("\\", "/");
-  if (normalized === ".DS_Store" || normalized.endsWith("/.DS_Store")) return true;
-
-  const parts = normalized.split("/").filter(Boolean);
-  return (
-    parts.includes(".git") ||
-    parts.includes("node_modules") ||
-    parts.includes("build") ||
-    parts.includes("dist")
-  );
-}
-
-function notifyStatusChanged(worktreeId: string, status: WorktreeStatus): void {
-  worktreeStatusListener?.({ worktreeId, status });
-}
-
 function getActiveWorktreeRow(worktreeId: string) {
   const db = getDb();
   const row = db.select().from(activeWorktrees).where(eq(activeWorktrees.id, worktreeId)).get();
   if (!row) throw new NotFoundError("ActiveWorktree", worktreeId);
   return row;
-}
-
-async function computeStatusForPath(worktreePath: string): Promise<WorktreeStatus> {
-  const [changedFiles, branchName, aheadBehind, lastFetch] = await Promise.all([
-    getChangedFilesCount(worktreePath),
-    getCurrentBranchName(worktreePath),
-    getAheadBehind(worktreePath),
-    getLastFetchTime(worktreePath),
-  ]);
-
-  return {
-    hasChanges: changedFiles > 0,
-    changedFiles,
-    branchName,
-    ahead: aheadBehind.ahead,
-    behind: aheadBehind.behind,
-    lastFetch,
-  };
-}
-
-function queueStatusRefresh(worktreeId: string): void {
-  const entry = watcherRegistry.get(worktreeId);
-  if (!entry) return;
-
-  if (entry.timeoutId !== null) {
-    clearTimeout(entry.timeoutId);
-  }
-
-  entry.timeoutId = setTimeout(() => {
-    entry.timeoutId = null;
-    void refreshWorktreeStatus(worktreeId).catch((error) => {
-      const message = error instanceof Error ? error.message : String(error);
-      log.error(`failed to refresh status for ${worktreeId}: ${message}`);
-    });
-  }, WATCH_DEBOUNCE_MS);
-}
-
-export async function createWatcher(worktreeId: string, worktreePath: string): Promise<Watcher> {
-  if (watcherRegistry.has(worktreeId)) {
-    throw new WorktreeAlreadyHasWatcherError(worktreeId);
-  }
-
-  const handle: WatcherEntry = {
-    worktreeId,
-    timeoutId: null,
-    unsubscribe: async () => {},
-  };
-  watcherRegistry.set(worktreeId, handle);
-
-  try {
-    const resolvedPath = resolve(worktreePath);
-    const fsWatcher = watch(resolvedPath, { recursive: true }, (_event, filename) => {
-      if (!filename) return;
-      const absolute = resolve(resolvedPath, filename.toString());
-      if (shouldIgnoreFileEvent(resolvedPath, absolute)) return;
-      queueStatusRefresh(worktreeId);
-    });
-
-    fsWatcher.on("error", (error) => {
-      log.error(`watcher error for ${worktreeId}: ${error.message}`);
-    });
-
-    handle.unsubscribe = async () => {
-      if (handle.timeoutId !== null) {
-        clearTimeout(handle.timeoutId);
-        handle.timeoutId = null;
-      }
-      fsWatcher.close();
-    };
-
-    return handle;
-  } catch (error) {
-    watcherRegistry.delete(worktreeId);
-    throw error;
-  }
-}
-
-export async function destroyWatcher(worktreeId: string): Promise<void> {
-  const existing = watcherRegistry.get(worktreeId);
-  if (!existing) return;
-
-  watcherRegistry.delete(worktreeId);
-  await existing.unsubscribe();
-}
-
-async function ensureWatcher(worktreeId: string, worktreePath: string): Promise<void> {
-  if (watcherRegistry.has(worktreeId)) return;
-
-  try {
-    await createWatcher(worktreeId, worktreePath);
-  } catch (error) {
-    if (error instanceof WorktreeAlreadyHasWatcherError) return;
-    throw error;
-  }
 }
 
 export async function createWorktreesForFeature(
@@ -274,7 +172,7 @@ export async function createWorktreesForFeature(
       };
       db.insert(activeWorktrees).values(row).run();
       try {
-        await ensureWatcher(id, path);
+        statusWatcher.startWatching(id, path);
         return { ...row, repo };
       } catch (error) {
         db.delete(activeWorktrees).where(eq(activeWorktrees.id, id)).run();
@@ -344,7 +242,7 @@ export async function listWorkspaceWorktrees(workspaceId: string): Promise<Workt
 
   const withStatus = await Promise.all(
     worktrees.map(async (worktree) => {
-      await ensureWatcher(worktree.id, worktree.path);
+      statusWatcher.startWatching(worktree.id, worktree.path);
       const status = await getWorktreeStatus(worktree.id);
       return { ...worktree, status };
     }),
@@ -370,7 +268,7 @@ export async function removeTrackedWorktree(worktreeId: string, force = false): 
     }
   }
 
-  await destroyWatcher(worktreeId);
+  await statusWatcher.stopWatching(worktreeId);
   await removeWorktree({ repoPath: repo.path, path: row.path, force });
   db.delete(activeWorktrees).where(eq(activeWorktrees.id, worktreeId)).run();
 }
@@ -382,6 +280,6 @@ export async function getWorktreeStatus(worktreeId: string): Promise<WorktreeSta
 
 export async function refreshWorktreeStatus(worktreeId: string): Promise<WorktreeStatus> {
   const status = await getWorktreeStatus(worktreeId);
-  notifyStatusChanged(worktreeId, status);
+  statusWatcher.notify(worktreeId, status);
   return status;
 }

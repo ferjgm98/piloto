@@ -16,6 +16,8 @@ import { createCodexBackend } from "./backends/codex.backend";
 
 const log = createLogger("agent");
 
+export const MAX_CONCURRENT_AGENTS = 5;
+
 type AgentUpdateListener = (payload: { sessionId: string; chunk: AgentUpdateDTO }) => void;
 type AgentStatusListener = (payload: AgentStatusChange) => void;
 
@@ -31,7 +33,7 @@ export function setAgentStatusNotifier(listener: AgentStatusListener | null): vo
 }
 
 interface RegistryEntry {
-  backend: AgentBackend;
+  backend: AgentBackend | null;
   workspaceId: string;
   worktreeId: string | null;
   stopping: boolean;
@@ -39,8 +41,29 @@ interface RegistryEntry {
 
 const registry = new Map<string, RegistryEntry>();
 
+type BackendFactory = (backend: AgentBackendName, sessionId: string) => AgentBackend;
+
+let backendFactory: BackendFactory | null = null;
+
+export function setBackendFactoryForTests(factory: BackendFactory | null): void {
+  backendFactory = factory;
+}
+
 function isBackendName(v: string): v is AgentBackendName {
   return v === "claude" || v === "codex";
+}
+
+function countActiveRegistryEntries(): number {
+  let n = 0;
+  for (const e of registry.values()) if (!e.stopping) n++;
+  return n;
+}
+
+function findRunningEntryForWorktree(worktreeId: string): string | null {
+  for (const [sessionId, e] of registry.entries()) {
+    if (!e.stopping && e.worktreeId === worktreeId) return sessionId;
+  }
+  return null;
 }
 
 function updateSessionStatus(sessionId: string, status: AgentStatus, errorMessage?: string): void {
@@ -103,6 +126,7 @@ function handleBackendExit(sessionId: string, code: number | null): void {
 }
 
 function instantiateBackend(backend: AgentBackendName, sessionId: string): AgentBackend {
+  if (backendFactory) return backendFactory(backend, sessionId);
   const onExit = ({ code }: { code: number | null }) => handleBackendExit(sessionId, code);
   if (backend === "claude") {
     return createClaudeBackend({ sessionId, onExit });
@@ -116,7 +140,29 @@ export async function startAgent(input: StartAgentInput): Promise<{ sessionId: s
   }
 
   const workingDir = resolveWorkingDir(input);
+
+  if (countActiveRegistryEntries() >= MAX_CONCURRENT_AGENTS) {
+    throw new ValidationError(
+      `Maximum ${MAX_CONCURRENT_AGENTS} concurrent agents already running; stop one before starting another`,
+    );
+  }
+
+  if (input.worktreeId) {
+    const existingId = findRunningEntryForWorktree(input.worktreeId);
+    if (existingId) {
+      throw new ValidationError(`Worktree already has a running agent (session ${existingId})`);
+    }
+  }
+
   const sessionId = randomUUID();
+
+  registry.set(sessionId, {
+    backend: null,
+    workspaceId: input.workspaceId,
+    worktreeId: input.worktreeId ?? null,
+    stopping: false,
+  });
+
   const now = new Date().toISOString();
   const db = getDb();
 
@@ -142,18 +188,15 @@ export async function startAgent(input: StartAgentInput): Promise<{ sessionId: s
     });
     await backend.start({ workingDir, prompt: input.prompt ?? "" });
   } catch (err) {
+    registry.delete(sessionId);
     const message = err instanceof Error ? err.message : String(err);
     updateSessionStatus(sessionId, "error", message);
     log.error(`startAgent failed for session ${sessionId}: ${message}`);
     throw err;
   }
 
-  registry.set(sessionId, {
-    backend,
-    workspaceId: input.workspaceId,
-    worktreeId: input.worktreeId ?? null,
-    stopping: false,
-  });
+  const entry = registry.get(sessionId);
+  if (entry) entry.backend = backend;
   setWorktreeAgentBinding(input.worktreeId ?? null, sessionId);
   statusListener?.({ sessionId, status: "running" });
 
@@ -174,11 +217,13 @@ export async function stopAgent(sessionId: string): Promise<{ success: boolean }
   }
 
   entry.stopping = true;
-  try {
-    await entry.backend.stop();
-  } catch (err) {
-    const message = err instanceof Error ? err.message : String(err);
-    log.warn(`stopAgent backend.stop threw: ${message}`);
+  if (entry.backend) {
+    try {
+      await entry.backend.stop();
+    } catch (err) {
+      const message = err instanceof Error ? err.message : String(err);
+      log.warn(`stopAgent backend.stop threw: ${message}`);
+    }
   }
 
   registry.delete(sessionId);

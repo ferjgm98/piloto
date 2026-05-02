@@ -117,6 +117,26 @@ const migrations: MigrationMeta[] = [
     folderMillis: 1776651417174,
     hash: "",
   },
+  {
+    // PIL-42: enforce per-worktree uniqueness for running agents.
+    // Drizzle Kit doesn't generate partial unique indexes, so this migration
+    // is hand-written and lives only here (no .sql in migrations/).
+    // Cleans zombie 'running' rows first so the partial index can be created
+    // on existing dev DBs where a previous process left orphaned sessions.
+    sql: [
+      `UPDATE \`agent_sessions\`
+        SET \`status\` = 'error',
+            \`error_message\` = 'orphaned at restart',
+            \`updated_at\` = datetime('now')
+        WHERE \`status\` = 'running';`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS \`agent_sessions_running_per_worktree_idx\`
+        ON \`agent_sessions\`(\`worktree_id\`)
+        WHERE \`status\` = 'running' AND \`worktree_id\` IS NOT NULL;`,
+    ],
+    bps: true,
+    folderMillis: 1777000000000,
+    hash: "",
+  },
 ];
 
 type EmbeddedMigrationDatabase = BunSQLiteDatabase<Record<string, unknown>> & {

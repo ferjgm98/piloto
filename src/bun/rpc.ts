@@ -2,7 +2,7 @@ import { BrowserView } from "electrobun/bun";
 import type { MainRPC } from "shared/rpc";
 import { setAgentStatusNotifier, setAgentUpdateNotifier } from "./modules/agent/agent.service";
 import { terminalHandlers } from "./modules/terminal/terminal.rpc";
-import { setWorktreeStatusNotifier } from "./modules/worktree/worktree.service";
+import { subscribeWorktreeStatus } from "./modules/worktree/worktree.service";
 import { requestHandlers } from "./rpc-handlers";
 import { wrapHandlers } from "./utils/rpc-middleware";
 
@@ -20,7 +20,7 @@ export function createRPC() {
     },
   });
 
-  setWorktreeStatusNotifier(({ worktreeId, status }) => {
+  subscribeWorktreeStatus(({ worktreeId, status }) => {
     rpc.send.worktreeStatusChanged({
       worktreeId,
       status: {

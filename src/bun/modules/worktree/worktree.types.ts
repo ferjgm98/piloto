@@ -53,8 +53,3 @@ export interface WorktreeStatus {
 }
 
 export type WorktreeWithStatus = ActiveWorktree & { status: WorktreeStatus };
-
-export interface Watcher {
-  worktreeId: string;
-  unsubscribe: () => Promise<void> | void;
-}

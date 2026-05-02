@@ -14,7 +14,6 @@ import {
   NotFoundError,
   UncommittedChangesError,
   ValidationError,
-  WorktreeAlreadyHasWatcherError,
   WorktreeInUseError,
 } from "./errors";
 import { createLogger } from "./logger";
@@ -29,7 +28,6 @@ function mapErrorCode(err: unknown): ErrorCode {
   if (err instanceof ValidationError) return Codes.VALIDATION;
   if (err instanceof GitError) return Codes.GIT_ERROR;
   if (err instanceof WorktreeInUseError) return Codes.WORKTREE_IN_USE;
-  if (err instanceof WorktreeAlreadyHasWatcherError) return Codes.WORKTREE_ALREADY_HAS_WATCHER;
   if (err instanceof UncommittedChangesError) return Codes.UNCOMMITTED_CHANGES;
   if (err instanceof AgentBinaryNotFoundError) return Codes.AGENT_BINARY_NOT_FOUND;
   if (err instanceof ConfigurationError) return Codes.CONFIGURATION_ERROR;

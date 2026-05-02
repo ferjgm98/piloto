@@ -76,7 +76,7 @@ system watcher. Keep all other PIL-20 behaviour identical (100 ms debounce,
 ### Ask-first reversal
 
 Per `CLAUDE.md`'s ask-first list, removing a runtime dependency normally
-requires discussion. This ADR *is* the discussion record — the removal is
+requires discussion. This ADR _is_ the discussion record — the removal is
 tied to a concrete, reproducible blocker (app won't launch) rather than a
 preference change.
 
@@ -100,3 +100,14 @@ Until then the spec points to this ADR for the watcher choice.
 - Worktree count grows past ~50 (JS-side filter cost becomes non-trivial)
 - Electrobun or Bun ships a fix that makes native modules trivial to bundle
 - `fs.watch` drops events in practice on any supported platform
+
+## Implementation location
+
+Post-PIL-20 the watcher was extracted into a dedicated sub-module:
+`src/bun/modules/worktree/status-watcher/` (types / service / test). The
+worktree service holds a singleton `StatusWatcher` and exposes
+`subscribeWorktreeStatus(listener)` for RPC bridging. The `recursive: true`
+flag, 100 ms debounce, and ignore predicate (`.git`, `node_modules`,
+`build`, `dist`, `.DS_Store`) all live behind that interface. Future
+revisits of this ADR should land in `status-watcher.service.ts`, not in
+`worktree.service.ts`.
