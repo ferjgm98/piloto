@@ -1,0 +1,33 @@
+{
+  "cli_version": "0.5.6",
+  "checkpoint_id": "37e00a91609e",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "shared/rpc.ts",
+    "src/bun/index.ts",
+    "src/bun/modules/agent/agent.rpc.ts",
+    "src/bun/modules/agent/agent.service.ts",
+    "src/bun/modules/agent/agent.test.ts",
+    "src/bun/rpc.test.ts",
+    "src/mainview/components/agent-session-view.tsx",
+    "src/mainview/hooks/index.ts",
+    "src/mainview/hooks/use-agents.ts"
+  ],
+  "sessions": [
+    {
+      "metadata": "/37/e00a91609e/0/metadata.json",
+      "transcript": "/37/e00a91609e/0/full.jsonl",
+      "content_hash": "/37/e00a91609e/0/content_hash.txt",
+      "prompt": "/37/e00a91609e/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 0,
+    "api_call_count": 0
+  }
+}

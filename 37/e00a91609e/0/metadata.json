@@ -1,0 +1,71 @@
+{
+  "cli_version": "0.5.6",
+  "checkpoint_id": "37e00a91609e",
+  "session_id": "a704c0f0-e430-4909-ac37-a6248ad34a43",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-02T19:07:22.608724Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "shared/rpc.ts",
+    "src/bun/index.ts",
+    "src/bun/modules/agent/agent.rpc.ts",
+    "src/bun/modules/agent/agent.service.ts",
+    "src/bun/modules/agent/agent.test.ts",
+    "src/bun/rpc.test.ts",
+    "src/mainview/components/agent-session-view.tsx",
+    "src/mainview/hooks/index.ts",
+    "src/mainview/hooks/use-agents.ts"
+  ],
+  "agent": "Factory AI Droid",
+  "model": "kimi-k2.6",
+  "turn_id": "8078d0fad476",
+  "token_usage": {
+    "input_tokens": 0,
+    "cache_creation_tokens": 0,
+    "cache_read_tokens": 0,
+    "output_tokens": 0,
+    "api_call_count": 0
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-02T19:07:22.605369Z",
+    "agent_lines": 192,
+    "agent_removed": 3,
+    "human_added": 500,
+    "human_modified": 5,
+    "human_removed": 0,
+    "total_committed": 697,
+    "total_lines_changed": 726,
+    "agent_percentage": 26.859504132231404,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 490,
+      "user_lines_removed": 5,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "shared/rpc.ts": 8,
+        "src/bun/index.ts": 9,
+        "src/bun/lifecycle.test.ts": 78,
+        "src/bun/lifecycle.ts": 31,
+        "src/bun/modules/agent/agent.rpc.ts": 16,
+        "src/bun/modules/agent/agent.service.ts": 65,
+        "src/bun/modules/agent/agent.test.ts": 259,
+        "src/bun/rpc.test.ts": 2,
+        "src/mainview/hooks/index.ts": 9,
+        "src/mainview/hooks/use-agents.ts": 13
+      },
+      "user_removed_per_file": {
+        "src/bun/index.ts": 2,
+        "src/bun/modules/agent/agent.test.ts": 1,
+        "src/mainview/hooks/index.ts": 2
+      }
+    }
+  ]
+}
