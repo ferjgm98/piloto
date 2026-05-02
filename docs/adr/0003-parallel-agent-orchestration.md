@@ -25,7 +25,7 @@ The work was sliced into four vertical tickets. This ADR captures the design dec
 - **Two named exports**, sharing a private helper:
   - `stopAllAgents(workspaceId: string)` for the RPC method (workspace-scoped).
   - `stopAllAgentsGlobal()` for signal handlers (every workspace).
-    Internal `_stopAllInRegistry(predicate)` keeps the iteration logic in one place.
+  Internal `_stopAllInRegistry(predicate)` keeps the iteration logic in one place.
 - **`Promise.allSettled` over the matched entries.** Parallel teardown bounds shutdown to roughly one backend's `shutdown(5_000)` timeout. `allSettled` so a hung agent doesn't reject the whole bundle and leave others alive.
 - **Window close uses the same teardown path as SIGTERM/SIGINT.** Today `mainWindow.on("close", () => process.exit(0))` exits immediately. macOS red-traffic-light close is the most common shutdown path; not handling it would orphan child processes and make PIL-43 mostly cosmetic. Window-close, SIGTERM, and SIGINT all `await stopAllAgentsGlobal()` then `process.exit(0)`.
 
