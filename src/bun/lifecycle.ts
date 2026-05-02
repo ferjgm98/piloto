@@ -1,4 +1,4 @@
-import { stopAllAgentsGlobal } from "./modules/agent/agent.service";
+import { stopAllThreadsGlobal } from "./modules/thread/thread.service";
 import { createLogger } from "./utils/logger";
 
 const log = createLogger("lifecycle");
@@ -13,12 +13,12 @@ export interface ShutdownDeps {
 export async function shutdown(reason: string, deps: ShutdownDeps = {}): Promise<void> {
   if (shuttingDown) return;
   shuttingDown = true;
-  const stopAll = deps.stopAll ?? stopAllAgentsGlobal;
+  const stopAll = deps.stopAll ?? stopAllThreadsGlobal;
   const exit = deps.exit ?? ((code: number) => process.exit(code));
   log.info(`Shutdown initiated: ${reason}`);
   try {
     const result = await stopAll();
-    log.info(`Stopped ${result.stopped} agent(s) on shutdown`);
+    log.info(`Stopped ${result.stopped} thread(s) on shutdown`);
   } catch (err) {
     const message = err instanceof Error ? err.message : String(err);
     log.error(`Shutdown teardown threw: ${message}`);

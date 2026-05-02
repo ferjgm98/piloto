@@ -1,5 +1,10 @@
-import { useAgentOutput, useAgentSession, useSendAgentPrompt, useStopAgent } from "@/hooks";
-import { useRPCSubscription } from "@/hooks/use-rpc-subscription";
+import {
+  useSendThreadPrompt,
+  useStopThread,
+  useThread,
+  useThreadOutput,
+  useThreadStatusChange,
+} from "@/hooks";
 import { useEffect, useRef, useState } from "react";
 import type { AgentStatus, AgentUpdateDTO } from "shared/rpc";
 import { Badge } from "./ui/badge";
@@ -30,20 +35,19 @@ function formatChunk(chunk: AgentUpdateDTO): string {
   }
 }
 
-export function AgentSessionView({ sessionId }: { sessionId: string }) {
-  const { data: session, error: sessionError, refetch } = useAgentSession(sessionId);
-  const chunks = useAgentOutput(sessionId);
-  const { mutate: sendPrompt, loading: sending, error: sendError } = useSendAgentPrompt();
-  const { mutate: stopAgent, loading: stopping } = useStopAgent();
+export function ThreadView({ threadId }: { threadId: string }) {
+  const { data: thread, error: threadError, refetch } = useThread(threadId);
+  const chunks = useThreadOutput(threadId);
+  const { mutate: sendPrompt, loading: sending, error: sendError } = useSendThreadPrompt();
+  const { mutate: stopThread, loading: stopping } = useStopThread();
   const [draft, setDraft] = useState("");
   const logRef = useRef<HTMLPreElement>(null);
 
-  useRPCSubscription<{ sessionId: string; status: AgentStatus; error?: string }>(
-    "agentStatusChange",
+  useThreadStatusChange(
     (payload) => {
-      if (payload.sessionId === sessionId) refetch();
+      if (payload.threadId === threadId) refetch();
     },
-    [sessionId],
+    [threadId],
   );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll to bottom whenever new chunks arrive
@@ -52,20 +56,20 @@ export function AgentSessionView({ sessionId }: { sessionId: string }) {
     if (el) el.scrollTop = el.scrollHeight;
   }, [chunks]);
 
-  const status = session?.status ?? "idle";
+  const status = thread?.status ?? "idle";
   const canSend = status === "running" && draft.trim().length > 0 && !sending;
   const canStop = status === "running" && !stopping;
 
   const handleSend = async () => {
     if (!canSend) return;
     const prompt = draft.trim();
-    const result = await sendPrompt({ sessionId, prompt });
+    const result = await sendPrompt({ threadId, prompt });
     if (result?.success) setDraft("");
   };
 
   const handleStop = async () => {
     if (!canStop) return;
-    await stopAgent({ sessionId });
+    await stopThread({ threadId });
     refetch();
   };
 
@@ -81,27 +85,27 @@ export function AgentSessionView({ sessionId }: { sessionId: string }) {
       <header className="flex shrink-0 items-center justify-between border-b border-border px-4 py-2.5">
         <div className="flex items-center gap-3">
           <span className="text-sm font-semibold text-foreground">
-            {session?.backend ?? "agent"}
+            {thread?.backend ?? "thread"}
           </span>
           <Badge variant={STATUS_VARIANT[status]} className="text-xs">
             {status}
           </Badge>
-          <span className="font-mono text-xs text-muted-foreground">{sessionId.slice(0, 8)}</span>
+          <span className="font-mono text-xs text-muted-foreground">{threadId.slice(0, 8)}</span>
         </div>
         <Button size="sm" variant="outline" onClick={handleStop} disabled={!canStop}>
           {stopping ? "Stopping…" : "Stop"}
         </Button>
       </header>
 
-      {sessionError && (
+      {threadError && (
         <div className="shrink-0 border-b border-destructive/50 bg-destructive/10 px-4 py-2 text-xs text-destructive">
-          {sessionError.code}: {sessionError.message}
+          {threadError.code}: {threadError.message}
         </div>
       )}
 
-      {session?.errorMessage && (
+      {thread?.errorMessage && (
         <div className="shrink-0 border-b border-destructive/50 bg-destructive/10 px-4 py-2 text-xs text-destructive">
-          {session.errorMessage}
+          {thread.errorMessage}
         </div>
       )}
 
@@ -133,7 +137,7 @@ export function AgentSessionView({ sessionId }: { sessionId: string }) {
             onChange={(e) => setDraft(e.target.value)}
             onKeyDown={handleKeyDown}
             placeholder={
-              status === "running" ? "Send a follow-up… (⌘/Ctrl+Enter)" : "Agent is not running"
+              status === "running" ? "Send a follow-up… (⌘/Ctrl+Enter)" : "Thread is not running"
             }
             disabled={status !== "running"}
             rows={3}

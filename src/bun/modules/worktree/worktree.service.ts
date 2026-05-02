@@ -17,6 +17,7 @@ import {
   hasUncommittedChanges,
   runGit,
 } from "../../utils/git";
+import { isWorktreeBoundToActiveThread } from "../thread/thread.service";
 import { createStatusWatcher } from "./status-watcher/status-watcher.service";
 import type {
   StatusWatcherSubscriber,
@@ -166,7 +167,6 @@ export async function createWorktreesForFeature(
         featureName,
         branch: branchName,
         path,
-        agentSessionId: null,
         createdAt: now,
         updatedAt: now,
       };
@@ -260,7 +260,7 @@ export async function removeTrackedWorktree(worktreeId: string, force = false): 
   if (!repo) throw new NotFoundError("WorkspaceRepo", row.repoId);
 
   if (!force) {
-    if (row.agentSessionId !== null) {
+    if (isWorktreeBoundToActiveThread(worktreeId)) {
       throw new WorktreeInUseError(worktreeId);
     }
     if (await hasUncommittedChanges(row.path)) {

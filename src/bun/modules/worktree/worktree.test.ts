@@ -6,7 +6,14 @@ import { tmpdir } from "node:os";
 import { join } from "node:path";
 import { eq } from "drizzle-orm";
 import { getDb, initializeDatabase } from "../../db/database";
-import { activeWorktrees, agentSessions, workspaceRepos, workspaces } from "../../db/schema";
+import {
+  activeWorktrees,
+  sessions,
+  threadRepos,
+  threads,
+  workspaceRepos,
+  workspaces,
+} from "../../db/schema";
 import { UncommittedChangesError, WorktreeInUseError } from "../../utils/errors";
 import { resetTestDb } from "../../utils/test-setup";
 import {
@@ -48,7 +55,6 @@ type TrackedInsert = {
   branch: string;
   featureName: string;
   path: string;
-  agentSessionId?: string | null;
 };
 
 function insertActiveWorktree(db: ReturnType<typeof getDb>, input: TrackedInsert) {
@@ -60,10 +66,24 @@ function insertActiveWorktree(db: ReturnType<typeof getDb>, input: TrackedInsert
       featureName: input.featureName,
       branch: input.branch,
       path: input.path,
-      agentSessionId: input.agentSessionId ?? null,
       createdAt: now,
       updatedAt: now,
     })
+    .run();
+}
+
+function bindWorktreeToRunningThread(
+  db: ReturnType<typeof getDb>,
+  workspaceId: string,
+  repoId: string,
+  worktreeId: string,
+): void {
+  const sessionId = randomUUID();
+  const threadId = randomUUID();
+  db.insert(sessions).values({ id: sessionId, workspaceId, name: "test session" }).run();
+  db.insert(threads).values({ id: threadId, sessionId, backend: "codex", status: "running" }).run();
+  db.insert(threadRepos)
+    .values({ id: randomUUID(), threadId, repoId, worktreeId, alias: "repo" })
     .run();
 }
 
@@ -150,16 +170,12 @@ describe("worktree.service (tracked)", () => {
     rmSync(rootDir, { recursive: true, force: true });
   });
 
-  test("removeTrackedWorktree throws WorktreeInUseError when agent attached and not forced", async () => {
+  test("removeTrackedWorktree throws WorktreeInUseError when bound to running thread and not forced", async () => {
     const canonical = realpathSync(repoPath);
     const wtPath = join(rootDir, "wt-inuse");
     await createWorktree({ repoPath: canonical, branch: "feature/inuse", path: wtPath });
 
     const db = getDb();
-    const sessionId = randomUUID();
-    db.insert(agentSessions)
-      .values({ id: sessionId, workspaceId, backend: "codex", status: "idle" })
-      .run();
     const worktreeId = randomUUID();
     insertActiveWorktree(db, {
       id: worktreeId,
@@ -167,8 +183,8 @@ describe("worktree.service (tracked)", () => {
       branch: "feature/inuse",
       featureName: "inuse",
       path: wtPath,
-      agentSessionId: sessionId,
     });
+    bindWorktreeToRunningThread(db, workspaceId, repoId, worktreeId);
 
     await expect(removeTrackedWorktree(worktreeId, false)).rejects.toBeInstanceOf(
       WorktreeInUseError,
@@ -207,10 +223,6 @@ describe("worktree.service (tracked)", () => {
     writeFileSync(join(wtPath, "dirty.txt"), "dirty\n");
 
     const db = getDb();
-    const sessionId = randomUUID();
-    db.insert(agentSessions)
-      .values({ id: sessionId, workspaceId, backend: "codex", status: "idle" })
-      .run();
     const worktreeId = randomUUID();
     insertActiveWorktree(db, {
       id: worktreeId,
@@ -218,8 +230,8 @@ describe("worktree.service (tracked)", () => {
       branch: "feature/force",
       featureName: "force",
       path: wtPath,
-      agentSessionId: sessionId,
     });
+    bindWorktreeToRunningThread(db, workspaceId, repoId, worktreeId);
 
     await removeTrackedWorktree(worktreeId, true);
 

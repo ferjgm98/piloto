@@ -32,7 +32,6 @@ function toActiveWorktreeDTO(wt: WorktreeWithStatus): ActiveWorktreeDTO {
     featureName: wt.featureName,
     branch: wt.branch,
     path: wt.path,
-    agentSessionId: wt.agentSessionId,
     createdAt: wt.createdAt,
     updatedAt: wt.updatedAt,
     repo: {
@@ -53,7 +52,6 @@ async function toTrackedWorktreeDTO(wt: ActiveWorktree): Promise<ActiveWorktreeD
     featureName: wt.featureName,
     branch: wt.branch,
     path: wt.path,
-    agentSessionId: wt.agentSessionId,
     createdAt: wt.createdAt,
     updatedAt: wt.updatedAt,
     repo: {

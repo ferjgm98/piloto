@@ -1,7 +1,7 @@
 import { BrowserView } from "electrobun/bun";
 import type { MainRPC } from "shared/rpc";
-import { setAgentStatusNotifier, setAgentUpdateNotifier } from "./modules/agent/agent.service";
 import { terminalHandlers } from "./modules/terminal/terminal.rpc";
+import { setThreadStatusNotifier, setThreadUpdateNotifier } from "./modules/thread/thread.service";
 import { subscribeWorktreeStatus } from "./modules/worktree/worktree.service";
 import { requestHandlers } from "./rpc-handlers";
 import { wrapHandlers } from "./utils/rpc-middleware";
@@ -34,12 +34,12 @@ export function createRPC() {
     });
   });
 
-  setAgentUpdateNotifier(({ sessionId, chunk }) => {
-    rpc.send.agentOutput({ sessionId, chunk });
+  setThreadUpdateNotifier(({ threadId, chunk }) => {
+    rpc.send.threadOutput({ threadId, chunk });
   });
 
-  setAgentStatusNotifier(({ sessionId, status, error }) => {
-    rpc.send.agentStatusChange({ sessionId, status, error });
+  setThreadStatusNotifier(({ threadId, status, error }) => {
+    rpc.send.threadStatusChange({ threadId, status, error });
   });
 
   return rpc;

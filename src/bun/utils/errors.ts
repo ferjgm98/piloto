@@ -32,7 +32,7 @@ export class GitError extends AppError {
 export class WorktreeInUseError extends AppError {
   constructor(worktreeId: string) {
     super(
-      `Worktree ${worktreeId} has a running agent session; pass force=true to override`,
+      `Worktree ${worktreeId} is bound to a running thread; pass force=true to override`,
       "WORKTREE_IN_USE",
     );
     this.name = "WorktreeInUseError";

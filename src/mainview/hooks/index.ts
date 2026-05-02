@@ -4,20 +4,34 @@ export { useRPCQuery } from "./use-rpc-query";
 export type { UseRPCQueryResult } from "./use-rpc-query";
 export { useRPCSubscription } from "./use-rpc-subscription";
 export {
-  useAgentOutput,
-  useAgents,
-  useAgentSession,
-  useSendAgentPrompt,
-  useStartAgent,
-  useStopAgent,
-  useStopAllAgents,
-} from "./use-agents";
+  useCreateSession,
+  useDeleteSession,
+  useRenameSession,
+  useSession,
+  useSessions,
+} from "./use-sessions";
+export type {
+  CreateSessionInput,
+  DeleteSessionInput,
+  RenameSessionInput,
+} from "./use-sessions";
+export {
+  useSendThreadPrompt,
+  useStartThread,
+  useStopAllThreads,
+  useStopThread,
+  useThread,
+  useThreadOutput,
+  useThreads,
+  useThreadStatusChange,
+} from "./use-threads";
 export type {
   SendPromptInput,
-  StartAgentInput,
-  StopAgentInput,
-  StopAllAgentsInput,
-} from "./use-agents";
+  StartThreadInput,
+  StopAllThreadsInput,
+  StopThreadInput,
+  ThreadsScope,
+} from "./use-threads";
 export {
   useCreateWorkspace,
   useDeleteWorkspace,

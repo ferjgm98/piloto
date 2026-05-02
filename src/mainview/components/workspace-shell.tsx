@@ -1,7 +1,7 @@
-import { useAgents } from "@/hooks";
+import { useThreads } from "@/hooks";
 import { useEffect, useState } from "react";
-import { AgentSessionView } from "./agent-session-view";
-import { AgentSessionsSidebar } from "./agent-sessions-sidebar";
+import { ThreadView } from "./thread-view";
+import { ThreadsSidebar } from "./threads-sidebar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "./ui/tabs";
 import { WorktreeDashboard } from "./worktree-dashboard";
 
@@ -11,38 +11,38 @@ interface WorkspaceShellProps {
 }
 
 export function WorkspaceShell({ workspaceId, workspaceName }: WorkspaceShellProps) {
-  const [activeSessionId, setActiveSessionId] = useState<string | null>(null);
-  const { data: sessions } = useAgents(workspaceId);
+  const [activeThreadId, setActiveThreadId] = useState<string | null>(null);
+  const { data: threads } = useThreads({ workspaceId });
 
   useEffect(() => {
-    if (!activeSessionId) return;
-    if (!sessions) return;
-    if (!sessions.some((s) => s.id === activeSessionId)) {
-      setActiveSessionId(null);
+    if (!activeThreadId) return;
+    if (!threads) return;
+    if (!threads.some((t) => t.id === activeThreadId)) {
+      setActiveThreadId(null);
     }
-  }, [sessions, activeSessionId]);
+  }, [threads, activeThreadId]);
 
   return (
-    <Tabs defaultValue="agents" className="flex h-full flex-col">
+    <Tabs defaultValue="threads" className="flex h-full flex-col">
       <TabsList className="mx-5 mt-3 self-start">
-        <TabsTrigger value="agents">Agents</TabsTrigger>
+        <TabsTrigger value="threads">Threads</TabsTrigger>
         <TabsTrigger value="worktrees">Worktrees</TabsTrigger>
       </TabsList>
 
-      <TabsContent value="agents" className="flex flex-1 overflow-hidden">
-        <AgentSessionsSidebar
+      <TabsContent value="threads" className="flex flex-1 overflow-hidden">
+        <ThreadsSidebar
           workspaceId={workspaceId}
-          activeSessionId={activeSessionId}
-          onSelect={setActiveSessionId}
+          activeThreadId={activeThreadId}
+          onSelect={setActiveThreadId}
         />
         <div className="flex flex-1 flex-col overflow-hidden p-4">
-          {activeSessionId ? (
-            <AgentSessionView sessionId={activeSessionId} />
+          {activeThreadId ? (
+            <ThreadView threadId={activeThreadId} />
           ) : (
             <div className="m-auto max-w-md rounded-md border border-dashed border-border p-6 text-center">
-              <p className="text-sm font-medium text-foreground">No session selected</p>
+              <p className="text-sm font-medium text-foreground">No thread selected</p>
               <p className="mt-1 text-xs text-muted-foreground">
-                Pick a session from the sidebar or start a new one.
+                Pick a thread from the sidebar or start a new one.
               </p>
             </div>
           )}

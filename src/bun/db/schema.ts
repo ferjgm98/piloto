@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text } from "drizzle-orm/sqlite-core";
+import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const workspaces = sqliteTable("workspaces", {
   id: text("id").primaryKey(),
@@ -24,24 +24,61 @@ export const workspaceRepos = sqliteTable("workspace_repos", {
   order: integer("order").notNull().default(0),
 });
 
-export const agentSessions = sqliteTable("agent_sessions", {
+export const sessions = sqliteTable("sessions", {
   id: text("id").primaryKey(),
   workspaceId: text("workspace_id")
     .notNull()
     .references(() => workspaces.id, { onDelete: "cascade" }),
-  worktreeId: text("worktree_id"),
-  backend: text("backend", { enum: ["claude", "codex"] }).notNull(),
-  status: text("status", { enum: ["idle", "running", "stopped", "error"] })
-    .notNull()
-    .default("idle"),
-  prompt: text("prompt"),
-  errorMessage: text("error_message"),
+  name: text("name").notNull(),
   createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
   updatedAt: text("updated_at")
     .notNull()
     .default(sql`(datetime('now'))`)
     .$onUpdate(() => new Date().toISOString()),
 });
+
+export const threads = sqliteTable("threads", {
+  id: text("id").primaryKey(),
+  sessionId: text("session_id")
+    .notNull()
+    .references(() => sessions.id, { onDelete: "cascade" }),
+  backend: text("backend", { enum: ["claude", "codex"] }).notNull(),
+  model: text("model"),
+  status: text("status", { enum: ["idle", "running", "stopped", "error"] })
+    .notNull()
+    .default("idle"),
+  prompt: text("prompt"),
+  errorMessage: text("error_message"),
+  reasoningLevel: text("reasoning_level"),
+  fastMode: integer("fast_mode", { mode: "boolean" }),
+  planMode: integer("plan_mode", { mode: "boolean" }),
+  createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
+  updatedAt: text("updated_at")
+    .notNull()
+    .default(sql`(datetime('now'))`)
+    .$onUpdate(() => new Date().toISOString()),
+});
+
+export const threadRepos = sqliteTable(
+  "thread_repos",
+  {
+    id: text("id").primaryKey(),
+    threadId: text("thread_id")
+      .notNull()
+      .references(() => threads.id, { onDelete: "cascade" }),
+    repoId: text("repo_id")
+      .notNull()
+      .references(() => workspaceRepos.id, { onDelete: "cascade" }),
+    worktreeId: text("worktree_id")
+      .notNull()
+      .references(() => activeWorktrees.id, { onDelete: "cascade" }),
+    alias: text("alias").notNull(),
+  },
+  (t) => [
+    uniqueIndex("thread_repos_thread_alias_idx").on(t.threadId, t.alias),
+    uniqueIndex("thread_repos_worktree_active_idx").on(t.worktreeId),
+  ],
+);
 
 export const activeWorktrees = sqliteTable("active_worktrees", {
   id: text("id").primaryKey(),
@@ -51,9 +88,6 @@ export const activeWorktrees = sqliteTable("active_worktrees", {
   featureName: text("feature_name"),
   branch: text("branch").notNull(),
   path: text("path").notNull(),
-  agentSessionId: text("agent_session_id").references(() => agentSessions.id, {
-    onDelete: "set null",
-  }),
   createdAt: text("created_at").notNull().default(sql`(datetime('now'))`),
   updatedAt: text("updated_at").notNull().default(sql`(datetime('now'))`),
 });

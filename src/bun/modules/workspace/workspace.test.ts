@@ -2,7 +2,7 @@ import { beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
 import { getDb, initializeDatabase } from "../../db/database";
-import { agentSessions, workspaceRepos, workspaces } from "../../db/schema";
+import { sessions, threads, workspaceRepos, workspaces } from "../../db/schema";
 import { NotFoundError, ValidationError } from "../../utils/errors";
 import { resetTestDb } from "../../utils/test-setup";
 import {
@@ -69,12 +69,25 @@ describe("workspace.service", () => {
     });
 
     const db = getDb();
-    db.insert(agentSessions)
+    const sessionId = randomUUID();
+    const now = new Date().toISOString();
+    db.insert(sessions)
+      .values({
+        id: sessionId,
+        workspaceId: workspace.id,
+        name: "Test session",
+        createdAt: now,
+        updatedAt: now,
+      })
+      .run();
+    db.insert(threads)
       .values({
         id: randomUUID(),
-        workspaceId: workspace.id,
+        sessionId,
         backend: "codex",
         status: "idle",
+        createdAt: now,
+        updatedAt: now,
       })
       .run();
 
@@ -86,9 +99,9 @@ describe("workspace.service", () => {
     expect(
       db.select().from(workspaceRepos).where(eq(workspaceRepos.workspaceId, workspace.id)).all(),
     ).toEqual([]);
-    expect(
-      db.select().from(agentSessions).where(eq(agentSessions.workspaceId, workspace.id)).all(),
-    ).toEqual([]);
+    expect(db.select().from(sessions).where(eq(sessions.workspaceId, workspace.id)).all()).toEqual(
+      [],
+    );
   });
 
   // --- getWorkspace ---

@@ -1,13 +1,13 @@
 import type { AgentUpdateDTO } from "shared/rpc";
 import { AgentBinaryNotFoundError } from "../../../utils/errors";
 import { createLogger } from "../../../utils/logger";
-import type { AgentBackend, AgentBackendExitInfo } from "../agent.types";
+import type { ThreadBackend, ThreadBackendExitInfo } from "../thread.types";
 import { type JsonRpcPeer, connectJsonRpc } from "./jsonrpc-stdio";
 
 export interface CodexBackendConfig {
   sessionId: string;
   binaryPath?: string;
-  onExit?: (info: AgentBackendExitInfo) => void;
+  onExit?: (info: ThreadBackendExitInfo) => void;
 }
 
 interface CodexThreadStartResult {
@@ -57,7 +57,7 @@ export function mapCodexNotification(method: string, params: unknown): AgentUpda
   return null;
 }
 
-export function createCodexBackend(config: CodexBackendConfig): AgentBackend {
+export function createCodexBackend(config: CodexBackendConfig): ThreadBackend {
   const log = createLogger("codex-backend");
   const binaryName = config.binaryPath ?? process.env.PILOTO_CODEX_BIN ?? "codex";
 

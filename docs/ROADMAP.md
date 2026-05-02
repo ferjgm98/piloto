@@ -9,8 +9,8 @@ Linear (team `PIL`) remains the source of truth for status, scope, and
 description. This file only orders the tickets — it does not duplicate
 their content.
 
-> Last updated: 2026-05-02 — after the PIL-23 cancellations and the
-> PIL-47 restructure split.
+> Last updated: 2026-05-02 — PIL-48 + PIL-49 landed as a single PR
+> (schema + RPC reshape shipped together, no shim). Next up: PIL-50.
 
 ## Phase 0 — In flight (M2 foundation, must land first)
 
@@ -20,14 +20,12 @@ bin process model. Build slices in order; each slice is a shippable PR.
 
 | Order | Ticket | Slice | Depends on | One-line scope |
 |------:|--------|-------|------------|----------------|
-| 1 | [PIL-48](https://linear.app/piloto/issue/PIL-48) | Schema + thread session dir | — | `sessions` / `threads` / `thread_repos` migration; `~/.piloto/threads/<id>/` symlink layout |
-| 2 | [PIL-49](https://linear.app/piloto/issue/PIL-49) | Per-thread bin lifecycle | PIL-48 | One bin per thread, cwd = thread session dir; `stopAllThreads` + signal handlers (folds in old PIL-43) |
-| 3a | [PIL-50](https://linear.app/piloto/issue/PIL-50) | Multi-workspace sidebar tree | PIL-49 | `workspace-tree.tsx`; replaces left strip in `home.tsx`; localStorage-persisted expansion |
-| 3b | [PIL-51](https://linear.app/piloto/issue/PIL-51) | Inline empty thread + tab strip + grouped model picker | PIL-49, PIL-50 | Replaces `NewSessionDialog`; atomic create on first prompt; `↗ open in new tab` for cross-backend |
-| 4 | [PIL-52](https://linear.app/piloto/issue/PIL-52) | Per-backend options | PIL-49, PIL-51 | `reasoning_level` / `fast_mode` / `plan_mode` columns + footer toggles |
-| 5 | [PIL-53](https://linear.app/piloto/issue/PIL-53) | Right rail | PIL-49, PIL-51 | `thread-right-rail.tsx` — Files / Diff / Todos / Plan tabs; deprecates `WorktreeDashboard` |
+| 1a | [PIL-50](https://linear.app/piloto/issue/PIL-50) | Multi-workspace sidebar tree | PIL-49 ✅ | `workspace-tree.tsx`; replaces left strip in `home.tsx`; localStorage-persisted expansion |
+| 1b | [PIL-51](https://linear.app/piloto/issue/PIL-51) | Inline empty thread + tab strip + grouped model picker | PIL-49 ✅, PIL-50 | Replaces `NewSessionDialog`; atomic create on first prompt; `↗ open in new tab` for cross-backend |
+| 2 | [PIL-52](https://linear.app/piloto/issue/PIL-52) | Per-backend options | PIL-51 | `reasoning_level` / `fast_mode` / `plan_mode` columns + footer toggles |
+| 3 | [PIL-53](https://linear.app/piloto/issue/PIL-53) | Right rail | PIL-51 | `thread-right-rail.tsx` — Files / Diff / Todos / Plan tabs; deprecates `WorktreeDashboard` |
 
-**3a and 3b can be parallelized** if two people are working — they touch
+**1a and 1b can be parallelized** if two people are working — they touch
 different surfaces. Solo, do PIL-50 first (smaller, lower risk).
 
 ## Phase 1 — MVP work unlocked after restructure
@@ -62,6 +60,7 @@ Order within this phase is flexible.
 
 ## Done
 
+- [PIL-48](https://linear.app/piloto/issue/PIL-48) + [PIL-49](https://linear.app/piloto/issue/PIL-49) — Session/thread schema + per-thread bin lifecycle ([ADR 0004](./adr/0004-session-thread-model.md)). Shipped as a single PR (no shim layer; pre-prod, no users).
 - [PIL-46](https://linear.app/piloto/issue/PIL-46) — File-system watcher (ADR 0001)
 - [PIL-31](https://linear.app/piloto/issue/PIL-31) — (see Linear)
 - [PIL-21](https://linear.app/piloto/issue/PIL-21) — Native CLI protocol pivot (ADR 0002)

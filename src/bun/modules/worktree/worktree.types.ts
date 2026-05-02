@@ -32,7 +32,6 @@ export interface ActiveWorktreeRow {
   featureName: string | null;
   branch: string;
   path: string;
-  agentSessionId: string | null;
   createdAt: string;
   updatedAt: string;
 }
