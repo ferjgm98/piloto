@@ -1,0 +1,17 @@
+<system-reminder>Note: The user opened the file "/Users/ferjgm98/projects/piloto/docs/adr/0001-file-system-watcher.md". This may or may not be relevant to the current task.</system-reminder>
+
+---
+
+Can you check what is this project about?
+
+---
+
+what are the next steps?
+
+---
+
+where did you check that?
+
+---
+
+got you, are you aware of the project architecture?

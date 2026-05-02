@@ -1,0 +1,1020 @@
+{
+  "info": {
+    "id": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+    "slug": "shiny-comet",
+    "projectID": "c16645f1a15caa3a708798dc69999c045773ad28",
+    "directory": "/Users/ferjgm98/projects/piloto",
+    "path": "",
+    "title": "Greeting",
+    "version": "1.14.31",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "time": {
+      "created": 1777693500863,
+      "updated": 1777694482635
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1777693500894
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "opencode-go",
+          "modelID": "deepseek-v4-flash",
+          "variant": "medium"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_de6ca25c4001BTg4nDfnL3JgBQ",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "<system-reminder>Note: The user opened the file \"/Users/ferjgm98/projects/piloto/docs/adr/0001-file-system-watcher.md\". This may or may not be relevant to the current task.</system-reminder>\n",
+          "synthetic": true,
+          "metadata": {
+            "kind": "editor_context",
+            "source": "websocket",
+            "filePath": "/Users/ferjgm98/projects/piloto/docs/adr/0001-file-system-watcher.md",
+            "ranges": [
+              {
+                "text": "",
+                "selection": {
+                  "start": {
+                    "line": 102,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 102,
+                    "character": 0
+                  }
+                }
+              }
+            ]
+          },
+          "id": "prt_de6ca25c4002S386i04fxyDdtC",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6ca25c4001BTg4nDfnL3JgBQ"
+        },
+        {
+          "type": "text",
+          "text": "hi",
+          "id": "prt_de6ca25c4003RyQxWE0C81DpKh",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6ca25c4001BTg4nDfnL3JgBQ"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_de6ca25c4001BTg4nDfnL3JgBQ",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "variant": "medium",
+        "path": {
+          "cwd": "/Users/ferjgm98/projects/piloto",
+          "root": "/Users/ferjgm98/projects/piloto"
+        },
+        "cost": 0.003543876,
+        "tokens": {
+          "total": 27169,
+          "input": 25223,
+          "output": 3,
+          "reasoning": 23,
+          "cache": {
+            "write": 0,
+            "read": 1920
+          }
+        },
+        "modelID": "deepseek-v4-flash",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1777693500907,
+          "completed": 1777693503621
+        },
+        "finish": "stop",
+        "id": "msg_de6ca25eb001ji4J3BNd8bRzhO",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-start",
+          "id": "prt_de6ca2dea001YQIEIdCKxAeyOk",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6ca25eb001ji4J3BNd8bRzhO"
+        },
+        {
+          "type": "reasoning",
+          "text": "The user just said \"hi\". This is a greeting. I should respond concisely without emojis.",
+          "time": {
+            "start": 1777693502955,
+            "end": 1777693503401
+          },
+          "id": "prt_de6ca2deb001Vet2In8JIIrlds",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6ca25eb001ji4J3BNd8bRzhO"
+        },
+        {
+          "type": "text",
+          "text": "Hi.",
+          "time": {
+            "start": 1777693503402,
+            "end": 1777693503555
+          },
+          "id": "prt_de6ca2faa0012M6YG5FHNjrBJu",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6ca25eb001ji4J3BNd8bRzhO"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-finish",
+          "tokens": {
+            "total": 27169,
+            "input": 25223,
+            "output": 3,
+            "reasoning": 23,
+            "cache": {
+              "write": 0,
+              "read": 1920
+            }
+          },
+          "cost": 0.003543876,
+          "id": "prt_de6ca3045001Yz1SoFRleKAb4o",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6ca25eb001ji4J3BNd8bRzhO"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1777694083061
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "opencode-go",
+          "modelID": "kimi-k2.6"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_de6d307d8001lwhrT1tkj6b5Bd",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "Can you check what is this project about?",
+          "id": "prt_de6d307d9001Q7w2TBgAx2Zh1y",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d307d8001lwhrT1tkj6b5Bd"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_de6d307d8001lwhrT1tkj6b5Bd",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/Users/ferjgm98/projects/piloto",
+          "root": "/Users/ferjgm98/projects/piloto"
+        },
+        "cost": 0.008644404,
+        "tokens": {
+          "total": 25840,
+          "input": 25149,
+          "output": 211,
+          "reasoning": 224,
+          "cache": {
+            "write": 0,
+            "read": 256
+          }
+        },
+        "modelID": "kimi-k2.6",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1777694083079,
+          "completed": 1777694097446
+        },
+        "finish": "stop",
+        "id": "msg_de6d30807001H0cs8Z961uAH8J",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-start",
+          "id": "prt_de6d3174a0018lNy02xRo6VJic",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d30807001H0cs8Z961uAH8J"
+        },
+        {
+          "type": "reasoning",
+          "text": "The user wants to know what the project \"piloto\" is about. I have some context from the system prompt about the working directory and the CLAUDE.md file content. I should provide a concise summary based on the information I have.\n\nFrom the system prompt:\n- Working directory: /Users/ferjgm98/projects/piloto\n- It's a git repo\n- The CLAUDE.md describes it as: \"An agentic development environment that makes multi-folder, multi-repo projects first-class. It orchestrates parallel AI agents across Git worktrees with an embedded terminal and diff viewer.\"\n\nKey tech stack mentioned:\n- Electrobun runtime (native window + system WebView)\n- Bun main process (services, DB, agents, worktrees)\n- React WebView (UI, hooks, design system)\n- SQLite (Drizzle schema)\n- TypeScript RPC between main process and webview\n\nI should summarize this clearly for the user.",
+          "time": {
+            "start": 1777694086989,
+            "end": 1777694091403
+          },
+          "id": "prt_de6d3174d001e56ycJ3pCJtunp",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d30807001H0cs8Z961uAH8J"
+        },
+        {
+          "type": "text",
+          "text": "This project is **Piloto** — an agentic development environment designed to make multi-folder, multi-repo projects first-class.\n\nHere's the core idea:\n\n*   It orchestrates **parallel AI agents** across **Git worktrees**\n*   It provides an **embedded terminal** and **diff viewer**\n*   It's built as a desktop app using **Electrobun** (native window + system WebView)\n\n**Architecture at a glance:**\n\n*   **Bun main process** (`src/bun/`) — handles services, SQLite database, agent orchestration, git operations, and worktree management\n*   **React WebView** (`src/mainview/`) — the UI layer with components, hooks, and design system\n*   **Typed RPC** (`shared/rpc.ts`) — connects the two sides with strict type safety\n\nThe project follows a modular architecture where each feature in the backend has exactly three files: types, service (business logic), and RPC handlers. The frontend uses shadcn/ui components and custom RPC hooks (`useRPCQuery`, `useRPCMutation`, etc.).\n\nIs there a specific part of the project you'd like to explore or work on?",
+          "time": {
+            "start": 1777694091405,
+            "end": 1777694097361
+          },
+          "id": "prt_de6d3288d001tTrTdD5Zf1qVLh",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d30807001H0cs8Z961uAH8J"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-finish",
+          "tokens": {
+            "total": 25840,
+            "input": 25149,
+            "output": 211,
+            "reasoning": 224,
+            "cache": {
+              "write": 0,
+              "read": 256
+            }
+          },
+          "cost": 0.008644404,
+          "id": "prt_de6d33fd40017u6zk5Y1NKWx9a",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d30807001H0cs8Z961uAH8J"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1777694376247
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "opencode",
+          "modelID": "glm-5.1"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_de6d7811e001eWZYuyAQ8zLQ6X",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "what are the next steps?",
+          "id": "prt_de6d7811e002GiRNWZqTw5YfTP",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d7811e001eWZYuyAQ8zLQ6X"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_de6d7811e001eWZYuyAQ8zLQ6X",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/Users/ferjgm98/projects/piloto",
+          "root": "/Users/ferjgm98/projects/piloto"
+        },
+        "cost": 0.0387558,
+        "tokens": {
+          "total": 27462,
+          "input": 27359,
+          "output": 103,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 0
+          }
+        },
+        "modelID": "glm-5.1",
+        "providerID": "opencode",
+        "time": {
+          "created": 1777694376258,
+          "completed": 1777694380490
+        },
+        "finish": "tool-calls",
+        "id": "msg_de6d781420013VdNueCEv6DWE8",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-start",
+          "id": "prt_de6d78a70001i444D0Gslg3MEM",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d781420013VdNueCEv6DWE8"
+        },
+        {
+          "type": "reasoning",
+          "text": "The user is asking about the next steps for the project. Let me check if there are any issue trackers, TODOs, roadmaps, or planning documents that might outline next steps.",
+          "time": {
+            "start": 1777694378609,
+            "end": 1777694378973
+          },
+          "id": "prt_de6d78a71002ZUe1iTHZ2W1UwQ",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d781420013VdNueCEv6DWE8"
+        },
+        {
+          "type": "text",
+          "text": "Let me check for any planning docs, issues, or roadmaps.",
+          "time": {
+            "start": 1777694378975,
+            "end": 1777694380416
+          },
+          "id": "prt_de6d78bde001dh6e7F2X0NSAeo",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d781420013VdNueCEv6DWE8"
+        },
+        {
+          "type": "tool",
+          "tool": "glob",
+          "callID": "chatcmpl-tool-b1d9f8d1b9fb06f9",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "**/*ROADMAP*"
+            },
+            "output": "No files found",
+            "metadata": {
+              "count": 0,
+              "truncated": false
+            },
+            "title": "",
+            "time": {
+              "start": 1777694379812,
+              "end": 1777694379827
+            }
+          },
+          "id": "prt_de6d78ea2001tHT0v1De1xnO58",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d781420013VdNueCEv6DWE8"
+        },
+        {
+          "type": "tool",
+          "tool": "glob",
+          "callID": "chatcmpl-tool-ae124d6d7caae1c1",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "**/*TODO*"
+            },
+            "output": "No files found",
+            "metadata": {
+              "count": 0,
+              "truncated": false
+            },
+            "title": "",
+            "time": {
+              "start": 1777694379929,
+              "end": 1777694379941
+            }
+          },
+          "id": "prt_de6d78f3f001KZ30t8J8ihrTRR",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d781420013VdNueCEv6DWE8"
+        },
+        {
+          "type": "tool",
+          "tool": "glob",
+          "callID": "chatcmpl-tool-9d47f59757d924ea",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "**/*MILESTONE*"
+            },
+            "output": "No files found",
+            "metadata": {
+              "count": 0,
+              "truncated": false
+            },
+            "title": "",
+            "time": {
+              "start": 1777694380105,
+              "end": 1777694380113
+            }
+          },
+          "id": "prt_de6d78fba001mvZWogGMZUhT4Z",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d781420013VdNueCEv6DWE8"
+        },
+        {
+          "type": "tool",
+          "tool": "glob",
+          "callID": "chatcmpl-tool-9670bda4c4938bd6",
+          "state": {
+            "status": "completed",
+            "input": {
+              "pattern": "docs/**/*.md"
+            },
+            "output": "/Users/ferjgm98/projects/piloto/docs/adr/0001-file-system-watcher.md\n/Users/ferjgm98/projects/piloto/docs/agents/triage-labels.md\n/Users/ferjgm98/projects/piloto/docs/agents/domain.md\n/Users/ferjgm98/projects/piloto/docs/agents/issue-tracker.md\n/Users/ferjgm98/projects/piloto/docs/audits/2026-04-27-weekly-audit.md\n/Users/ferjgm98/projects/piloto/docs/adr/0002-agent-protocol-choice.md\n/Users/ferjgm98/projects/piloto/docs/audits/2026-04-13-weekly-audit.md\n/Users/ferjgm98/projects/piloto/docs/RELEASE_STRATEGY.md\n/Users/ferjgm98/projects/piloto/docs/DEVELOPMENT.md\n/Users/ferjgm98/projects/piloto/docs/ARCHITECTURE.md\n/Users/ferjgm98/projects/piloto/docs/design-worktree-management.md",
+            "metadata": {
+              "count": 11,
+              "truncated": false
+            },
+            "title": "",
+            "time": {
+              "start": 1777694380247,
+              "end": 1777694380256
+            }
+          },
+          "id": "prt_de6d7906c001Oz2841dF1sJIhl",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d781420013VdNueCEv6DWE8"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-finish",
+          "tokens": {
+            "total": 27462,
+            "input": 27359,
+            "output": 103,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 0
+            }
+          },
+          "cost": 0.0387558,
+          "id": "prt_de6d791820015iJY9hX17R1j2V",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d781420013VdNueCEv6DWE8"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_de6d7811e001eWZYuyAQ8zLQ6X",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/Users/ferjgm98/projects/piloto",
+          "root": "/Users/ferjgm98/projects/piloto"
+        },
+        "cost": 0.00807728,
+        "tokens": {
+          "total": 27811,
+          "input": 343,
+          "output": 110,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 27358
+          }
+        },
+        "modelID": "glm-5.1",
+        "providerID": "opencode",
+        "time": {
+          "created": 1777694380491,
+          "completed": 1777694384824
+        },
+        "finish": "tool-calls",
+        "id": "msg_de6d791cb001wus34WbReiXjYF",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-start",
+          "id": "prt_de6d79b1b001IouJnm8hd43Dyr",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d791cb001wus34WbReiXjYF"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "chatcmpl-tool-9a3ce7c2ce8c3afe",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/Users/ferjgm98/projects/piloto/docs/audits/2026-04-27-weekly-audit.md"
+            },
+            "output": "<path>/Users/ferjgm98/projects/piloto/docs/audits/2026-04-27-weekly-audit.md</path>\n<type>file</type>\n<content>\n1: # Weekly Project Health Audit — 2026-04-27\n2: \n3: **Scope:** Piloto MVP (Linear project \"Piloto MVP\", team PIL)\n4: **Data sources:** Linear MCP, codebase at `piloto/`, design docs, ADRs\n5: **Previous audit:** [2026-04-13](./2026-04-13-weekly-audit.md)\n6: \n7: ---\n8: \n9: ## TL;DR — needs attention\n10: \n11: 1. **Project status is wrong.** \"Piloto MVP\" in Linear is marked `Completed` (completedAt 2026-04-20), yet only M0 + M1 are 100% done; M2 is 50%, M3–M6 are 0%. PIL-22 was even closed on 2026-04-21, *after* the project was flagged complete. Reopen the project (set status back to `In Progress`).\n12: 2. **Epic PIL-7 (Phase 2: Agent Orchestration) is still `Backlog`** even though PIL-21 and PIL-22 are Done. Move it to `In Progress`.\n13: 3. **ADR 0001 follow-up is untracked.** ADR 0001 commits to a follow-up ticket investigating `@parcel/watcher` viability under Electrobun bundling. No issue exists in the MVP or Post-MVP project.\n14: 4. **No commits in 7 days** (latest commit `6786a81` 2026-04-20). No stale `In Progress` issues — but velocity has paused. Likely because nothing in the MVP backlog is currently picked up.\n15: 5. **PIL-23 is the only thing blocking M2 closure.** Its prerequisites (PIL-21, PIL-22) are Done. It's unblocked and ready to pull.\n16: \n17: ---\n18: \n19: ## 1. Linear status vs codebase reality\n20: \n21: ### Done issues — verified against the source tree\n22: \n23: All 12 `Done` issues in the MVP project map to real implementation:\n24: \n25: | Issue | Title | Verdict |\n26: |-------|-------|---------|\n27: | PIL-12 | Initialize from electrobun-starter | OK — `electrobun.config.ts`, `package.json` configured |\n28: | PIL-13 | Electrobun shell + React/TS | OK — `src/mainview/`, `src/bun/` scaffolded |\n29: | PIL-14 | Bun main process module structure | OK — 5 modules: `agent/`, `mcp/`, `terminal/`, `workspace/`, `worktree/` + `db/` with Drizzle |\n30: | PIL-15 | IPC Typed RPC | OK — `shared/rpc.ts` (277 lines), `rpc-middleware.ts`, `rpc-client.ts`, hooks |\n31: | PIL-16 | CI/CD pipeline | OK — `.github/workflows/` |\n32: | PIL-17 | Design system | OK — Tailwind v4 + shadcn/ui in `components/ui/` |\n33: | PIL-31 | Test infrastructure | OK — `workspace.test.ts`, `worktree.test.ts`, `agent.test.ts` (311 lines) |\n34: | PIL-18 | Workspace CRUD + SQLite | OK — `getWorkspace`, `listWorkspaces`, `createWorkspace`, `updateWorkspace`, `deleteWorkspace` all present |\n35: | PIL-19 | Multi-repo worktree lifecycle | OK — `createWorktreesForFeature`, `listWorkspaceWorktrees`, `removeTrackedWorktree` in `worktree.service.ts` |\n36: | PIL-20 | Worktree status dashboard + watcher | OK — `createWatcher`, `destroyWatcher`, `computeAllStatuses`, `getWorktreeStatus`, `refreshWorktreeStatus` |\n37: | PIL-21 | Agent abstraction + Claude/Codex backends | OK — `agent.service.ts` (200 LOC), `backends/claude.backend.ts`, `backends/codex.backend.ts`, `backends/jsonrpc-stdio.ts` |\n38: | PIL-22 | Codex CLI backend integration tests | OK — covered in `agent.test.ts` and the Codex backend module |\n39: \n40: Stubs that are correctly *not* claimed as done:\n41: \n42: - `src/bun/modules/terminal/terminal.service.ts` — single-line stub for libghostty (M3, PIL-24 still Backlog) ✓\n43: - `src/bun/modules/mcp/mcp.service.ts` — single-line stub for MCP bridge (M5, PIL-27 still Backlog) ✓\n44: \n45: ### In Progress issues\n46: \n47: None. The MVP project has zero issues in `In Progress` right now.\n48: \n49: ### Status anomalies\n50: \n51: - **Project \"Piloto MVP\" → status = `Completed`.** Completed at 2026-04-20T01:53Z. Mismatch: M2 progress 50%, M3–M6 progress 0%, and PIL-22 closed *after* the project (2026-04-21T03:35Z). Almost certainly an accidental side-effect of closing the PIL-6 Phase 1 epic on the same date.\n52: - **Epic PIL-7 (Phase 2: Agent Orchestration) → status = `Backlog`.** Two of its three children (PIL-21, PIL-22) are Done; only PIL-23 remains. Should be `In Progress`.\n53: \n54: ---\n55: \n56: ## 2. Untracked work in git history\n57: \n58: 7 commits since the last audit (2026-04-13). All map to either a tracked issue, a documented ADR, or the audit doc itself:\n59: \n60: | Commit | Issue / Doc |\n61: |---|---|\n62: | `6786a81` feat(agent): PIL-22 Codex CLI backend integration tests | PIL-22 ✓ |\n63: | `65d6469` refactor(agent): PIL-21 — pivot from ACP to native CLI | PIL-21 ✓ + ADR 0002 |\n64: | `9197825` docs: README + ADR 0002 agent protocol choice | PIL-21 ✓ |\n65: | `9432a74` refactor(worktree): switch to node:fs.watch (ADR 0001) | PIL-20 ✓ + ADR 0001 |\n66: | `a3f5c9a` Add live worktree status dashboard with watcher updates | PIL-20 ✓ |\n67: | `a174798` docs(audits): 2026-04-13 weekly audit | meta — last audit |\n68: | `4fe5425` feat(worktree): multi-repo worktree lifecycle (PIL-19) | PIL-19 ✓ |\n69: \n70: No untracked feature commits. All new files (`src/bun/modules/agent/backends/*`, watcher wiring in `worktree.service.ts`) correspond to PIL-19/20/21/22.\n71: \n72: ### One untracked follow-up\n73: \n74: `docs/adr/0001-file-system-watcher.md` explicitly states that a follow-up ticket will investigate making `@parcel/watcher` work in Electrobun (disabling `useAsar`, `createRequire` against `process.execPath`, or upstream patch). **No such ticket exists in MVP or Post-MVP.** Recommend creating one, low-priority, in Post-MVP — labelled with the revisit triggers from the ADR (\"Linux support added\", \">~50 worktrees\", \"Bun bundler fix lands\", \"fs.watch drops events in practice\").\n75: \n76: ---\n77: \n78: ## 3. Stale issues\n79: \n80: - **No `In Progress` issues** to be stale.\n81: - **Backlog issues with all blockers resolved:**\n82:   - **PIL-23** (Parallel agent execution + UI streaming) — children PIL-21 and PIL-22 are Done. Fully unblocked. This is the last MVP item before M2 closes. **Recommend: pull next.**\n83:   - **PIL-24** (libghostty terminal) — independent of M2; can start in parallel.\n84:   - **PIL-25 / PIL-26 / PIL-32** (M4 diff view + accept/reject + merge service) — independent. Pull after M2 closes.\n85: - **Velocity:** Latest commit is 7 days old. Not technically a \"stale issue\" since nothing is `In Progress`, but the pause is worth noting given the project was prematurely flagged Complete.\n86: \n87: ---\n88: \n89: ## 4. Design doc deferred items\n90: \n91: `docs/design-worktree-management.md` was reviewed against current state.\n92: \n93: - **Phase 1 (foundation)** — folded into M1 work and shipped. ✓\n94: - **Phase 2 (hooks + merge)** — the *merge* half is tracked as **PIL-32** in M4 (still Backlog). The *hooks* half is tracked as **PIL-33** in **Post-MVP** ✓.\n95: - **Phase 3 (cross-repo coordination)** — the cross-repo branch creation half shipped under PIL-19 (`createWorktreesForFeature`). Cache sharing is **PIL-34** in Post-MVP ✓.\n96: - **Phase 4 (external interop)** — **PIL-35** in Post-MVP ✓.\n97: \n98: Other Post-MVP items (PIL-36 browser, PIL-37 connections, PIL-38 memory, PIL-39 sandbox, PIL-40 mobile, PIL-41 plugin system) all map to roadmap-level features documented elsewhere.\n99: \n100: **No design-doc items have become \"now-relevant\" enough to promote into MVP scope.** The boundary still holds: M4 ships merge (PIL-32); hooks/cache/interop stay deferred until alpha lands.\n101: \n102: ADR follow-up gap noted in §2 above.\n103: \n104: ---\n105: \n106: ## 5. Milestone progress\n107: \n108: | Milestone | Issues (closed / total) | Progress | Notes |\n109: |---|---|---|---|\n110: | M0: Project Bootstrap | 6 / 6 | 100% | All shipped before 2026-04-13 audit |\n111: | M1: Workspace & Worktree Core | 4 / 4 (incl. PIL-6 epic) | 100% | Closed in last cycle (PIL-19, PIL-20, epic 04-20) |\n112: | M2: Agent Orchestration | 2 / 4 | 50% | PIL-21 + PIL-22 Done. **PIL-23 left + epic PIL-7 not yet flipped to In Progress.** |\n113: | M3: Terminal Integration | 0 / 2 | 0% | PIL-8 epic + PIL-24 libghostty. Both Backlog. Independent of M2/M4. |\n114: | M4: Diff View & Change Management | 0 / 4 | 0% | PIL-9 epic + PIL-25, PIL-26, PIL-32. All Backlog. |\n115: | M5: MCP & Skills | 0 / 3 | 0% | PIL-10 epic + PIL-27, PIL-28. All Backlog. |\n116: | M6: Polish & Alpha Release | 0 / 3 | 0% | PIL-11 epic + PIL-29, PIL-30. All Backlog. |\n117: \n118: **Falling behind?** Not quantitatively — there are no missed targetDates (none set). But the pace from the first three weeks (M0+M1 in ~3 weeks) implies M2 should already be wrapping. The 7-day commit gap suggests momentum risk for M2.\n119: \n120: ---\n121: \n122: ## Recommendations (review-only — no automatic changes)\n123: \n124: 1. **Reopen the \"Piloto MVP\" project** — set status back to `In Progress`. Likely accidental closure when PIL-6 closed on 2026-04-20.\n125: 2. **Move epic PIL-7 to `In Progress`** — two of three children Done.\n126: 3. **Pull PIL-23 next** — only remaining MVP work before M2 closes; fully unblocked.\n127: 4. **Open a Post-MVP issue for the @parcel/watcher follow-up** referenced in ADR 0001. Low priority. Title suggestion: *\"ADR 0001 follow-up: revisit `@parcel/watcher` integration with Electrobun bundling\"*.\n128: 5. **(Optional) Set targetDates on M2–M6** — currently null. Useful for the next audit's \"falling behind\" check.\n129: \n130: ---\n131: \n132: *Generated by the scheduled weekly project health audit. Next run: 2026-05-04.*\n\n(End of file - total 132 lines)\n</content>",
+            "metadata": {
+              "preview": "# Weekly Project Health Audit — 2026-04-27\n\n**Scope:** Piloto MVP (Linear project \"Piloto MVP\", team PIL)\n**Data sources:** Linear MCP, codebase at `piloto/`, design docs, ADRs\n**Previous audit:** [2026-04-13](./2026-04-13-weekly-audit.md)\n\n---\n\n## TL;DR — needs attention\n\n1. **Project status is wrong.** \"Piloto MVP\" in Linear is marked `Completed` (completedAt 2026-04-20), yet only M0 + M1 are 100% done; M2 is 50%, M3–M6 are 0%. PIL-22 was even closed on 2026-04-21, *after* the project was flagged complete. Reopen the project (set status back to `In Progress`).\n2. **Epic PIL-7 (Phase 2: Agent Orchestration) is still `Backlog`** even though PIL-21 and PIL-22 are Done. Move it to `In Progress`.\n3. **ADR 0001 follow-up is untracked.** ADR 0001 commits to a follow-up ticket investigating `@parcel/watcher` viability under Electrobun bundling. No issue exists in the MVP or Post-MVP project.\n4. **No commits in 7 days** (latest commit `6786a81` 2026-04-20). No stale `In Progress` issues — but velocity has paused. Likely because nothing in the MVP backlog is currently picked up.\n5. **PIL-23 is the only thing blocking M2 closure.** Its prerequisites (PIL-21, PIL-22) are Done. It's unblocked and ready to pull.\n\n---\n\n## 1. Linear status vs codebase reality\n",
+              "truncated": false,
+              "loaded": []
+            },
+            "title": "docs/audits/2026-04-27-weekly-audit.md",
+            "time": {
+              "start": 1777694383089,
+              "end": 1777694383097
+            }
+          },
+          "id": "prt_de6d79b1c001cSmD1LLlakgkxC",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d791cb001wus34WbReiXjYF"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "chatcmpl-tool-b4b5b01653d39480",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/Users/ferjgm98/projects/piloto/docs/RELEASE_STRATEGY.md"
+            },
+            "output": "<path>/Users/ferjgm98/projects/piloto/docs/RELEASE_STRATEGY.md</path>\n<type>file</type>\n<content>\n1: # Piloto — release strategy\n2: \n3: This document defines how Piloto gets from the current bootstrap state to the\n4: first external release without waiting for the entire original product vision\n5: to land.\n6: \n7: ## Summary\n8: \n9: Piloto ships on a staged release ladder:\n10: \n11: - **R0: Dev Preview** keeps `main` continuously releasable for the founder\n12: - **R1: Trusted Alpha** is the first installable build for a small invited set\n13: - **R2: Public Alpha** opens access after the core workflow proves reliable\n14: - **R3: Beta** broadens support toward the original long-term vision\n15: \n16: The first real release is a **macOS-only trusted alpha**. It proves one\n17: high-value workflow end to end:\n18: \n19: 1. Create a multi-repo workspace\n20: 2. Create linked worktrees across those repos\n21: 3. Run one supported agent backend in that workspace\n22: 4. Stream output in the app\n23: 5. Inspect resulting repo changes with external git/editor tooling\n24: \n25: That release deliberately ships before embedded terminal, in-app diff review,\n26: MCP, skills, and the full dual-backend promise are complete.\n27: \n28: ## Release ladder\n29: \n30: ### R0 — Dev Preview\n31: \n32: Purpose: keep `main` releasable for internal iteration.\n33: \n34: - Audience: founder only\n35: - Channel: `bun run build:canary`\n36: - Gate:\n37:   - `bun run check` passes\n38:   - app launches locally\n39: - Outcome: continuous internal validation, not user-facing\n40: \n41: ### R1 — Trusted Alpha\n42: \n43: Purpose: first installable build for a small invited group.\n44: \n45: - Platform: macOS only\n46: - Channel: canary builds promoted manually to an alpha artifact\n47: - Supported backend: Claude Code first\n48: - Success criterion: a tester can complete one cross-repo task end to end with\n49:   one supported backend and review resulting repo changes outside Piloto if\n50:   needed\n51: \n52: Required slice:\n53: \n54: - `PIL-18` Workspace CRUD and persistence\n55: - `PIL-19` Multi-repo worktree lifecycle\n56: - `PIL-21` Agent abstraction and Claude integration\n57: - `PIL-23` Agent output streaming\n58: - `PIL-31` Test infrastructure and foundational coverage\n59: - Minimal release hygiene from `PIL-29` and `PIL-30`\n60: \n61: Stretch, but not blocking:\n62: \n63: - `PIL-20` Worktree status dashboard\n64: \n65: Explicitly deferred from trusted alpha:\n66: \n67: - Embedded terminal: `PIL-24`, `PIL-8`\n68: - In-app diff review and merge: `PIL-25`, `PIL-26`, `PIL-32`, `PIL-9`\n69: - MCP and skills: `PIL-27`, `PIL-28`, `PIL-10`\n70: - Most post-MVP work\n71: \n72: ### R2 — Public Alpha\n73: \n74: Purpose: open Piloto to a broader external audience.\n75: \n76: Before promotion:\n77: \n78: - Add a second backend or clearly label it experimental\n79: - Strengthen onboarding and settings\n80: - Improve packaging and release documentation\n81: - Add at least a minimal in-app review path if external testers need it\n82: - Harden macOS distribution enough for broader installability\n83: \n84: Gate:\n85: \n86: - At least one full trusted-alpha dogfood cycle completes without\n87:   release-blocking data-loss or worktree-corruption issues\n88: \n89: ### R3 — Beta\n90: \n91: Purpose: broaden support toward the original product vision.\n92: \n93: Expected additions:\n94: \n95: - Robust parallel multi-agent behavior\n96: - In-app diff accept/reject and merge flow\n97: - Terminal integration\n98: - Selected MCP and skills capabilities\n99: - Platform reassessment for Linux after trusted alpha\n100: \n101: Windows stays out until runtime behavior and packaging are stable.\n102: \n103: ## Release process\n104: \n105: ### Build policy\n106: \n107: - Use `build:canary` continuously from `main`\n108: - Promote specific canary builds manually after a release checklist pass\n109: - Treat `build:stable` as a later-stage release path, not the default for the\n110:   first external milestone\n111: \n112: ### Promotion checklist\n113: \n114: Every promoted alpha build must have:\n115: \n116: - Passing `bun run check`\n117: - Install/run smoke test on macOS\n118: - Workspace creation smoke test\n119: - Multi-repo worktree creation smoke test\n120: - Agent start/stop smoke test\n121: - Known issues documented for testers\n122: \n123: ### Release blockers\n124: \n125: These issues block promotion:\n126: \n127: - Workspace corruption\n128: - Incorrect worktree lifecycle behavior\n129: - Agent process orphaning\n130: - Loss of user changes\n131: - App failing to start on target macOS environments\n132: \n133: ## Positioning\n134: \n135: Trusted alpha should be described as:\n136: \n137: > multi-repo workspace plus worktree orchestration with one supported agent backend\n138: \n139: Do not position trusted alpha as the full dual-backend, terminal-integrated,\n140: diff-managed, MCP-enabled Piloto vision yet. Keep the full thesis visible, but\n141: mark those capabilities as upcoming milestones.\n142: \n143: ## Test scenarios\n144: \n145: Use scenario-based gates in addition to code checks.\n146: \n147: 1. Create a workspace with two repos, reopen the app, and verify persistence.\n148: 2. Create one linked worktree set across those repos, then list and delete it\n149:    safely.\n150: 3. Launch the supported agent backend, stream output, stop it cleanly, and\n151:    confirm no orphan processes remain.\n152: 4. Make the agent produce changes in more than one repo and verify the user can\n153:    find and review those changes without data loss.\n154: 5. Install the promoted alpha artifact on a clean macOS machine and complete\n155:    the same flow from scratch.\n156: 6. Run the regression pass for every promoted alpha using the `PIL-31` test\n157:    baseline plus `bun run check`.\n\n(End of file - total 157 lines)\n</content>",
+            "metadata": {
+              "preview": "# Piloto — release strategy\n\nThis document defines how Piloto gets from the current bootstrap state to the\nfirst external release without waiting for the entire original product vision\nto land.\n\n## Summary\n\nPiloto ships on a staged release ladder:\n\n- **R0: Dev Preview** keeps `main` continuously releasable for the founder\n- **R1: Trusted Alpha** is the first installable build for a small invited set\n- **R2: Public Alpha** opens access after the core workflow proves reliable\n- **R3: Beta** broadens support toward the original long-term vision\n\nThe first real release is a **macOS-only trusted alpha**. It proves one\nhigh-value workflow end to end:\n\n1. Create a multi-repo workspace\n2. Create linked worktrees across those repos",
+              "truncated": false,
+              "loaded": []
+            },
+            "title": "docs/RELEASE_STRATEGY.md",
+            "time": {
+              "start": 1777694384040,
+              "end": 1777694384044
+            }
+          },
+          "id": "prt_de6d79c12001GhS4lEC4KrXEBn",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d791cb001wus34WbReiXjYF"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "chatcmpl-tool-bc6a451f92501040",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/Users/ferjgm98/projects/piloto/docs/design-worktree-management.md"
+            },
+            "output": "<path>/Users/ferjgm98/projects/piloto/docs/design-worktree-management.md</path>\n<type>file</type>\n<content>\n1: # Design Doc: Worktree Management Layer\n2: \n3: **Status:** Proposed\n4: **Author:** Fer\n5: **Date:** 2026-04-03\n6: **Related:** [worktrunk CLI](https://worktrunk.dev/worktrunk/)\n7: \n8: ## Context and Goals\n9: \n10: Piloto's core value proposition is running multiple AI agents in parallel across multi-repo workspaces using Git worktrees. The current implementation (`worktree.service.ts`) provides basic CRUD operations — list, create, remove — by shelling out to `git worktree` commands via `runGit()`. This is functional but minimal.\n11: \n12: [worktrunk](https://worktrunk.dev/worktrunk/) is a Rust CLI tool that solves a very similar problem: making git worktrees ergonomic for parallel AI agent workflows. It has a mature feature set including hook systems, merge workflows, port hashing for dev servers, and build cache sharing. The question is whether Piloto should depend on worktrunk, port its ideas, or chart its own course.\n13: \n14: This document proposes **porting worktrunk's best patterns into Piloto's native TypeScript worktree layer** rather than taking a runtime dependency on the CLI tool.\n15: \n16: ## Current State\n17: \n18: ### What exists today\n19: \n20: ```\n21: src/bun/modules/worktree/\n22:   worktree.service.ts   — list, create, remove (git worktree CLI wrapper)\n23:   worktree.types.ts     — Worktree, WorktreeCreateInput, WorktreeRemoveInput\n24:   worktree.rpc.ts       — RPC handlers exposed to the renderer\n25: \n26: src/bun/modules/workspace/\n27:   workspace.service.ts  — CRUD for multi-repo workspaces (SQLite-backed)\n28:   workspace.types.ts    — Workspace, WorkspaceRepo, CreateWorkspaceInput\n29: \n30: src/bun/utils/git.ts    — runGit() helper with timeout and error handling\n31: ```\n32: \n33: The `Worktree` type tracks `path`, `branch`, `head`, and `isMain`. Workspaces group multiple repos (`workspaceRepos` table) and agent sessions are linked to workspaces. The agent service is still a Phase 2 stub.\n34: \n35: ### What's missing\n36: \n37: The gap between \"create a worktree\" and \"run an agent in it productively\" is substantial:\n38: \n39: 1. **No lifecycle hooks** — nothing happens before/after worktree creation or removal (e.g., install deps, start dev server, clean up).\n40: 2. **No merge workflow** — no squash/rebase/merge + cleanup in one operation.\n41: 3. **No port isolation** — two worktrees running dev servers will collide.\n42: 4. **No build cache sharing** — each worktree does a full `node_modules` install.\n43: 5. **No status enrichment** — no staged change counts, commit age, or CI status per worktree.\n44: 6. **No cross-repo coordination** — worktrees are per-repo, but Piloto workspaces span multiple repos. Creating a \"feature\" across repos means coordinating worktree creation with consistent branch naming.\n45: \n46: ## Decision: Native Implementation over CLI Dependency\n47: \n48: ### Why not depend on worktrunk directly\n49: \n50: | Concern | Detail |\n51: |---|---|\n52: | **Runtime dependency** | Adds a Rust binary (via Homebrew/Cargo) to a Bun + Zig stack. Users must install it separately. |\n53: | **Single-repo scope** | worktrunk operates within one repo. Piloto's differentiator is multi-repo workspace coordination — worktrunk can't help there. |\n54: | **GUI vs CLI** | Piloto users interact through a desktop GUI, not a terminal. Wrapping CLI output parsing is fragile and adds latency vs. calling `git` directly (which we already do). |\n55: | **Update coupling** | worktrunk's breaking changes become Piloto's breaking changes, with no control over the release cadence. |\n56: \n57: ### What to port from worktrunk\n58: \n59: worktrunk has solved real problems through community iteration. These patterns are worth adopting:\n60: \n61: #### 1. Template-based worktree paths\n62: \n63: worktrunk computes worktree paths from branch names using configurable templates. Piloto should do the same to keep worktree directories predictable and tidy.\n64: \n65: ```typescript\n66: // Proposed: path template resolution\n67: interface WorktreePathConfig {\n68:   // Default: `../{repo-name}-worktrees/{branch}`\n69:   template: string;\n70: }\n71: \n72: function resolveWorktreePath(repoPath: string, branch: string, config: WorktreePathConfig): string {\n73:   const repoName = path.basename(repoPath);\n74:   return config.template\n75:     .replace(\"{repo-name}\", repoName)\n76:     .replace(\"{branch}\", branch.replace(/\\//g, \"-\"));\n77: }\n78: ```\n79: \n80: #### 2. Lifecycle hooks\n81: \n82: worktrunk runs user-defined hooks at key moments. Piloto should support this natively, configured per-workspace:\n83: \n84: ```typescript\n85: interface WorktreeHooks {\n86:   postCreate?: HookAction[];   // e.g., install deps, copy .env, start dev server\n87:   preRemove?: HookAction[];    // e.g., stop processes, warn about uncommitted changes\n88:   preMerge?: HookAction[];     // e.g., run tests\n89:   postMerge?: HookAction[];    // e.g., cleanup branch, notify\n90: }\n91: \n92: type HookAction =\n93:   | { type: \"shell\"; command: string }\n94:   | { type: \"installDeps\" }        // built-in: detect package manager, install\n95:   | { type: \"copyFile\"; from: string; to: string }\n96:   | { type: \"startDevServer\"; portOffset?: number };\n97: ```\n98: \n99: #### 3. Port hashing for dev servers\n100: \n101: worktrunk's `hash_port` filter deterministically assigns a port per worktree branch, avoiding collisions. This is critical for parallel agents running dev servers.\n102: \n103: ```typescript\n104: function hashPort(branch: string, basePort: number = 3000, range: number = 1000): number {\n105:   let hash = 0;\n106:   for (const char of branch) {\n107:     hash = ((hash << 5) - hash + char.charCodeAt(0)) | 0;\n108:   }\n109:   return basePort + (Math.abs(hash) % range);\n110: }\n111: ```\n112: \n113: #### 4. Unified merge workflow\n114: \n115: Instead of requiring users to manually squash, merge, delete the branch, and remove the worktree, expose a single `mergeWorktree` operation:\n116: \n117: ```typescript\n118: interface MergeWorktreeInput {\n119:   repoPath: string;\n120:   worktreePath: string;\n121:   targetBranch: string;\n122:   strategy: \"squash\" | \"rebase\" | \"merge\";\n123:   deleteBranch?: boolean;   // default: true\n124:   removeWorktree?: boolean; // default: true\n125: }\n126: ```\n127: \n128: #### 5. Status enrichment\n129: \n130: worktrunk's `list --full` shows staged changes, commit counts, age, and CI status. Piloto should compute this for the GUI:\n131: \n132: ```typescript\n133: interface WorktreeStatus extends Worktree {\n134:   stagedCount: number;\n135:   unstagedCount: number;\n136:   aheadCount: number;       // commits ahead of target branch\n137:   behindCount: number;\n138:   lastCommitAge: string;    // relative, e.g., \"2h ago\"\n139:   lastCommitMessage: string;\n140: }\n141: ```\n142: \n143: ## What Piloto Builds Beyond worktrunk\n144: \n145: These features are unique to Piloto and have no worktrunk equivalent:\n146: \n147: ### Cross-repo worktree coordination\n148: \n149: When a user creates a \"feature\" in a multi-repo workspace, Piloto should create worktrees in all repos simultaneously with consistent branch naming:\n150: \n151: ```typescript\n152: interface CrossRepoWorktreeInput {\n153:   workspaceId: string;\n154:   featureName: string;          // becomes branch name across all repos\n155:   repos?: string[];             // subset of workspace repos, or all if omitted\n156: }\n157: \n158: async function createFeatureWorktrees(input: CrossRepoWorktreeInput): Promise<Worktree[]> {\n159:   const repos = input.repos ?? getWorkspaceRepos(input.workspaceId);\n160:   const branch = `feature/${input.featureName}`;\n161: \n162:   return Promise.all(\n163:     repos.map((repoPath) =>\n164:       createWorktree({\n165:         repoPath,\n166:         branch,\n167:         path: resolveWorktreePath(repoPath, branch, config),\n168:       })\n169:     ),\n170:   );\n171: }\n172: ```\n173: \n174: ### Agent-aware worktree lifecycle\n175: \n176: Since agents run inside worktrees, the worktree module should coordinate with the agent module:\n177: \n178: - **Pre-remove check:** refuse to remove a worktree with a running agent (or offer to stop it first).\n179: - **Agent spawn integration:** when creating a worktree + agent in one step, run hooks (install deps) before starting the agent.\n180: - **Worktree health:** expose per-worktree agent status alongside git status in the GUI.\n181: \n182: ### Build cache sharing\n183: \n184: For `node_modules`, Piloto can symlink or use workspace-level caching to avoid redundant installs across worktrees of the same repo. This requires detecting the package manager (`package-lock.json` → npm, `bun.lock` → bun, etc.) and choosing the right caching strategy.\n185: \n186: ## Proposed Schema Changes\n187: \n188: The `worktree` module currently has no database backing — it reads directly from `git worktree list`. To support hooks, templates, and cross-repo coordination, add:\n189: \n190: ```sql\n191: CREATE TABLE worktree_configs (\n192:   id TEXT PRIMARY KEY,\n193:   workspace_repo_id TEXT NOT NULL REFERENCES workspace_repos(id),\n194:   path_template TEXT DEFAULT '../{repo-name}-worktrees/{branch}',\n195:   hooks_json TEXT DEFAULT '{}',\n196:   created_at TEXT DEFAULT (datetime('now'))\n197: );\n198: \n199: CREATE TABLE active_worktrees (\n200:   id TEXT PRIMARY KEY,\n201:   workspace_id TEXT NOT NULL REFERENCES workspaces(id),\n202:   workspace_repo_id TEXT NOT NULL REFERENCES workspace_repos(id),\n203:   feature_name TEXT,           -- groups worktrees across repos\n204:   branch TEXT NOT NULL,\n205:   path TEXT NOT NULL,\n206:   head TEXT NOT NULL,\n207:   agent_session_id TEXT REFERENCES agent_sessions(id),\n208:   created_at TEXT DEFAULT (datetime('now'))\n209: );\n210: ```\n211: \n212: This lets Piloto track worktrees it created (vs. externally created ones) and associate them with agents and cross-repo features.\n213: \n214: ## Implementation Phases\n215: \n216: ### Phase 1: Foundation (aligns with current Phase 2 agent work)\n217: \n218: - Add `active_worktrees` and `worktree_configs` tables.\n219: - Implement template-based path resolution.\n220: - Implement `hashPort()`.\n221: - Enrich `listWorktrees` to return `WorktreeStatus` (staged/unstaged counts, ahead/behind).\n222: - Wire into existing RPC layer.\n223: \n224: ### Phase 2: Hooks and Merge\n225: \n226: - Implement hook system (shell commands, built-in actions).\n227: - Implement `mergeWorktree` with squash/rebase/merge + cleanup.\n228: - Add pre-remove safety checks (running agents, uncommitted changes).\n229: \n230: ### Phase 3: Cross-repo Coordination\n231: \n232: - Implement `createFeatureWorktrees` for multi-repo branch creation.\n233: - Add feature grouping in the `active_worktrees` table.\n234: - Build cache sharing (symlinks for `node_modules`/`target`).\n235: \n236: ### Phase 4: External Worktree Interop (optional)\n237: \n238: - Detect and import worktrees created outside Piloto (including via worktrunk).\n239: - Read worktrunk config if present to infer path templates.\n240: \n241: ## Open Questions\n242: \n243: 1. **Hook execution model:** Should hooks run in the integrated libghostty terminal (visible to user) or in a background process? Probably terminal for transparency, background for batch operations.\n244: \n245: 2. **Cache sharing strategy:** Symlinks vs. hardlinks vs. copy-on-write (APFS clones on macOS). Bun's `bun install` already has good caching — worth benchmarking before adding complexity.\n246: \n247: 3. **Conflict resolution in cross-repo merges:** If one repo's merge succeeds but another fails, should Piloto roll back the successful one? Or leave both in their current state and let the user decide?\n\n(End of file - total 247 lines)\n</content>",
+            "metadata": {
+              "preview": "# Design Doc: Worktree Management Layer\n\n**Status:** Proposed\n**Author:** Fer\n**Date:** 2026-04-03\n**Related:** [worktrunk CLI](https://worktrunk.dev/worktrunk/)\n\n## Context and Goals\n\nPiloto's core value proposition is running multiple AI agents in parallel across multi-repo workspaces using Git worktrees. The current implementation (`worktree.service.ts`) provides basic CRUD operations — list, create, remove — by shelling out to `git worktree` commands via `runGit()`. This is functional but minimal.\n\n[worktrunk](https://worktrunk.dev/worktrunk/) is a Rust CLI tool that solves a very similar problem: making git worktrees ergonomic for parallel AI agent workflows. It has a mature feature set including hook systems, merge workflows, port hashing for dev servers, and build cache sharing. The question is whether Piloto should depend on worktrunk, port its ideas, or chart its own course.\n\nThis document proposes **porting worktrunk's best patterns into Piloto's native TypeScript worktree layer** rather than taking a runtime dependency on the CLI tool.\n\n## Current State\n\n### What exists today\n\n```",
+              "truncated": false,
+              "loaded": []
+            },
+            "title": "docs/design-worktree-management.md",
+            "time": {
+              "start": 1777694384320,
+              "end": 1777694384327
+            }
+          },
+          "id": "prt_de6d79fc9001LShJnnwMne1k8U",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d791cb001wus34WbReiXjYF"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "chatcmpl-tool-9a4a2cb5c75bceb9",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/Users/ferjgm98/projects/piloto/docs/agents/issue-tracker.md"
+            },
+            "output": "<path>/Users/ferjgm98/projects/piloto/docs/agents/issue-tracker.md</path>\n<type>file</type>\n<content>\n1: # Issue Tracker\n2: \n3: Issues for this repo live in **Linear**, team **Piloto** (key `PIL`).\n4: \n5: ## Workflow\n6: \n7: - **Tool**: use the Linear MCP (`mcp__plugin_linear_linear__*`) for all create / list / update / comment operations. Do not shell out to a Linear CLI.\n8: - **Team**: every issue belongs to team `PIL`.\n9: - **Projects**: two known projects exist:\n10:   - `Piloto MVP` — the in-flight MVP (status was marked Completed in Linear on 2026-04-20, but work may still be open against it; confirm with the user)\n11:   - `Piloto Post-MVP` — deferred features beyond the MVP (worktree hooks, build cache sharing, external interop, etc.)\n12: - **Default project**: skills should **ask the user which project** when creating a new issue rather than defaulting. List the two projects above as the choices.\n13: \n14: ## Spec linking convention\n15: \n16: Each major effort has a spec page in Notion that's linked to its top-level Linear issue (typically the Epic).\n17: \n18: - **Epic / project-level issues**: must link a Notion spec page in the issue description. If the user doesn't provide one, ask before creating the issue.\n19: - **Sub-issues under an Epic**: inherit the parent's spec link. Do not require a separate Notion page; reference the parent epic in the description.\n20: - **Standalone issues** (not part of an Epic): a Notion spec is optional but encouraged for anything larger than a small fix.\n21: \n22: Use the Notion MCP (`mcp__plugin_Notion_notion__notion-*`) to fetch or create spec pages when needed.\n23: \n24: ## Conventions\n25: \n26: - **Branch / commit / PR references**: commit messages use the `PIL-NN` issue key prefix (e.g. `feat(agent): PIL-22 ...`). When opening a PR for an issue, include `PIL-NN` in the PR title or body so Linear auto-links it.\n27: - **Existing labels in PIL**: `Epic`, `Bug`, `Feature`, `Improvement`. Apply the appropriate type label on creation.\n28: - **Triage labels**: see `docs/agents/triage-labels.md`. The triage vocabulary is separate from the type labels above and may be created lazily on first use.\n29: \n30: ## Skills that read this file\n31: \n32: `to-issues`, `triage`, `to-prd`, `qa`, and any skill that creates or updates issues.\n\n(End of file - total 32 lines)\n</content>",
+            "metadata": {
+              "preview": "# Issue Tracker\n\nIssues for this repo live in **Linear**, team **Piloto** (key `PIL`).\n\n## Workflow\n\n- **Tool**: use the Linear MCP (`mcp__plugin_linear_linear__*`) for all create / list / update / comment operations. Do not shell out to a Linear CLI.\n- **Team**: every issue belongs to team `PIL`.\n- **Projects**: two known projects exist:\n  - `Piloto MVP` — the in-flight MVP (status was marked Completed in Linear on 2026-04-20, but work may still be open against it; confirm with the user)\n  - `Piloto Post-MVP` — deferred features beyond the MVP (worktree hooks, build cache sharing, external interop, etc.)\n- **Default project**: skills should **ask the user which project** when creating a new issue rather than defaulting. List the two projects above as the choices.\n\n## Spec linking convention\n\nEach major effort has a spec page in Notion that's linked to its top-level Linear issue (typically the Epic).\n\n- **Epic / project-level issues**: must link a Notion spec page in the issue description. If the user doesn't provide one, ask before creating the issue.\n- **Sub-issues under an Epic**: inherit the parent's spec link. Do not require a separate Notion page; reference the parent epic in the description.\n- **Standalone issues** (not part of an Epic): a Notion spec is optional but encouraged for anything larger than a small fix.",
+              "truncated": false,
+              "loaded": []
+            },
+            "title": "docs/agents/issue-tracker.md",
+            "time": {
+              "start": 1777694384641,
+              "end": 1777694384645
+            }
+          },
+          "id": "prt_de6d7a0e4001bJoWCSPOuK7jIz",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d791cb001wus34WbReiXjYF"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-finish",
+          "tokens": {
+            "total": 27811,
+            "input": 343,
+            "output": 110,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 27358
+            }
+          },
+          "cost": 0.00807728,
+          "id": "prt_de6d7a276001ejq1HS8hetw9O1",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d791cb001wus34WbReiXjYF"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_de6d7811e001eWZYuyAQ8zLQ6X",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/Users/ferjgm98/projects/piloto",
+          "root": "/Users/ferjgm98/projects/piloto"
+        },
+        "cost": 0.0204114,
+        "tokens": {
+          "total": 36351,
+          "input": 8285,
+          "output": 366,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 27700
+          }
+        },
+        "modelID": "glm-5.1",
+        "providerID": "opencode",
+        "time": {
+          "created": 1777694384826,
+          "completed": 1777694395443
+        },
+        "finish": "stop",
+        "id": "msg_de6d7a2ba0011uTel2Og52G5ty",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-start",
+          "id": "prt_de6d7b0ff001cuMx1nFe5opqZ4",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d7a2ba0011uTel2Og52G5ty"
+        },
+        {
+          "type": "text",
+          "text": "Based on the latest weekly audit (2026-04-27), here's where the project stands and the immediate next steps:\n\n## Current Status\n\n- **M0** (Bootstrap) — 100% done\n- **M1** (Workspace & Worktree Core) — 100% done\n- **M2** (Agent Orchestration) — **50%** (2 of 4 issues done)\n- **M3–M6** — 0% (all in Backlog)\n- **7 days with no commits** — momentum has paused\n\n## Immediate Next Steps (from the audit)\n\n1. **Pull PIL-23 next** — \"Parallel agent execution + UI streaming\" — the only remaining issue to close M2. It's fully unblocked (prerequisites PIL-21 and PIL-22 are Done).\n2. **Fix Linear anomalies** — the \"Piloto MVP\" project was accidentally marked `Completed`; reopen it. Move epic PIL-7 to `In Progress`.\n3. **Create a follow-up issue for ADR 0001** — investigate `@parcel/watcher` viability under Electrobun bundling (currently untracked).\n4. **Optionally set target dates** on M2–M6 to enable velocity tracking.\n\n## After M2\n\n- **PIL-24** (libghostty terminal) — can start in parallel with M3\n- **PIL-25/26/32** (diff view + accept/reject + merge) — M4 work\n- The **R1 Trusted Alpha** release gate requires PIL-23 + basic release hygiene (PIL-29/30) to ship\n\nWant me to start working on PIL-23, or would you prefer to tackle something else first?",
+          "time": {
+            "start": 1777694388480,
+            "end": 1777694395370
+          },
+          "id": "prt_de6d7b100001R3yW9mFIEIlgcV",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d7a2ba0011uTel2Og52G5ty"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-finish",
+          "tokens": {
+            "total": 36351,
+            "input": 8285,
+            "output": 366,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 27700
+            }
+          },
+          "cost": 0.0204114,
+          "id": "prt_de6d7cbea002ncWsDoa9YxF01Y",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d7a2ba0011uTel2Og52G5ty"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1777694418051
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "opencode",
+          "modelID": "glm-5.1"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_de6d8246c001NJTN2UJRmjSfud",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "where did you check that?",
+          "id": "prt_de6d8246d001gpSuT90YdeOpGl",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d8246c001NJTN2UJRmjSfud"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_de6d8246c001NJTN2UJRmjSfud",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/Users/ferjgm98/projects/piloto",
+          "root": "/Users/ferjgm98/projects/piloto"
+        },
+        "cost": 0.02050328,
+        "tokens": {
+          "total": 36511,
+          "input": 8961,
+          "output": 192,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 27358
+          }
+        },
+        "modelID": "glm-5.1",
+        "providerID": "opencode",
+        "time": {
+          "created": 1777694418053,
+          "completed": 1777694423951
+        },
+        "finish": "stop",
+        "id": "msg_de6d82485001YMHPJK4F6eOmmX",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-start",
+          "id": "prt_de6d82cf1001BOmBq4NfZ5av4a",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d82485001YMHPJK4F6eOmmX"
+        },
+        {
+          "type": "reasoning",
+          "text": "The user is asking where I checked the project status/next steps. I should be transparent about the sources I used.",
+          "time": {
+            "start": 1777694420211,
+            "end": 1777694420351
+          },
+          "id": "prt_de6d82cf3001udG1aa2WE7ENWW",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d82485001YMHPJK4F6eOmmX"
+        },
+        {
+          "type": "text",
+          "text": "From these files I read:\n\n1. **`docs/audits/2026-04-27-weekly-audit.md`** — the latest weekly project health audit, which has milestone progress, stale issues, and recommendations\n2. **`docs/RELEASE_STRATEGY.md`** — the release ladder (R0–R3) and what's required for the Trusted Alpha\n3. **`docs/design-worktree-management.md`** — design doc with phased implementation and deferred items\n4. **`docs/agents/issue-tracker.md`** — confirms issues live in Linear (team PIL), not GitHub\n\nI didn't check Linear directly (no MCP access here). All the milestone and issue data came from the audit doc, which was generated from Linear on 2026-04-27.",
+          "time": {
+            "start": 1777694420352,
+            "end": 1777694423873
+          },
+          "id": "prt_de6d82d80001mGVO35KxEapSV1",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d82485001YMHPJK4F6eOmmX"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-finish",
+          "tokens": {
+            "total": 36511,
+            "input": 8961,
+            "output": 192,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 27358
+            }
+          },
+          "cost": 0.02050328,
+          "id": "prt_de6d83b43001H1CdczDFYrnSXF",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d82485001YMHPJK4F6eOmmX"
+        }
+      ]
+    },
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1777694479222
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "opencode-go",
+          "modelID": "glm-5"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_de6d9135d001MmyqMctWRHkdQC",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "got you, are you aware of the project architecture?",
+          "id": "prt_de6d9135d002df9vHDnYmwKiX2",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d9135d001MmyqMctWRHkdQC"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_de6d9135d001MmyqMctWRHkdQC",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/Users/ferjgm98/projects/piloto",
+          "root": "/Users/ferjgm98/projects/piloto"
+        },
+        "cost": 0.0360114,
+        "tokens": {
+          "total": 36168,
+          "input": 35541,
+          "output": 115,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 512
+          }
+        },
+        "modelID": "glm-5",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1777694479232,
+          "completed": 1777694482571
+        },
+        "finish": "tool-calls",
+        "id": "msg_de6d91380001YaVXieR1DlGZhD",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-start",
+          "id": "prt_de6d91bad001go4sGrnIOXIC4S",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d91380001YaVXieR1DlGZhD"
+        },
+        {
+          "type": "reasoning",
+          "text": "The user is asking if I'm aware of the project architecture. I already read the CLAUDE.md which has an architecture overview, but I also noticed there's a dedicated `docs/ARCHITECTURE.md` file that likely has more detail. Let me read it to give a properanswer.",
+          "time": {
+            "start": 1777694481327,
+            "end": 1777694481916
+          },
+          "id": "prt_de6d91baf001vKVSRUkzc0h3wi",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d91380001YaVXieR1DlGZhD"
+        },
+        {
+          "type": "text",
+          "text": "I have the high-level overview from `CLAUDE.md`, but let me read the full architecture doc to give you anaccurate answer.",
+          "time": {
+            "start": 1777694481916,
+            "end": 1777694482503
+          },
+          "id": "prt_de6d91dfc00278GhjvtBfK2Gvj",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d91380001YaVXieR1DlGZhD"
+        },
+        {
+          "type": "tool",
+          "tool": "read",
+          "callID": "call_b20c",
+          "state": {
+            "status": "completed",
+            "input": {
+              "filePath": "/Users/ferjgm98/projects/piloto/docs/ARCHITECTURE.md"
+            },
+            "output": "<path>/Users/ferjgm98/projects/piloto/docs/ARCHITECTURE.md</path>\n<type>file</type>\n<content>\n1: # Piloto — architecture\n2: \n3: This document explains *why* Piloto is built the way it is. For rules and\n4: conventions see `../CLAUDE.md`. For a step-by-step guide to adding features\n5: see `DEVELOPMENT.md`.\n6: \n7: ## Why Electrobun (not Electron)\n8: \n9: Piloto uses [Electrobun](https://electrobun.dev/) as its desktop runtime.\n10: The key trade-off was being able to embed `libghostty` — the Ghostty\n11: terminal emulator — through a direct Zig↔Zig FFI instead of writing a C\n12: bridge. Electrobun's main process runs on Bun and its native layer is Zig,\n13: which makes that integration natural.\n14: \n15: Secondary benefits:\n16: \n17: - **Bundle size.** ~14 MB vs ~200 MB for an equivalent Electron app.\n18: - **Startup time.** Under 50 ms to first window.\n19: - **System WebView** instead of bundling Chromium. Smaller, less memory.\n20: \n21: The cost is a smaller ecosystem and younger tooling. We accept that in\n22: exchange for the native integration surface.\n23: \n24: ## Process model\n25: \n26: ```\n27: ┌───────────────────────────────────────────────────────────────┐\n28: │  Native window (Electrobun)                                   │\n29: │                                                               │\n30: │  ┌─────────────────────┐         ┌─────────────────────────┐  │\n31: │  │  Bun main process   │◀───────▶│  System WebView         │  │\n32: │  │  src/bun/           │  Typed  │  src/mainview/          │  │\n33: │  │                     │  RPC    │                         │  │\n34: │  │  • services         │         │  • React 19             │  │\n35: │  │  • Drizzle + SQLite │         │  • Tailwind 4           │  │\n36: │  │  • git worktrees    │         │  • shadcn/ui            │  │\n37: │  │  • agent orchestr.  │         │  • Monaco (planned)     │  │\n38: │  │  • MCP clients      │         │                         │  │\n39: │  └─────────────────────┘         └─────────────────────────┘  │\n40: │            │                                                  │\n41: │            ▼                                                  │\n42: │    Zig native layer                                           │\n43: │    (libghostty, FFI)                                          │\n44: └───────────────────────────────────────────────────────────────┘\n45: ```\n46: \n47: Exactly one process boundary exists inside the app: main ↔ webview. All\n48: communication crosses it through `shared/rpc.ts`.\n49: \n50: ## Layer boundaries and rationale\n51: \n52: ### `src/bun/` — main process\n53: \n54: Everything with a side effect lives here: filesystem access, git commands,\n55: child processes, database, MCP servers, agent stdio. The main process is\n56: the trust boundary — user input from the webview is validated here before\n57: touching any of those systems.\n58: \n59: Organized as feature **modules** under `src/bun/modules/<feature>/`. Each\n60: module has a fixed three-file shape:\n61: \n62: - `.types.ts` — domain model, pure types\n63: - `.service.ts` — business logic; the layer that other modules can depend on\n64: - `.rpc.ts` — thin handlers that unwrap RPC params and delegate to the service\n65: \n66: The separation exists so that cross-module imports always go through\n67: `.service.ts`. If module A ever depends on module B, A imports from\n68: `B.service.ts`, never from `B.rpc.ts`. This keeps the RPC layer from\n69: becoming an implicit service registry.\n70: \n71: ### `src/mainview/` — webview\n72: \n73: Pure UI. React, Tailwind, shadcn/ui, Monaco (planned), and the hook layer\n74: built on top of the RPC client. No side effects beyond DOM and RPC calls.\n75: \n76: The webview can be developed in two modes:\n77: \n78: - **`bun run dev`** / **`bun run dev:hmr`** — launches the native\n79:   Electrobun window. This is the production runtime and the only place\n80:   real RPC calls succeed.\n81: - **`bun run hmr`** alone — plain Vite dev server. Useful for browser-only\n82:   UI iteration. RPC calls surface as `RPCClientError(INTERNAL)` because\n83:   the transport is absent; the hooks' error paths render normally.\n84: \n85: The second mode works because `src/mainview/lib/electrobun.ts` feature-detects\n86: Electrobun's preload globals (`window.__electrobunWebviewId`,\n87: `window.__electrobunRpcSocketPort`) and skips `Electroview` construction\n88: when they're absent.\n89: \n90: ### `shared/` — contracts\n91: \n92: Types and small pure helpers shared between the two processes. The rule is:\n93: anything in `shared/` must be importable from both runtimes without side\n94: effects. No I/O, no module-load work, no dependencies on Bun or DOM APIs.\n95: \n96: `shared/rpc.ts` — the typed RPC schema. Adding a new method starts here.\n97: `shared/errors.ts` — the wire error contract and the `RPC_ERROR_PREFIX`\n98: marker used to carry structured errors through Electrobun's string-only\n99: error channel.\n100: \n101: ## Cross-process communication (Typed RPC)\n102: \n103: Piloto uses Electrobun's built-in Typed RPC layer with a project-specific\n104: middleware on top. The flow for a request:\n105: \n106: ```\n107: React component\n108:   └─ useRPCQuery(\"listWorkspaces\")\n109:      └─ rpcRequest()                              src/mainview/lib/rpc-client.ts\n110:         └─ electrobun.rpc.request.listWorkspaces()\n111:            ─── IPC (websocket, AES-GCM) ──▶\n112:                                                wrapped handler               src/bun/rpc.ts\n113:                                                 └─ workspaceHandlers.listWorkspaces\n114:                                                    └─ workspaceService.listAll()   src/bun/modules/workspace/workspace.service.ts\n115:                                                       └─ db.select()...\n116: ```\n117: \n118: Why we added middleware (PIL-15):\n119: \n120: - **Observability.** Every request is logged with timing (`[rpc] DEBUG\n121:   listWorkspaces completed in 3.2ms`). One place to add tracing, rate\n122:   limiting, or metrics later.\n123: - **Structured errors.** Electrobun's wire protocol only transports\n124:   `error.message` as a string. To preserve error codes we JSON-encode an\n125:   `RPCError` shape into `Error.message` behind the `__RPC_ERROR__:` marker\n126:   prefix, catch it on the webview, and reconstruct it as `RPCClientError`.\n127:   The middleware is the single place that serializes; the client is the\n128:   single place that deserializes.\n129: - **AppError mapping.** Service code throws domain errors (`NotFoundError`,\n130:   `ValidationError`, `GitError`) without worrying about wire format. The\n131:   middleware maps them to `ErrorCode` values before sending.\n132: \n133: Two bugs from the original PIL-15 spec, preserved here as cautionary tales:\n134: \n135: - **Throwing a plain object**. `throw { code, message, details }` looks\n136:   reasonable but Electrobun's handler drops non-`Error` throws entirely.\n137:   Always throw a real `Error`.\n138: - **Mutating `rpc.handlers.messages[event]`.** Subscriptions go through\n139:   `rpc.addMessageListener(event, handler)` and\n140:   `rpc.removeMessageListener(event, handler)`. There is no handler map\n141:   to mutate.\n142: \n143: ## Data model\n144: \n145: SQLite via [Drizzle ORM](https://orm.drizzle.team/). Database file defaults\n146: to `./.context/piloto.db`; override with `DATABASE_URL`.\n147: \n148: Core entities:\n149: \n150: - **Workspace** — a named group of repository paths.\n151: - **WorkspaceRepo** — join table: repo path + default branch.\n152: - **AgentSession** — a running agent instance (Claude Code or Codex CLI).\n153: \n154: Worktrees are computed on demand by reading the filesystem; they are not\n155: stored in the database. This keeps the DB as the source of truth only for\n156: things it owns exclusively.\n157: \n158: ## Zig native layer\n159: \n160: Currently just Electrobun's bundled runtime. The planned next step is\n161: embedding `libghostty` for an in-app terminal, accessed via Zig FFI without\n162: a C shim. This is the primary reason Electrobun was chosen over Electron.\n163: \n164: ## Known constraints\n165: \n166: - **`electrobun.ts` feature-detects native globals.** Plain browser dev\n167:   works but RPC calls surface as `RPCClientError(INTERNAL)`. Full smoke\n168:   tests of the success path require running `bun run dev` (native window).\n169: - **No test framework is set up yet.** `docs/DEVELOPMENT.md` notes this as\n170:   a placeholder. Picking a framework (Bun's built-in runner vs vitest) is\n171:   an upcoming decision.\n172: - **`.claude/` is gitignored.** Team-shared dev-guide artifacts live at\n173:   the repo root (`CLAUDE.md`, `docs/`) or in tracked scripts. Anything\n174:   under `.claude/` is personal per developer.\n175: \n176: ## Historical decision records\n177: \n178: Plan files for completed features that captured design decisions:\n179: \n180: - **PIL-15** (frontend IPC layer + middleware): the original plan file\n181:   documents why we use a marker-prefix wire contract and why subscriptions\n182:   use `addMessageListener` instead of handler-map mutation.\n\n(End of file - total 182 lines)\n</content>",
+            "metadata": {
+              "preview": "# Piloto — architecture\n\nThis document explains *why* Piloto is built the way it is. For rules and\nconventions see `../CLAUDE.md`. For a step-by-step guide to adding features\nsee `DEVELOPMENT.md`.\n\n## Why Electrobun (not Electron)\n\nPiloto uses [Electrobun](https://electrobun.dev/) as its desktop runtime.\nThe key trade-off was being able to embed `libghostty` — the Ghostty\nterminal emulator — through a direct Zig↔Zig FFI instead of writing a C\nbridge. Electrobun's main process runs on Bun and its native layer is Zig,\nwhich makes that integration natural.\n\nSecondary benefits:\n\n- **Bundle size.** ~14 MB vs ~200 MB for an equivalent Electron app.\n- **Startup time.** Under 50 ms to first window.\n- **System WebView** instead of bundling Chromium. Smaller, less memory.\n",
+              "truncated": false,
+              "loaded": []
+            },
+            "title": "docs/ARCHITECTURE.md",
+            "time": {
+              "start": 1777694482298,
+              "end": 1777694482300
+            }
+          },
+          "id": "prt_de6d91f77001SOAwd1zzHcf4M3",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d91380001YaVXieR1DlGZhD"
+        },
+        {
+          "reason": "tool-calls",
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-finish",
+          "tokens": {
+            "total": 36168,
+            "input": 35541,
+            "output": 115,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 512
+            }
+          },
+          "cost": 0.0360114,
+          "id": "prt_de6d92049001KIT3jD6wz92FBg",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d91380001YaVXieR1DlGZhD"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_de6d9135d001MmyqMctWRHkdQC",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/Users/ferjgm98/projects/piloto",
+          "root": "/Users/ferjgm98/projects/piloto"
+        },
+        "cost": 0.0103054,
+        "tokens": {
+          "total": 38751,
+          "input": 2459,
+          "output": 196,
+          "reasoning": 0,
+          "cache": {
+            "write": 0,
+            "read": 36096
+          }
+        },
+        "modelID": "glm-5",
+        "providerID": "opencode-go",
+        "time": {
+          "created": 1777694482572,
+          "completed": 1777694485981
+        },
+        "finish": "stop",
+        "id": "msg_de6d9208c001yiBVQBbMiL2tQQ",
+        "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7"
+      },
+      "parts": [
+        {
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-start",
+          "id": "prt_de6d92590001rNXg3IAVHGDZ1G",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d9208c001yiBVQBbMiL2tQQ"
+        },
+        {
+          "type": "text",
+          "text": "Yes. The key points:\n\n- **Electrobun** runtime (not Electron) — Bun main process + System WebView, chosen for native `libghostty` FFI via Zig\n- **Single process boundary** — main process (`src/bun/`) ↔ webview (`src/mainview/`) connected only through typed RPC (`shared/rpc.ts`)\n- **Module pattern** — each feature in `src/bun/modules/<feature>/` has exactly 3 files: `.types.ts`, `.service.ts`, `.rpc.ts`. Cross-module imports go through `.service.ts` only\n- **Data** — SQLite via Drizzle ORM. Worktrees are computed from the filesystem, not stored in DB\n- **Webview** — React 19 + Tailwind 4 + shadcn/ui. Can be developed standalone via `bun run hmr` (browser-only, RPC errors surface cleanly) or with the native window via `bun run dev`",
+          "time": {
+            "start": 1777694483858,
+            "end": 1777694485908
+          },
+          "id": "prt_de6d92592001meXgErH5XOFtJt",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d9208c001yiBVQBbMiL2tQQ"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-finish",
+          "tokens": {
+            "total": 38751,
+            "input": 2459,
+            "output": 196,
+            "reasoning": 0,
+            "cache": {
+              "write": 0,
+              "read": 36096
+            }
+          },
+          "cost": 0.0103054,
+          "id": "prt_de6d92d950019pu0o1KZ78rCGy",
+          "sessionID": "ses_21935da40ffeYl6GV7KTx4Zfn7",
+          "messageID": "msg_de6d9208c001yiBVQBbMiL2tQQ"
+        }
+      ]
+    }
+  ]
+}
