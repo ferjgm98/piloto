@@ -1,0 +1,164 @@
+{
+  "info": {
+    "id": "ses_2195064b2ffebvAvi8vk6ndZDY",
+    "slug": "gentle-planet",
+    "projectID": "c16645f1a15caa3a708798dc69999c045773ad28",
+    "directory": "/Users/ferjgm98/projects/piloto",
+    "path": "",
+    "title": "Light chat: hola",
+    "version": "1.14.31",
+    "summary": {
+      "additions": 0,
+      "deletions": 0,
+      "files": 0
+    },
+    "time": {
+      "created": 1777691761485,
+      "updated": 1777691762981
+    }
+  },
+  "messages": [
+    {
+      "info": {
+        "role": "user",
+        "time": {
+          "created": 1777691761517
+        },
+        "agent": "build",
+        "model": {
+          "providerID": "opencode",
+          "modelID": "big-pickle"
+        },
+        "summary": {
+          "diffs": []
+        },
+        "id": "msg_de6af9b52001pLpRZsVV3tvzFp",
+        "sessionID": "ses_2195064b2ffebvAvi8vk6ndZDY"
+      },
+      "parts": [
+        {
+          "type": "text",
+          "text": "<system-reminder>Note: The user opened the file \"/Users/ferjgm98/projects/piloto/docs/adr/0001-file-system-watcher.md\". This may or may not be relevant to the current task.</system-reminder>\n",
+          "synthetic": true,
+          "metadata": {
+            "kind": "editor_context",
+            "source": "websocket",
+            "filePath": "/Users/ferjgm98/projects/piloto/docs/adr/0001-file-system-watcher.md",
+            "ranges": [
+              {
+                "text": "",
+                "selection": {
+                  "start": {
+                    "line": 102,
+                    "character": 0
+                  },
+                  "end": {
+                    "line": 102,
+                    "character": 0
+                  }
+                }
+              }
+            ]
+          },
+          "id": "prt_de6af9b52002n4ok1jvaoY4N9O",
+          "sessionID": "ses_2195064b2ffebvAvi8vk6ndZDY",
+          "messageID": "msg_de6af9b52001pLpRZsVV3tvzFp"
+        },
+        {
+          "type": "text",
+          "text": "hola",
+          "id": "prt_de6af9b520036U95qeEH0SyGZX",
+          "sessionID": "ses_2195064b2ffebvAvi8vk6ndZDY",
+          "messageID": "msg_de6af9b52001pLpRZsVV3tvzFp"
+        }
+      ]
+    },
+    {
+      "info": {
+        "parentID": "msg_de6af9b52001pLpRZsVV3tvzFp",
+        "role": "assistant",
+        "mode": "build",
+        "agent": "build",
+        "path": {
+          "cwd": "/Users/ferjgm98/projects/piloto",
+          "root": "/Users/ferjgm98/projects/piloto"
+        },
+        "cost": 0,
+        "tokens": {
+          "total": 28035,
+          "input": 6,
+          "output": 38,
+          "reasoning": 0,
+          "cache": {
+            "write": 27991,
+            "read": 0
+          }
+        },
+        "modelID": "big-pickle",
+        "providerID": "opencode",
+        "time": {
+          "created": 1777691761529,
+          "completed": 1777691765990
+        },
+        "finish": "stop",
+        "id": "msg_de6af9b79001O6Zi3RKyqR5hWM",
+        "sessionID": "ses_2195064b2ffebvAvi8vk6ndZDY"
+      },
+      "parts": [
+        {
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-start",
+          "id": "prt_de6afa9c4001iraCwJkV3XgskM",
+          "sessionID": "ses_2195064b2ffebvAvi8vk6ndZDY",
+          "messageID": "msg_de6af9b79001O6Zi3RKyqR5hWM"
+        },
+        {
+          "type": "reasoning",
+          "text": "The user is greeting me in Spanish. I'll respond with a brief, friendly greeting back.",
+          "time": {
+            "start": 1777691765189,
+            "end": 1777691765435
+          },
+          "metadata": {
+            "anthropic": {
+              "signature": ""
+            }
+          },
+          "id": "prt_de6afa9c5001Hf6VdKz9Iffsx7",
+          "sessionID": "ses_2195064b2ffebvAvi8vk6ndZDY",
+          "messageID": "msg_de6af9b79001O6Zi3RKyqR5hWM"
+        },
+        {
+          "type": "text",
+          "text": "Hola! ¿En qué te puedo ayudar con el proyecto Piloto?",
+          "time": {
+            "start": 1777691765437,
+            "end": 1777691765792
+          },
+          "id": "prt_de6afaabd001n0ALNiUt6huc3Q",
+          "sessionID": "ses_2195064b2ffebvAvi8vk6ndZDY",
+          "messageID": "msg_de6af9b79001O6Zi3RKyqR5hWM"
+        },
+        {
+          "reason": "stop",
+          "snapshot": "512c12cd4e4eb9ff74d1541d4934f4cedecf5889",
+          "type": "step-finish",
+          "tokens": {
+            "total": 28035,
+            "input": 6,
+            "output": 38,
+            "reasoning": 0,
+            "cache": {
+              "write": 27991,
+              "read": 0
+            }
+          },
+          "cost": 0,
+          "id": "prt_de6afac9f001JK0B2UxBu91BcY",
+          "sessionID": "ses_2195064b2ffebvAvi8vk6ndZDY",
+          "messageID": "msg_de6af9b79001O6Zi3RKyqR5hWM"
+        }
+      ]
+    }
+  ]
+}

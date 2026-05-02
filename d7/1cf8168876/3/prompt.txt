@@ -1,0 +1,1 @@
+<system-reminder>Note: The user opened the file "/Users/ferjgm98/projects/piloto/docs/adr/0001-file-system-watcher.md". This may or may not be relevant to the current task.</system-reminder>

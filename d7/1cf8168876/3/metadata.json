@@ -1,0 +1,77 @@
+{
+  "cli_version": "0.5.6",
+  "checkpoint_id": "d71cf8168876",
+  "session_id": "ses_2195064b2ffebvAvi8vk6ndZDY",
+  "strategy": "manual-commit",
+  "created_at": "2026-05-02T14:51:51.636882Z",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "CLAUDE.md",
+    "CONTEXT.md",
+    "docs/adr/0001-file-system-watcher.md",
+    "shared/errors.ts",
+    "src/bun/modules/worktree/worktree.service.ts",
+    "src/bun/modules/worktree/worktree.test.ts",
+    "src/bun/modules/worktree/worktree.types.ts",
+    "src/bun/rpc.ts",
+    "src/bun/utils/errors.ts",
+    "src/bun/utils/rpc-middleware.ts"
+  ],
+  "agent": "OpenCode",
+  "model": "big-pickle",
+  "turn_id": "17dc08d0b667",
+  "token_usage": {
+    "input_tokens": 6,
+    "cache_creation_tokens": 27991,
+    "cache_read_tokens": 0,
+    "output_tokens": 38,
+    "api_call_count": 1
+  },
+  "session_metrics": {
+    "turn_count": 1
+  },
+  "initial_attribution": {
+    "calculated_at": "2026-05-02T14:51:51.63569Z",
+    "agent_lines": 0,
+    "agent_removed": 0,
+    "human_added": 0,
+    "human_modified": 130,
+    "human_removed": 132,
+    "total_committed": 0,
+    "total_lines_changed": 274,
+    "agent_percentage": 0,
+    "metric_version": 2
+  },
+  "prompt_attributions": [
+    {
+      "checkpoint_number": 1,
+      "user_lines_added": 393,
+      "user_lines_removed": 262,
+      "agent_lines_added": 0,
+      "agent_lines_removed": 0,
+      "user_added_per_file": {
+        "CLAUDE.md": 6,
+        "CONTEXT.md": 8,
+        "docs/adr/0001-file-system-watcher.md": 12,
+        "src/bun/modules/worktree/status-watcher/status-watcher.service.ts": 129,
+        "src/bun/modules/worktree/status-watcher/status-watcher.test.ts": 164,
+        "src/bun/modules/worktree/status-watcher/status-watcher.types.ts": 23,
+        "src/bun/modules/worktree/worktree.service.ts": 36,
+        "src/bun/modules/worktree/worktree.test.ts": 13,
+        "src/bun/rpc.ts": 2
+      },
+      "user_removed_per_file": {
+        "CONTEXT.md": 2,
+        "docs/adr/0001-file-system-watcher.md": 1,
+        "shared/errors.ts": 1,
+        "src/bun/modules/worktree/worktree.service.ts": 138,
+        "src/bun/modules/worktree/worktree.test.ts": 104,
+        "src/bun/modules/worktree/worktree.types.ts": 5,
+        "src/bun/rpc.ts": 2,
+        "src/bun/utils/errors.ts": 7,
+        "src/bun/utils/rpc-middleware.ts": 2
+      }
+    }
+  ]
+}
