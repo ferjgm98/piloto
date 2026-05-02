@@ -1,0 +1,102 @@
+Awesome, let's now create a plan to address PIL-43
+
+---
+
+Did you take in mind the ADDR3 and the latests comments in PIL-23 and PIL-43 issues?
+
+---
+
+Cool, let's address tests for PIL-42 and then work on this plan
+
+---
+
+Cool, now let's go back with PIL-43 plan
+
+---
+
+Cool, can we now create a plan for PIL-44
+
+---
+
+go ahead
+
+---
+
+Awesome, let's now plan PIL-45 and then check if there's something missing to complete PIL-23. Relay on /ui  for ui decisions
+
+---
+
+/caveman  go ahead
+
+---
+
+How difficult would be to shift with a UI like this, I think we have a wrong approach for the agent
+
+* Sidebar: should be a list of workspaces. Each workspace have multiple sessions, each session is it's own isolated worktree per project, by default
+* Chat section, here we can choose the model (models from claude code, codex, or acp's added) - we can't change this after first message because we are using the original bin of each agent
+* We can have multiple tabs per session, each with it's own chat. the same as we can change model we can change any of the projects of the workspace so we can run a chat over just the backend repo, the frontend repo, or both of them
+* Right bar, diff viewer, todos, plan,s or any relevant data of the session
+
+---
+
+I'd like deep. /grill-with-docs this, so we can create the proper issues and re-adjust the readmap
+
+---
+
+A is good
+
+---
+
+Yeah, go ahead with A, but let's give users option to create new worktree or use the existing one
+
+---
+
+A is good
+
+---
+
+Yes, A is the correct approach
+
+---
+
+Go ahead with option B, but do't show a dialog to show, start with new tab, with empty conversation, default to all the workspace repos as choose (they can choose a single repo if they want), model set to the first in the list:
+
+Idea is:
+
+Claude
+[ models]
+
+Codex
+[Models]
+
+In a dropdown at first 
+
+We have to include options from claude code and codex like reasoning level button, fast mode (if available) plan mode toggle, etc
+
+---
+
+yeah so if we choose a claude model, we can switch from the same provider in the conversation. This is like on first message if we have Opus 4.7 set, we start the claude code bin, and we are using the claude code harness, is never our own harness, so we can then only switch between claude models. Same happens with codex, if we want a model from a different provider, we can add the option and let them click to open a new tab.
+
+---
+
+There's no existing data, truncate db if needed so option A
+
+---
+
+Yeah, A is good
+
+---
+
+Go ahead with A
+
+---
+
+A is good, we might deep dive on the existing issues pending issues (We are at PIL-24) so we can remove them or re-write them
+
+---
+
+Cool can you map the current project documentation so we can update them, then do an exhaustive check over linear for next item after PIL-24 and PIL-25 until early PIL-40 I think so we need to delete items or re write them
+
+---
+
+yes, go ahead with 1-3 and keep in mind 4 for the last

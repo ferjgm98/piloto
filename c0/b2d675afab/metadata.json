@@ -1,0 +1,25 @@
+{
+  "cli_version": "0.5.6",
+  "checkpoint_id": "c0b2d675afab",
+  "strategy": "manual-commit",
+  "branch": "main",
+  "checkpoints_count": 1,
+  "files_touched": [
+    "docs/adr/0003-parallel-agent-orchestration.md"
+  ],
+  "sessions": [
+    {
+      "metadata": "/c0/b2d675afab/0/metadata.json",
+      "transcript": "/c0/b2d675afab/0/full.jsonl",
+      "content_hash": "/c0/b2d675afab/0/content_hash.txt",
+      "prompt": "/c0/b2d675afab/0/prompt.txt"
+    }
+  ],
+  "token_usage": {
+    "input_tokens": 49,
+    "cache_creation_tokens": 69234,
+    "cache_read_tokens": 3241479,
+    "output_tokens": 20703,
+    "api_call_count": 24
+  }
+}
