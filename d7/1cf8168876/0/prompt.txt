@@ -1,0 +1,5 @@
+Do we need to update docs in the codebase/notion or linear issues to have complete awareness of these changes?
+
+---
+
+go ahead with the 3 of them, don't need to bee exhaustive but make sure we have a clear roadmap and track of changes
