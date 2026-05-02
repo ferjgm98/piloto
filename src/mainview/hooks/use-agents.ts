@@ -15,6 +15,23 @@ export interface StopAgentInput extends Record<string, unknown> {
   sessionId: string;
 }
 
+export interface SendPromptInput extends Record<string, unknown> {
+  sessionId: string;
+  prompt: string;
+}
+
+export interface StopAllAgentsInput extends Record<string, unknown> {
+  workspaceId: string;
+}
+
+export function useAgentSession(sessionId: string): UseRPCQueryResult<AgentSessionDTO> {
+  return useRPCQuery<AgentSessionDTO>("getAgentSession", { sessionId }, [sessionId]);
+}
+
+export function useSendAgentPrompt(): UseRPCMutationResult<{ success: boolean }, SendPromptInput> {
+  return useRPCMutation<{ success: boolean }, SendPromptInput>("sendPrompt");
+}
+
 export function useAgents(workspaceId: string): UseRPCQueryResult<AgentSessionDTO[]> {
   const query = useRPCQuery<AgentSessionDTO[]>("listAgentSessions", { workspaceId }, [workspaceId]);
   useRPCSubscription<{ sessionId: string; status: AgentStatus; error?: string }>(
@@ -33,6 +50,10 @@ export function useStartAgent(): UseRPCMutationResult<{ sessionId: string }, Sta
 
 export function useStopAgent(): UseRPCMutationResult<{ success: boolean }, StopAgentInput> {
   return useRPCMutation<{ success: boolean }, StopAgentInput>("stopAgent");
+}
+
+export function useStopAllAgents(): UseRPCMutationResult<{ stopped: number }, StopAllAgentsInput> {
+  return useRPCMutation<{ stopped: number }, StopAllAgentsInput>("stopAllAgents");
 }
 
 export function useAgentOutput(sessionId: string | null): AgentUpdateDTO[] {

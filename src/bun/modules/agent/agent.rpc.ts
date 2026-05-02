@@ -38,6 +38,22 @@ export const agentHandlers = {
     stopAgent: async ({ sessionId }: { sessionId: string }): Promise<{ success: boolean }> => {
       return agentService.stopAgent(sessionId);
     },
+    stopAllAgents: async ({
+      workspaceId,
+    }: {
+      workspaceId: string;
+    }): Promise<{ stopped: number }> => {
+      return agentService.stopAllAgents(workspaceId);
+    },
+    sendPrompt: async ({
+      sessionId,
+      prompt,
+    }: {
+      sessionId: string;
+      prompt: string;
+    }): Promise<{ success: boolean }> => {
+      return agentService.sendPrompt(sessionId, prompt);
+    },
   },
   messages: {},
 };

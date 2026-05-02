@@ -25,6 +25,8 @@ const expectedRequestKeys = {
   getAgentSession: true,
   startAgent: true,
   stopAgent: true,
+  stopAllAgents: true,
+  sendPrompt: true,
   listTerminals: true,
   createTerminal: true,
   listMcpServers: true,

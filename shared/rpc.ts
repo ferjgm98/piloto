@@ -225,6 +225,14 @@ export type MainRPC = {
         params: { sessionId: string };
         response: { success: boolean };
       };
+      stopAllAgents: {
+        params: { workspaceId: string };
+        response: { stopped: number };
+      };
+      sendPrompt: {
+        params: { sessionId: string; prompt: string };
+        response: { success: boolean };
+      };
 
       // Terminal (stub)
       listTerminals: {

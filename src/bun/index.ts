@@ -1,5 +1,6 @@
 import { ApplicationMenu, BrowserWindow } from "electrobun/bun";
 import { initializeDatabase } from "./db/database";
+import { shutdown } from "./lifecycle";
 import { createRPC } from "./rpc";
 import { createLogger } from "./utils/logger";
 
@@ -63,12 +64,18 @@ async function bootstrap(): Promise<void> {
   });
 
   mainWindow.on("close", () => {
-    log.info("Main window closed");
-    process.exit(0);
+    void shutdown("window-close");
   });
 
   mainWindow.webview.on("dom-ready", () => {
     log.info("Webview DOM ready");
+  });
+
+  process.on("SIGTERM", () => {
+    void shutdown("SIGTERM");
+  });
+  process.on("SIGINT", () => {
+    void shutdown("SIGINT");
   });
 
   log.info("piloto app started");

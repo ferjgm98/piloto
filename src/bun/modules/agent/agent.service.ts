@@ -1,5 +1,5 @@
 import { randomUUID } from "node:crypto";
-import { asc, eq } from "drizzle-orm";
+import { asc, desc, eq, sql } from "drizzle-orm";
 import type { AgentBackendName, AgentStatus, AgentUpdateDTO } from "shared/rpc";
 import { getDb } from "../../db/database";
 import { activeWorktrees, agentSessions, workspaceRepos } from "../../db/schema";
@@ -47,6 +47,10 @@ let backendFactory: BackendFactory | null = null;
 
 export function setBackendFactoryForTests(factory: BackendFactory | null): void {
   backendFactory = factory;
+}
+
+export function _resetRegistryForTests(): void {
+  registry.clear();
 }
 
 function isBackendName(v: string): v is AgentBackendName {
@@ -203,6 +207,64 @@ export async function startAgent(input: StartAgentInput): Promise<{ sessionId: s
   return { sessionId };
 }
 
+async function _stopAllInRegistry(
+  predicate: (entry: RegistryEntry, sessionId: string) => boolean,
+): Promise<{ stopped: string[]; failed: string[] }> {
+  const matched: Array<[string, RegistryEntry]> = [];
+  for (const [id, e] of registry.entries()) {
+    if (!e.stopping && predicate(e, id)) {
+      e.stopping = true;
+      matched.push([id, e]);
+    }
+  }
+
+  const results = await Promise.allSettled(
+    matched.map(async ([id, e]) => {
+      if (e.backend) await e.backend.stop();
+      return id;
+    }),
+  );
+
+  const stopped: string[] = [];
+  const failed: string[] = [];
+  results.forEach((r, i) => {
+    const [id, e] = matched[i];
+    registry.delete(id);
+    setWorktreeAgentBinding(e.worktreeId, null);
+    if (r.status === "fulfilled") {
+      stopped.push(id);
+      updateSessionStatus(id, "stopped");
+    } else {
+      failed.push(id);
+      const reason = r.reason instanceof Error ? r.reason.message : String(r.reason);
+      log.warn(`stopAll teardown failed for ${id}: ${reason}`);
+      updateSessionStatus(id, "error", `teardown failed: ${reason}`);
+    }
+  });
+
+  return { stopped, failed };
+}
+
+export async function stopAllAgents(workspaceId: string): Promise<{ stopped: number }> {
+  const { stopped } = await _stopAllInRegistry((e) => e.workspaceId === workspaceId);
+  return { stopped: stopped.length };
+}
+
+export async function stopAllAgentsGlobal(): Promise<{ stopped: number }> {
+  const { stopped } = await _stopAllInRegistry(() => true);
+  return { stopped: stopped.length };
+}
+
+export async function sendPrompt(sessionId: string, prompt: string): Promise<{ success: boolean }> {
+  const entry = registry.get(sessionId);
+  if (!entry) throw new NotFoundError("AgentSession", sessionId);
+  if (entry.stopping || !entry.backend) {
+    throw new ValidationError(`Cannot send prompt: session ${sessionId} is not running`);
+  }
+  await entry.backend.sendPrompt(prompt);
+  return { success: true };
+}
+
 export async function stopAgent(sessionId: string): Promise<{ success: boolean }> {
   const entry = registry.get(sessionId);
   if (!entry) {
@@ -234,7 +296,15 @@ export async function stopAgent(sessionId: string): Promise<{ success: boolean }
 
 export function listAgentSessions(workspaceId: string): AgentSessionRow[] {
   const db = getDb();
-  return db.select().from(agentSessions).where(eq(agentSessions.workspaceId, workspaceId)).all();
+  return db
+    .select()
+    .from(agentSessions)
+    .where(eq(agentSessions.workspaceId, workspaceId))
+    .orderBy(
+      sql`CASE WHEN ${agentSessions.status} = 'running' THEN 0 ELSE 1 END`,
+      desc(agentSessions.updatedAt),
+    )
+    .all();
 }
 
 export function getAgentSession(sessionId: string): AgentSessionRow {

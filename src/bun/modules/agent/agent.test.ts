@@ -1,18 +1,26 @@
 import { afterEach, beforeAll, beforeEach, describe, expect, test } from "bun:test";
 import { randomUUID } from "node:crypto";
 import { eq } from "drizzle-orm";
+import type { AgentBackendName } from "shared/rpc";
 import { getDb, initializeDatabase } from "../../db/database";
-import { agentSessions, workspaceRepos, workspaces } from "../../db/schema";
+import { activeWorktrees, agentSessions, workspaceRepos, workspaces } from "../../db/schema";
 import { AgentBinaryNotFoundError, NotFoundError, ValidationError } from "../../utils/errors";
 import { resetTestDb } from "../../utils/test-setup";
 import {
+  MAX_CONCURRENT_AGENTS,
+  _resetRegistryForTests,
   getAgentSession,
   listAgentSessions,
+  sendPrompt,
   setAgentStatusNotifier,
   setAgentUpdateNotifier,
+  setBackendFactoryForTests,
   startAgent,
   stopAgent,
+  stopAllAgents,
+  stopAllAgentsGlobal,
 } from "./agent.service";
+import type { AgentBackend } from "./agent.types";
 import { createCodexBackend, mapCodexNotification } from "./backends/codex.backend";
 
 function restoreEnv(key: string, original: string | undefined): void {
@@ -51,12 +59,61 @@ function seedWorkspaceWithRepo(): { workspaceId: string; repoId: string } {
   return { workspaceId, repoId };
 }
 
+function seedWorktree(repoId: string): string {
+  const id = randomUUID();
+  const now = new Date().toISOString();
+  getDb()
+    .insert(activeWorktrees)
+    .values({
+      id,
+      repoId,
+      featureName: `feat-${id.slice(0, 6)}`,
+      branch: `feature/${id.slice(0, 6)}`,
+      path: `/tmp/test-worktree-${id.slice(0, 6)}`,
+      agentSessionId: null,
+      createdAt: now,
+      updatedAt: now,
+    })
+    .run();
+  return id;
+}
+
+interface MockBackendOptions {
+  stopDelayMs?: number;
+  stopThrows?: boolean;
+  blockStop?: boolean;
+  recordPrompts?: string[];
+}
+
+function makeMockBackend(opts: MockBackendOptions = {}): AgentBackend {
+  return {
+    name: "codex",
+    start: async () => ({ sessionId: "" }),
+    sendPrompt: async (prompt: string) => {
+      opts.recordPrompts?.push(prompt);
+    },
+    stop: async () => {
+      if (opts.blockStop) await new Promise(() => {});
+      if (opts.stopDelayMs) await new Promise((r) => setTimeout(r, opts.stopDelayMs));
+      if (opts.stopThrows) throw new Error("mock stop boom");
+    },
+    onUpdate: () => {},
+  };
+}
+
+function installMockFactory(opts: MockBackendOptions = {}): void {
+  setBackendFactoryForTests((_backend: AgentBackendName, _sessionId: string) =>
+    makeMockBackend(opts),
+  );
+}
+
 function seedSession(
   workspaceId: string,
   overrides: Partial<{
     backend: "claude" | "codex";
     status: "running" | "stopped" | "error";
     prompt: string;
+    updatedAt: string;
   }> = {},
 ): string {
   const sessionId = randomUUID();
@@ -72,7 +129,7 @@ function seedSession(
       prompt: overrides.prompt ?? "test",
       errorMessage: null,
       createdAt: now,
-      updatedAt: now,
+      updatedAt: overrides.updatedAt ?? now,
     })
     .run();
   return sessionId;
@@ -85,11 +142,13 @@ describe("agent.service", () => {
 
   beforeEach(() => {
     resetTestDb(getDb());
+    _resetRegistryForTests();
   });
 
   afterEach(() => {
     setAgentUpdateNotifier(null);
     setAgentStatusNotifier(null);
+    setBackendFactoryForTests(null);
   });
 
   describe("startAgent", () => {
@@ -197,6 +256,29 @@ describe("agent.service", () => {
       expect(sessions[0].id).toBe(sessionId1);
       expect(sessions[0].backend).toBe("codex");
     });
+
+    test("sorts running sessions first, then by updatedAt desc", () => {
+      const { workspaceId } = seedWorkspaceWithRepo();
+      const olderRunning = seedSession(workspaceId, {
+        status: "running",
+        updatedAt: "2026-01-01T00:00:00.000Z",
+      });
+      const newerRunning = seedSession(workspaceId, {
+        status: "running",
+        updatedAt: "2026-01-02T00:00:00.000Z",
+      });
+      const newerStopped = seedSession(workspaceId, {
+        status: "stopped",
+        updatedAt: "2026-01-03T00:00:00.000Z",
+      });
+      const olderError = seedSession(workspaceId, {
+        status: "error",
+        updatedAt: "2026-01-01T12:00:00.000Z",
+      });
+
+      const ids = listAgentSessions(workspaceId).map((s) => s.id);
+      expect(ids).toEqual([newerRunning, olderRunning, newerStopped, olderError]);
+    });
   });
 
   describe("getAgentSession", () => {
@@ -214,6 +296,208 @@ describe("agent.service", () => {
     test("throws NotFoundError for non-existent session", () => {
       expect(() => getAgentSession("non-existent-id")).toThrow(NotFoundError);
       expect(() => getAgentSession("non-existent-id")).toThrow(/AgentSession not found/);
+    });
+  });
+
+  describe("PIL-42 concurrency control", () => {
+    test(`6th startAgent throws ValidationError when ${MAX_CONCURRENT_AGENTS} are running`, async () => {
+      const { workspaceId } = seedWorkspaceWithRepo();
+      installMockFactory();
+
+      for (let i = 0; i < MAX_CONCURRENT_AGENTS; i++) {
+        await startAgent({ workspaceId, backend: "codex", prompt: `p${i}` });
+      }
+
+      const overflow = startAgent({ workspaceId, backend: "codex", prompt: "overflow" });
+      await expect(overflow).rejects.toBeInstanceOf(ValidationError);
+      await expect(overflow).rejects.toThrow(
+        new RegExp(`Maximum ${MAX_CONCURRENT_AGENTS} concurrent agents`),
+      );
+    });
+
+    test("second startAgent on same worktree throws ValidationError", async () => {
+      const { workspaceId, repoId } = seedWorkspaceWithRepo();
+      const worktreeId = seedWorktree(repoId);
+      installMockFactory();
+
+      await startAgent({ workspaceId, worktreeId, backend: "codex", prompt: "first" });
+
+      const second = startAgent({ workspaceId, worktreeId, backend: "codex", prompt: "second" });
+      await expect(second).rejects.toBeInstanceOf(ValidationError);
+      await expect(second).rejects.toThrow(/Worktree already has a running agent/);
+    });
+
+    test("stopping a session frees a slot for a new agent", async () => {
+      const { workspaceId } = seedWorkspaceWithRepo();
+      installMockFactory();
+
+      const sessions: string[] = [];
+      for (let i = 0; i < MAX_CONCURRENT_AGENTS; i++) {
+        const { sessionId } = await startAgent({
+          workspaceId,
+          backend: "codex",
+          prompt: `p${i}`,
+        });
+        sessions.push(sessionId);
+      }
+
+      await stopAgent(sessions[0]);
+
+      const { sessionId: freshId } = await startAgent({
+        workspaceId,
+        backend: "codex",
+        prompt: "after-stop",
+      });
+      expect(freshId).toBeDefined();
+    });
+
+    test("workspaceId-only path (no worktree) does not clash on per-worktree check", async () => {
+      const { workspaceId } = seedWorkspaceWithRepo();
+      installMockFactory();
+
+      const a = await startAgent({ workspaceId, backend: "codex", prompt: "a" });
+      const b = await startAgent({ workspaceId, backend: "codex", prompt: "b" });
+      expect(a.sessionId).not.toBe(b.sessionId);
+    });
+  });
+
+  describe("PIL-44 sendPrompt", () => {
+    test("throws NotFoundError when registry has no entry", async () => {
+      await expect(sendPrompt("missing-session-id", "hi")).rejects.toBeInstanceOf(NotFoundError);
+    });
+
+    test("throws ValidationError when entry is stopping", async () => {
+      const { workspaceId } = seedWorkspaceWithRepo();
+      const recorded: string[] = [];
+      setBackendFactoryForTests(() =>
+        makeMockBackend({ blockStop: true, recordPrompts: recorded }),
+      );
+
+      const { sessionId } = await startAgent({
+        workspaceId,
+        backend: "codex",
+        prompt: "init",
+      });
+
+      void stopAgent(sessionId);
+      await Promise.resolve();
+
+      const call = sendPrompt(sessionId, "queued");
+      await expect(call).rejects.toBeInstanceOf(ValidationError);
+      await expect(call).rejects.toThrow(/is not running/);
+      expect(recorded).not.toContain("queued");
+    });
+
+    test("delegates to backend.sendPrompt with the same prompt", async () => {
+      const { workspaceId } = seedWorkspaceWithRepo();
+      const recorded: string[] = [];
+      setBackendFactoryForTests(() => makeMockBackend({ recordPrompts: recorded }));
+
+      const { sessionId } = await startAgent({
+        workspaceId,
+        backend: "codex",
+        prompt: "init",
+      });
+
+      const result = await sendPrompt(sessionId, "hello agent");
+      expect(result.success).toBe(true);
+      expect(recorded).toContain("hello agent");
+    });
+  });
+
+  describe("PIL-43 bulk teardown", () => {
+    test("stopAllAgents stops every running session in workspace and returns count", async () => {
+      const { workspaceId: wsA } = seedWorkspaceWithRepo();
+      const { workspaceId: wsB } = seedWorkspaceWithRepo();
+      installMockFactory();
+
+      await startAgent({ workspaceId: wsA, backend: "codex", prompt: "a1" });
+      await startAgent({ workspaceId: wsA, backend: "codex", prompt: "a2" });
+      const { sessionId: bId } = await startAgent({
+        workspaceId: wsB,
+        backend: "codex",
+        prompt: "b1",
+      });
+
+      const result = await stopAllAgents(wsA);
+      expect(result.stopped).toBe(2);
+
+      const wsARows = getDb()
+        .select()
+        .from(agentSessions)
+        .where(eq(agentSessions.workspaceId, wsA))
+        .all();
+      expect(wsARows.every((r) => r.status === "stopped")).toBe(true);
+
+      const bRow = getDb().select().from(agentSessions).where(eq(agentSessions.id, bId)).get();
+      expect(bRow?.status).toBe("running");
+    });
+
+    test("stopAllAgents is idempotent — second call returns { stopped: 0 }", async () => {
+      const { workspaceId } = seedWorkspaceWithRepo();
+      installMockFactory();
+
+      await startAgent({ workspaceId, backend: "codex", prompt: "a" });
+      await startAgent({ workspaceId, backend: "codex", prompt: "b" });
+
+      const first = await stopAllAgents(workspaceId);
+      expect(first.stopped).toBe(2);
+
+      const second = await stopAllAgents(workspaceId);
+      expect(second.stopped).toBe(0);
+    });
+
+    test("stopAllAgentsGlobal stops sessions across every workspace", async () => {
+      const { workspaceId: wsA } = seedWorkspaceWithRepo();
+      const { workspaceId: wsB } = seedWorkspaceWithRepo();
+      installMockFactory();
+
+      await startAgent({ workspaceId: wsA, backend: "codex", prompt: "a1" });
+      await startAgent({ workspaceId: wsB, backend: "codex", prompt: "b1" });
+      await startAgent({ workspaceId: wsB, backend: "codex", prompt: "b2" });
+
+      const result = await stopAllAgentsGlobal();
+      expect(result.stopped).toBe(3);
+
+      const allRows = getDb().select().from(agentSessions).all();
+      expect(allRows.every((r) => r.status === "stopped")).toBe(true);
+    });
+
+    test("Promise.allSettled isolates a throwing backend.stop()", async () => {
+      const { workspaceId } = seedWorkspaceWithRepo();
+
+      let callCount = 0;
+      setBackendFactoryForTests(() => {
+        callCount += 1;
+        return makeMockBackend({ stopThrows: callCount === 2 });
+      });
+
+      const a = await startAgent({ workspaceId, backend: "codex", prompt: "a" });
+      const b = await startAgent({ workspaceId, backend: "codex", prompt: "b" });
+      const c = await startAgent({ workspaceId, backend: "codex", prompt: "c" });
+
+      const result = await stopAllAgents(workspaceId);
+      expect(result.stopped).toBe(2);
+
+      const rowA = getDb()
+        .select()
+        .from(agentSessions)
+        .where(eq(agentSessions.id, a.sessionId))
+        .get();
+      const rowB = getDb()
+        .select()
+        .from(agentSessions)
+        .where(eq(agentSessions.id, b.sessionId))
+        .get();
+      const rowC = getDb()
+        .select()
+        .from(agentSessions)
+        .where(eq(agentSessions.id, c.sessionId))
+        .get();
+      expect(rowA?.status).toBe("stopped");
+      expect(rowB?.status).toBe("error");
+      expect(rowB?.errorMessage).toContain("teardown failed");
+      expect(rowC?.status).toBe("stopped");
     });
   });
 });
