@@ -1,8 +1,10 @@
 # ADR 0003: Parallel agent execution and multi-session UI
 
-- **Status:** Accepted
+- **Status:** Superseded by [ADR 0004](./0004-session-thread-model.md) (2026-05-02)
 - **Date:** 2026-05-02
 - **Ticket:** [PIL-23](https://linear.app/piloto/issue/PIL-23) (sliced into [PIL-42](https://linear.app/piloto/issue/PIL-42), [PIL-43](https://linear.app/piloto/issue/PIL-43), [PIL-44](https://linear.app/piloto/issue/PIL-44), [PIL-45](https://linear.app/piloto/issue/PIL-45))
+
+> **Superseded:** The single-`agent_session`-per-workspace model documented here was replaced same-day by the workspace > session > thread restructure ([PIL-47](https://linear.app/piloto/issue/PIL-47)). `agent_sessions` becomes `threads`; a new `sessions` parent groups thread tabs; bin processes are now per-thread (with a symlinked thread session dir for multi-repo). See ADR 0004 for the new design and the slicing into PIL-48–PIL-53. The "Decisions" section below is preserved as historical record of the pre-restructure model.
 
 ## Context
 
@@ -23,7 +25,7 @@ The work was sliced into four vertical tickets. This ADR captures the design dec
 - **Two named exports**, sharing a private helper:
   - `stopAllAgents(workspaceId: string)` for the RPC method (workspace-scoped).
   - `stopAllAgentsGlobal()` for signal handlers (every workspace).
-  Internal `_stopAllInRegistry(predicate)` keeps the iteration logic in one place.
+    Internal `_stopAllInRegistry(predicate)` keeps the iteration logic in one place.
 - **`Promise.allSettled` over the matched entries.** Parallel teardown bounds shutdown to roughly one backend's `shutdown(5_000)` timeout. `allSettled` so a hung agent doesn't reject the whole bundle and leave others alive.
 - **Window close uses the same teardown path as SIGTERM/SIGINT.** Today `mainWindow.on("close", () => process.exit(0))` exits immediately. macOS red-traffic-light close is the most common shutdown path; not handling it would orphan child processes and make PIL-43 mostly cosmetic. Window-close, SIGTERM, and SIGINT all `await stopAllAgentsGlobal()` then `process.exit(0)`.
 
