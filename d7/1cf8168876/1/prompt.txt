@@ -1,0 +1,57 @@
+/caveman
+
+---
+
+/grill-me PIL-23
+
+---
+
+Go ahead with A
+
+---
+
+Yeah A is good
+
+---
+
+Go ahead with A
+
+---
+
+Yes, option B sounds good
+
+---
+
+A
+
+---
+
+Yes, use A
+
+---
+
+Option D is good, we will add some filtering and archive preference later
+
+---
+
+A
+
+---
+
+B is good
+
+---
+
+Yeah, B is good
+
+---
+
+Use linear and then and ADR locally
+
+---
+
+Let's work on PIL-42 based on PIL-23 spec. Create a plan
+
+---
+
+Go ahead
