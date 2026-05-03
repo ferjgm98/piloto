@@ -17,6 +17,13 @@ interface NewSessionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: (threadId: string) => void;
+  /**
+   * When set, the dialog skips session creation and starts a thread under
+   * the provided session. Used by the workspace tree's "+ new thread"
+   * affordance. PIL-51 will replace this whole dialog with an inline
+   * empty-thread tab; treat the prop as throwaway scaffolding.
+   */
+  presetSessionId?: string;
 }
 
 export function NewSessionDialog({
@@ -24,6 +31,7 @@ export function NewSessionDialog({
   open,
   onOpenChange,
   onCreated,
+  presetSessionId,
 }: NewSessionDialogProps) {
   const { data: worktrees, loading: worktreesLoading } = useWorkspaceWorktrees(workspaceId);
   const {
@@ -39,22 +47,31 @@ export function NewSessionDialog({
   const [worktreeId, setWorktreeId] = useState<string>("");
   const [prompt, setPrompt] = useState("");
 
+  const threadOnly = Boolean(presetSessionId);
   const busy = creatingSession || starting;
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    const sessionName = name.trim();
-    if (!sessionName || !worktreeId) return;
+    if (!worktreeId) return;
     const wt = worktrees?.find((w) => w.id === worktreeId);
     if (!wt) return;
 
-    const session = await createSession({ workspaceId, name: sessionName });
-    if (!session) return;
+    let sessionId = presetSessionId ?? null;
+    let createdSessionId: string | null = null;
+
+    if (!sessionId) {
+      const sessionName = name.trim();
+      if (!sessionName) return;
+      const session = await createSession({ workspaceId, name: sessionName });
+      if (!session) return;
+      sessionId = session.id;
+      createdSessionId = session.id;
+    }
 
     let result: { threadId: string } | undefined;
     try {
       result = await startThread({
-        sessionId: session.id,
+        sessionId,
         backend,
         bindings: [{ repoId: wt.repoId, worktreeId: wt.id }],
         prompt: prompt.trim() || undefined,
@@ -64,9 +81,11 @@ export function NewSessionDialog({
     }
 
     if (!result?.threadId) {
-      // Roll back the orphan session so the user can retry without leaking
-      // empty sessions invisible to the threads-only sidebar.
-      await deleteSession({ id: session.id }).catch(() => {});
+      // Roll back any orphan session we created so the user can retry
+      // without leaking empty sessions.
+      if (createdSessionId) {
+        await deleteSession({ id: createdSessionId }).catch(() => {});
+      }
       return;
     }
 
@@ -77,32 +96,36 @@ export function NewSessionDialog({
     onOpenChange(false);
   };
 
-  const canSubmit = name.trim().length > 0 && worktreeId.length > 0 && !busy;
+  const canSubmit = (threadOnly || name.trim().length > 0) && worktreeId.length > 0 && !busy;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>New session</DialogTitle>
+          <DialogTitle>{threadOnly ? "New thread" : "New session"}</DialogTitle>
           <DialogDescription>
-            Create a session with one thread bound to a worktree.
+            {threadOnly
+              ? "Start a new thread bound to a worktree under this session."
+              : "Create a session with one thread bound to a worktree."}
           </DialogDescription>
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <div className="flex flex-col gap-1.5">
-            <label htmlFor="new-session-name" className="text-xs font-medium text-foreground">
-              Session name
-            </label>
-            <input
-              id="new-session-name"
-              name="name"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="e.g. Refactor auth"
-              className="rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
-            />
-          </div>
+          {!threadOnly && (
+            <div className="flex flex-col gap-1.5">
+              <label htmlFor="new-session-name" className="text-xs font-medium text-foreground">
+                Session name
+              </label>
+              <input
+                id="new-session-name"
+                name="name"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="e.g. Refactor auth"
+                className="rounded-md border border-input bg-transparent px-3 py-2 text-sm text-foreground outline-none focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50"
+              />
+            </div>
+          )}
 
           <div className="flex flex-col gap-1.5">
             <label htmlFor="new-session-backend" className="text-xs font-medium text-foreground">
