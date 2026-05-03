@@ -1,4 +1,7 @@
 import { useThread, useThreadStatusChange, useTreeExpansion } from "@/hooks";
+import type { RPCClientError } from "@/lib/rpc-client";
+import { useEffect } from "react";
+import { ErrorCode } from "shared/errors";
 import type { AgentStatus, ThreadDTO } from "shared/rpc";
 import { ThreadView } from "./thread-view";
 import { Badge } from "./ui/badge";
@@ -13,7 +16,7 @@ const STATUS_VARIANT: Record<AgentStatus, "secondary" | "warning" | "destructive
 
 export function Home() {
   const expansion = useTreeExpansion();
-  const { activeThreadId } = expansion;
+  const { activeThreadId, setActiveThreadId } = expansion;
 
   return (
     <div className="isolate flex h-dvh overflow-hidden bg-background text-foreground antialiased scheme-only-dark">
@@ -21,7 +24,7 @@ export function Home() {
 
       <main className="flex flex-1 flex-col overflow-hidden">
         {activeThreadId ? (
-          <ActiveThreadPane threadId={activeThreadId} />
+          <ActiveThreadPane threadId={activeThreadId} onMissing={() => setActiveThreadId(null)} />
         ) : (
           <>
             <ToolbarShell title="No thread selected" />
@@ -33,8 +36,8 @@ export function Home() {
   );
 }
 
-function ActiveThreadPane({ threadId }: { threadId: string }) {
-  const { data: thread, refetch } = useThread(threadId);
+function ActiveThreadPane({ threadId, onMissing }: { threadId: string; onMissing: () => void }) {
+  const { data: thread, error: threadError, loading, refetch } = useThread(threadId);
 
   useThreadStatusChange(
     (payload) => {
@@ -43,23 +46,44 @@ function ActiveThreadPane({ threadId }: { threadId: string }) {
     [threadId],
   );
 
+  useEffect(() => {
+    if (threadError?.code === ErrorCode.NOT_FOUND) onMissing();
+  }, [threadError, onMissing]);
+
   return (
     <>
-      <ThreadToolbar thread={thread ?? null} />
+      <ThreadToolbar thread={thread ?? null} error={threadError} loading={loading} />
       <div className="flex flex-1 overflow-hidden">
-        <ThreadView threadId={threadId} />
+        <ThreadView
+          threadId={threadId}
+          thread={thread}
+          threadError={threadError}
+          refetch={refetch}
+        />
       </div>
     </>
   );
 }
 
-function ThreadToolbar({ thread }: { thread: ThreadDTO | null }) {
-  const title = formatThreadTitle(thread);
+function ThreadToolbar({
+  thread,
+  error,
+  loading,
+}: {
+  thread: ThreadDTO | null;
+  error: RPCClientError | undefined;
+  loading: boolean;
+}) {
+  const title = formatThreadTitle(thread, error, loading);
   return (
     <div className="flex h-11 shrink-0 items-center justify-between border-b border-border px-5">
       <div className="flex items-center gap-3">
-        <h1 className="truncate text-sm font-semibold text-foreground">{title}</h1>
-        {thread && (
+        <h1
+          className={`truncate text-sm font-semibold ${error ? "text-destructive" : "text-foreground"}`}
+        >
+          {title}
+        </h1>
+        {thread && !error && (
           <Badge variant={STATUS_VARIANT[thread.status]} className="text-[10px]">
             {thread.status}
           </Badge>
@@ -93,8 +117,17 @@ function EmptyState() {
   );
 }
 
-function formatThreadTitle(thread: ThreadDTO | null): string {
-  if (!thread) return "Loading…";
+function formatThreadTitle(
+  thread: ThreadDTO | null,
+  error: RPCClientError | undefined,
+  loading: boolean,
+): string {
+  if (error) {
+    return error.code === ErrorCode.NOT_FOUND
+      ? "Thread not found"
+      : `Failed to load — ${error.code}`;
+  }
+  if (!thread) return loading ? "Loading…" : "No thread selected";
   const prompt = thread.prompt?.trim();
   if (prompt) {
     return prompt.length <= 60 ? prompt : `${prompt.slice(0, 60)}…`;

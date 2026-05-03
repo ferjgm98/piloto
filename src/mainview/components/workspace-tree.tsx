@@ -86,7 +86,7 @@ interface ExpandedWorkspaceProps {
 }
 
 function ExpandedWorkspace({ workspaceId, expansion }: ExpandedWorkspaceProps) {
-  const { data: sessions, loading, error } = useSessions(workspaceId);
+  const { data: sessions, loading, error, refetch } = useSessions(workspaceId);
 
   return (
     <div className="mt-0.5 space-y-0.5">
@@ -99,7 +99,7 @@ function ExpandedWorkspace({ workspaceId, expansion }: ExpandedWorkspaceProps) {
           <SessionNode key={session.id} session={session} expansion={expansion} />
         ))
       ) : null}
-      <NewSessionButton workspaceId={workspaceId} expansion={expansion} />
+      <NewSessionButton workspaceId={workspaceId} expansion={expansion} refetchSessions={refetch} />
     </div>
   );
 }
@@ -138,7 +138,7 @@ interface ExpandedSessionProps {
 }
 
 function ExpandedSession({ sessionId, workspaceId, expansion }: ExpandedSessionProps) {
-  const { data: threads, loading, error } = useThreads({ sessionId });
+  const { data: threads, loading, error, refetch } = useThreads({ sessionId });
 
   return (
     <div className="mt-0.5 space-y-0.5">
@@ -156,7 +156,12 @@ function ExpandedSession({ sessionId, workspaceId, expansion }: ExpandedSessionP
           />
         ))
       ) : null}
-      <NewThreadButton sessionId={sessionId} workspaceId={workspaceId} expansion={expansion} />
+      <NewThreadButton
+        sessionId={sessionId}
+        workspaceId={workspaceId}
+        expansion={expansion}
+        refetchThreads={refetch}
+      />
     </div>
   );
 }
@@ -175,6 +180,7 @@ function ThreadNode({ thread, active, onSelect }: ThreadNodeProps) {
       type="button"
       onClick={onSelect}
       title={label}
+      aria-current={active ? "true" : undefined}
       className={
         active
           ? "flex w-full items-center gap-2 rounded-md bg-primary/15 py-1.5 pr-2 pl-8 text-left text-foreground"
@@ -215,6 +221,7 @@ function DisclosureRow({ expanded, onToggle, label, indent }: DisclosureRowProps
     <button
       type="button"
       onClick={onToggle}
+      aria-expanded={expanded}
       className={`flex w-full items-center gap-1.5 rounded-md py-1.5 pr-2 ${indent} text-left text-sm text-foreground hover:bg-accent/50`}
       data-state={expanded ? "open" : "closed"}
     >
@@ -230,9 +237,10 @@ function DisclosureRow({ expanded, onToggle, label, indent }: DisclosureRowProps
 interface NewSessionButtonProps {
   workspaceId: string;
   expansion: UseTreeExpansionResult;
+  refetchSessions: () => void;
 }
 
-function NewSessionButton({ workspaceId, expansion }: NewSessionButtonProps) {
+function NewSessionButton({ workspaceId, expansion, refetchSessions }: NewSessionButtonProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -250,6 +258,7 @@ function NewSessionButton({ workspaceId, expansion }: NewSessionButtonProps) {
         open={open}
         onOpenChange={setOpen}
         onCreated={(threadId) => expansion.setActiveThreadId(threadId)}
+        onSessionListShouldRefresh={refetchSessions}
       />
     </>
   );
@@ -259,9 +268,15 @@ interface NewThreadButtonProps {
   workspaceId: string;
   sessionId: string;
   expansion: UseTreeExpansionResult;
+  refetchThreads: () => void;
 }
 
-function NewThreadButton({ workspaceId, sessionId, expansion }: NewThreadButtonProps) {
+function NewThreadButton({
+  workspaceId,
+  sessionId,
+  expansion,
+  refetchThreads,
+}: NewThreadButtonProps) {
   const [open, setOpen] = useState(false);
 
   return (
@@ -280,6 +295,7 @@ function NewThreadButton({ workspaceId, sessionId, expansion }: NewThreadButtonP
         open={open}
         onOpenChange={setOpen}
         onCreated={(threadId) => expansion.setActiveThreadId(threadId)}
+        onThreadListShouldRefresh={refetchThreads}
       />
     </>
   );

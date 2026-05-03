@@ -17,6 +17,10 @@ interface NewSessionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onCreated: (threadId: string) => void;
+  /** Refetch the parent session list after a successful create. */
+  onSessionListShouldRefresh?: () => void;
+  /** Refetch the parent thread list after a successful start. */
+  onThreadListShouldRefresh?: () => void;
   /**
    * When set, the dialog skips session creation and starts a thread under
    * the provided session. Used by the workspace tree's "+ new thread"
@@ -31,6 +35,8 @@ export function NewSessionDialog({
   open,
   onOpenChange,
   onCreated,
+  onSessionListShouldRefresh,
+  onThreadListShouldRefresh,
   presetSessionId,
 }: NewSessionDialogProps) {
   const { data: worktrees, loading: worktreesLoading } = useWorkspaceWorktrees(workspaceId);
@@ -66,6 +72,7 @@ export function NewSessionDialog({
       if (!session) return;
       sessionId = session.id;
       createdSessionId = session.id;
+      onSessionListShouldRefresh?.();
     }
 
     let result: { threadId: string } | undefined;
@@ -89,6 +96,7 @@ export function NewSessionDialog({
       return;
     }
 
+    onThreadListShouldRefresh?.();
     onCreated(result.threadId);
     setName("");
     setPrompt("");
