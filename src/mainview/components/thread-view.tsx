@@ -1,12 +1,7 @@
-import {
-  useSendThreadPrompt,
-  useStopThread,
-  useThread,
-  useThreadOutput,
-  useThreadStatusChange,
-} from "@/hooks";
+import { useSendThreadPrompt, useStopThread, useThreadOutput } from "@/hooks";
+import type { RPCClientError } from "@/lib/rpc-client";
 import { useEffect, useRef, useState } from "react";
-import type { AgentStatus, AgentUpdateDTO } from "shared/rpc";
+import type { AgentStatus, AgentUpdateDTO, ThreadDTO } from "shared/rpc";
 import { Badge } from "./ui/badge";
 import { Button } from "./ui/button";
 import { Textarea } from "./ui/textarea";
@@ -35,20 +30,19 @@ function formatChunk(chunk: AgentUpdateDTO): string {
   }
 }
 
-export function ThreadView({ threadId }: { threadId: string }) {
-  const { data: thread, error: threadError, refetch } = useThread(threadId);
+interface ThreadViewProps {
+  threadId: string;
+  thread: ThreadDTO | undefined;
+  threadError: RPCClientError | undefined;
+  refetch: () => void;
+}
+
+export function ThreadView({ threadId, thread, threadError, refetch }: ThreadViewProps) {
   const chunks = useThreadOutput(threadId);
   const { mutate: sendPrompt, loading: sending, error: sendError } = useSendThreadPrompt();
   const { mutate: stopThread, loading: stopping, error: stopError } = useStopThread();
   const [draft, setDraft] = useState("");
   const logRef = useRef<HTMLPreElement>(null);
-
-  useThreadStatusChange(
-    (payload) => {
-      if (payload.threadId === threadId) refetch();
-    },
-    [threadId],
-  );
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: scroll to bottom whenever new chunks arrive
   useEffect(() => {

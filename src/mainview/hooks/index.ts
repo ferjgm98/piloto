@@ -32,6 +32,8 @@ export type {
   StopThreadInput,
   ThreadsScope,
 } from "./use-threads";
+export { useTreeExpansion } from "./use-tree-expansion";
+export type { UseTreeExpansionResult } from "./use-tree-expansion";
 export {
   useCreateWorkspace,
   useDeleteWorkspace,
