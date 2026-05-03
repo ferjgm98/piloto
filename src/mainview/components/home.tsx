@@ -1,6 +1,6 @@
 import { useWorkspaces } from "@/hooks";
 import { useEffect, useState } from "react";
-import { WorktreeDashboard } from "./worktree-dashboard";
+import { WorkspaceShell } from "./workspace-shell";
 
 const AGENTS = [
   { name: "Claude Code", active: true },
@@ -124,31 +124,28 @@ export function Home() {
           <span className="text-xs text-muted-foreground">Watcher-driven updates</span>
         </div>
 
-        {/* Dashboard */}
-        <div className="flex-1 overflow-auto">
-          <div className="mx-auto max-w-6xl px-5 py-6">
-            {error ? (
-              <section className="rounded-xl border border-destructive/50 bg-destructive/10 p-6">
-                <p className="text-sm text-destructive">
-                  Failed to load workspaces: {error.message}
-                </p>
-              </section>
-            ) : activeWorkspace ? (
-              <WorktreeDashboard
-                workspaceId={activeWorkspace.id}
-                workspaceName={activeWorkspace.name}
-              />
-            ) : (
-              <section className="rounded-xl border border-border bg-card p-6">
-                <p className="text-sm text-foreground">
-                  Create a workspace to start tracking worktrees.
-                </p>
-                <p className="mt-2 text-sm text-muted-foreground">
-                  This dashboard updates automatically when files change inside tracked worktrees.
-                </p>
-              </section>
-            )}
-          </div>
+        {/* Shell */}
+        <div className="flex flex-1 overflow-hidden">
+          {error ? (
+            <div className="m-5 max-w-2xl rounded-md border border-destructive/50 bg-destructive/10 p-6">
+              <p className="text-sm text-destructive">Failed to load workspaces: {error.message}</p>
+            </div>
+          ) : activeWorkspace ? (
+            <WorkspaceShell
+              key={activeWorkspace.id}
+              workspaceId={activeWorkspace.id}
+              workspaceName={activeWorkspace.name}
+            />
+          ) : (
+            <div className="m-5 max-w-2xl rounded-md border border-border bg-card p-6">
+              <p className="text-sm text-foreground">
+                Create a workspace to start tracking worktrees.
+              </p>
+              <p className="mt-2 text-sm text-muted-foreground">
+                This dashboard updates automatically when files change inside tracked worktrees.
+              </p>
+            </div>
+          )}
         </div>
       </main>
     </div>

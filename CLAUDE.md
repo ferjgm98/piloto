@@ -36,6 +36,12 @@ main process exclusively through the typed RPC contract.
   - `<feature>.service.ts` — pure business logic. Throws `AppError` subclasses.
   - `<feature>.rpc.ts` — exports `const <feature>Handlers = { requests, messages }`.
   - `<feature>.test.ts` — colocated unit tests (optional, zero or more).
+- The 3-file rule applies at the **module root**. A feature module may
+  contain nested sub-modules (e.g.
+  `src/bun/modules/worktree/status-watcher/`) for module-internal helpers
+  that don't expose RPC. Sub-modules use the `<name>.types.ts` /
+  `<name>.service.ts` / `<name>.test.ts` trio (no `.rpc.ts`) and are only
+  imported from within their parent module.
 - `src/bun/utils/` — shared utilities (`logger.ts`, `errors.ts`, `rpc-middleware.ts`, `git.ts`).
 - `src/bun/db/` — database setup and Drizzle schema.
 - `src/mainview/components/` — React components. shadcn/ui primitives live under `ui/`.
@@ -166,3 +172,17 @@ radius or reverse prior decisions.
 - `docs/ARCHITECTURE.md` — why the layers are the way they are.
 - `docs/DEVELOPMENT.md` — setup, narrative walkthrough for adding a feature, debugging tips, common pitfalls.
 - `README.md` — product description and tech stack summary.
+
+## Agent skills
+
+### Issue tracker
+
+Issues live in Linear, team `PIL` (Piloto). Skills use the Linear MCP for create/list/update; Notion specs are linked from Epic-level issues. See `docs/agents/issue-tracker.md`.
+
+### Triage labels
+
+Five canonical triage labels (`needs-triage`, `needs-info`, `ready-for-agent`, `ready-for-human`, `wontfix`) created lazily in Linear on first use. See `docs/agents/triage-labels.md`.
+
+### Domain docs
+
+Single-context repo: `CONTEXT.md` (lazy) and `docs/adr/` at the root. See `docs/agents/domain.md`.

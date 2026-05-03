@@ -117,6 +117,96 @@ const migrations: MigrationMeta[] = [
     folderMillis: 1776651417174,
     hash: "",
   },
+  {
+    // PIL-42: enforce per-worktree uniqueness for running agents.
+    // Drizzle Kit doesn't generate partial unique indexes, so this migration
+    // is hand-written and lives only here (no .sql in migrations/).
+    // Cleans zombie 'running' rows first so the partial index can be created
+    // on existing dev DBs where a previous process left orphaned sessions.
+    sql: [
+      `UPDATE \`agent_sessions\`
+        SET \`status\` = 'error',
+            \`error_message\` = 'orphaned at restart',
+            \`updated_at\` = datetime('now')
+        WHERE \`status\` = 'running';`,
+      `CREATE UNIQUE INDEX IF NOT EXISTS \`agent_sessions_running_per_worktree_idx\`
+        ON \`agent_sessions\`(\`worktree_id\`)
+        WHERE \`status\` = 'running' AND \`worktree_id\` IS NOT NULL;`,
+    ],
+    bps: true,
+    folderMillis: 1777000000000,
+    hash: "",
+  },
+  {
+    // PIL-48 + PIL-49: replace agent_sessions with sessions + threads + thread_repos.
+    // Drops the partial unique index from migration 5 and recreates active_worktrees
+    // without the agent_session_id column (SQLite rename-trick — pre-prod, no users,
+    // so existing data is dropped intentionally per ADR 0004).
+    sql: [
+      // FKs OFF for the whole migration: dropping agent_sessions while
+      // active_worktrees.agent_session_id still references it (migration 4)
+      // would otherwise raise FOREIGN KEY constraint failed under SQLite's
+      // implicit DELETE on DROP TABLE. We rebuild active_worktrees below.
+      "PRAGMA foreign_keys=OFF;",
+      "DROP INDEX IF EXISTS `agent_sessions_running_per_worktree_idx`;",
+      "DROP TABLE IF EXISTS `agent_sessions`;",
+      `CREATE TABLE \`sessions\` (
+	\`id\` text PRIMARY KEY NOT NULL,
+	\`workspace_id\` text NOT NULL,
+	\`name\` text NOT NULL,
+	\`created_at\` text DEFAULT (datetime('now')) NOT NULL,
+	\`updated_at\` text DEFAULT (datetime('now')) NOT NULL,
+	FOREIGN KEY (\`workspace_id\`) REFERENCES \`workspaces\`(\`id\`) ON UPDATE no action ON DELETE cascade
+);`,
+      `CREATE TABLE \`threads\` (
+	\`id\` text PRIMARY KEY NOT NULL,
+	\`session_id\` text NOT NULL,
+	\`backend\` text NOT NULL,
+	\`model\` text,
+	\`status\` text DEFAULT 'idle' NOT NULL,
+	\`prompt\` text,
+	\`error_message\` text,
+	\`reasoning_level\` text,
+	\`fast_mode\` integer,
+	\`plan_mode\` integer,
+	\`created_at\` text DEFAULT (datetime('now')) NOT NULL,
+	\`updated_at\` text DEFAULT (datetime('now')) NOT NULL,
+	FOREIGN KEY (\`session_id\`) REFERENCES \`sessions\`(\`id\`) ON UPDATE no action ON DELETE cascade
+);`,
+      `CREATE TABLE \`__new_active_worktrees\` (
+	\`id\` text PRIMARY KEY NOT NULL,
+	\`repo_id\` text NOT NULL,
+	\`feature_name\` text,
+	\`branch\` text NOT NULL,
+	\`path\` text NOT NULL,
+	\`created_at\` text DEFAULT (datetime('now')) NOT NULL,
+	\`updated_at\` text DEFAULT (datetime('now')) NOT NULL,
+	FOREIGN KEY (\`repo_id\`) REFERENCES \`workspace_repos\`(\`id\`) ON UPDATE no action ON DELETE cascade
+);`,
+      `INSERT INTO \`__new_active_worktrees\`("id", "repo_id", "feature_name", "branch", "path", "created_at", "updated_at") SELECT "id", "repo_id", "feature_name", "branch", "path", "created_at", "updated_at" FROM \`active_worktrees\`;`,
+      "DROP TABLE `active_worktrees`;",
+      "ALTER TABLE `__new_active_worktrees` RENAME TO `active_worktrees`;",
+      "PRAGMA foreign_keys=ON;",
+      `CREATE TABLE \`thread_repos\` (
+	\`id\` text PRIMARY KEY NOT NULL,
+	\`thread_id\` text NOT NULL,
+	\`repo_id\` text NOT NULL,
+	\`worktree_id\` text NOT NULL,
+	\`alias\` text NOT NULL,
+	FOREIGN KEY (\`thread_id\`) REFERENCES \`threads\`(\`id\`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (\`repo_id\`) REFERENCES \`workspace_repos\`(\`id\`) ON UPDATE no action ON DELETE cascade,
+	FOREIGN KEY (\`worktree_id\`) REFERENCES \`active_worktrees\`(\`id\`) ON UPDATE no action ON DELETE cascade
+);`,
+      "CREATE UNIQUE INDEX `thread_repos_thread_alias_idx` ON `thread_repos`(`thread_id`,`alias`);",
+      // Non-unique: thread_repos rows survive past thread stop for history,
+      // so a global UNIQUE on worktree_id would block legitimate reuse. The
+      // service layer enforces "at most one running thread per worktree".
+      "CREATE INDEX `thread_repos_worktree_idx` ON `thread_repos`(`worktree_id`);",
+    ],
+    bps: true,
+    folderMillis: 1778000000000,
+    hash: "",
+  },
 ];
 
 type EmbeddedMigrationDatabase = BunSQLiteDatabase<Record<string, unknown>> & {

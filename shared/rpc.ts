@@ -9,7 +9,6 @@ export interface ActiveWorktreeDTO {
   featureName: string | null;
   branch: string;
   path: string;
-  agentSessionId: string | null;
   createdAt: string;
   updatedAt: string;
   repo: {
@@ -37,16 +36,43 @@ export interface WorktreeStatus {
 export type AgentBackendName = "claude" | "codex";
 export type AgentStatus = "idle" | "running" | "stopped" | "error";
 
-export interface AgentSessionDTO {
+export interface SessionDTO {
   id: string;
   workspaceId: string;
-  worktreeId: string | null;
+  name: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface ThreadRepoDTO {
+  id: string;
+  threadId: string;
+  repoId: string;
+  worktreeId: string;
+  alias: string;
+}
+
+export interface ThreadDTO {
+  id: string;
+  sessionId: string;
+  workspaceId: string;
   backend: AgentBackendName;
+  model: string | null;
   status: AgentStatus;
   prompt: string | null;
   errorMessage: string | null;
+  reasoningLevel: string | null;
+  fastMode: boolean | null;
+  planMode: boolean | null;
   createdAt: string;
   updatedAt: string;
+  repos: ThreadRepoDTO[];
+}
+
+export interface ThreadBindingInput {
+  repoId: string;
+  worktreeId: string;
+  alias?: string;
 }
 
 export type AgentUpdateDTO =
@@ -203,27 +229,61 @@ export type MainRPC = {
         response: WorktreeStatus;
       };
 
-      // Agent
-      listAgentSessions: {
+      // Session
+      listSessions: {
         params: { workspaceId: string };
-        response: AgentSessionDTO[];
+        response: SessionDTO[];
       };
-      getAgentSession: {
-        params: { sessionId: string };
-        response: AgentSessionDTO;
+      getSession: {
+        params: { id: string };
+        response: SessionDTO;
       };
-      startAgent: {
+      createSession: {
+        params: { workspaceId: string; name: string };
+        response: SessionDTO;
+      };
+      renameSession: {
+        params: { id: string; name: string };
+        response: SessionDTO;
+      };
+      deleteSession: {
+        params: { id: string };
+        response: undefined;
+      };
+
+      // Thread
+      listThreads: {
+        params: { sessionId?: string; workspaceId?: string };
+        response: ThreadDTO[];
+      };
+      getThread: {
+        params: { threadId: string };
+        response: ThreadDTO;
+      };
+      startThread: {
         params: {
-          workspaceId: string;
-          worktreeId?: string;
+          sessionId: string;
           backend: AgentBackendName;
+          bindings: ThreadBindingInput[];
           prompt?: string;
         };
-        response: { sessionId: string };
+        response: { threadId: string };
       };
-      stopAgent: {
-        params: { sessionId: string };
+      stopThread: {
+        params: { threadId: string };
         response: { success: boolean };
+      };
+      stopAllThreads: {
+        params: { workspaceId: string };
+        response: { stopped: number };
+      };
+      sendPrompt: {
+        params: { threadId: string; prompt: string };
+        response: { success: boolean };
+      };
+      getThreadOutput: {
+        params: { threadId: string };
+        response: AgentUpdateDTO[];
       };
 
       // Terminal (stub)
@@ -270,8 +330,14 @@ export type MainRPC = {
     requests: Record<string, never>;
     messages: {
       worktreeStatusChanged: { worktreeId: string; status: WorktreeStatus };
-      agentOutput: { sessionId: string; chunk: AgentUpdateDTO };
-      agentStatusChange: { sessionId: string; status: AgentStatus; error?: string };
+      threadOutput: { threadId: string; chunk: AgentUpdateDTO };
+      threadStatusChange: {
+        threadId: string;
+        workspaceId: string;
+        sessionId: string;
+        status: AgentStatus;
+        error?: string;
+      };
     };
   }>;
 };

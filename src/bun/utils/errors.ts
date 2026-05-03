@@ -32,17 +32,10 @@ export class GitError extends AppError {
 export class WorktreeInUseError extends AppError {
   constructor(worktreeId: string) {
     super(
-      `Worktree ${worktreeId} has a running agent session; pass force=true to override`,
+      `Worktree ${worktreeId} is bound to a running thread; pass force=true to override`,
       "WORKTREE_IN_USE",
     );
     this.name = "WorktreeInUseError";
-  }
-}
-
-export class WorktreeAlreadyHasWatcherError extends AppError {
-  constructor(worktreeId: string) {
-    super(`Worktree ${worktreeId} already has an active watcher`, "WORKTREE_ALREADY_HAS_WATCHER");
-    this.name = "WorktreeAlreadyHasWatcherError";
   }
 }
 
@@ -67,5 +60,12 @@ export class ConfigurationError extends AppError {
   constructor(message: string) {
     super(message, "CONFIGURATION_ERROR");
     this.name = "ConfigurationError";
+  }
+}
+
+export class InternalError extends AppError {
+  constructor(message: string) {
+    super(message, "INTERNAL");
+    this.name = "InternalError";
   }
 }

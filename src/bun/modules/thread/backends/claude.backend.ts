@@ -1,13 +1,13 @@
 import type { AgentUpdateDTO } from "shared/rpc";
 import { AgentBinaryNotFoundError } from "../../../utils/errors";
 import { createLogger } from "../../../utils/logger";
-import type { AgentBackend, AgentBackendExitInfo } from "../agent.types";
+import type { ThreadBackend, ThreadBackendExitInfo } from "../thread.types";
 import { type LineStreamHandle, spawnLineStream } from "./jsonrpc-stdio";
 
 export interface ClaudeBackendConfig {
   sessionId: string;
   binaryPath?: string;
-  onExit?: (info: AgentBackendExitInfo) => void;
+  onExit?: (info: ThreadBackendExitInfo) => void;
 }
 
 interface StreamJsonTextBlock {
@@ -45,7 +45,7 @@ interface StreamJsonUserEvent {
   message: { content: StreamJsonBlock[] };
 }
 
-export function createClaudeBackend(config: ClaudeBackendConfig): AgentBackend {
+export function createClaudeBackend(config: ClaudeBackendConfig): ThreadBackend {
   const log = createLogger("claude-backend");
   const binaryName = config.binaryPath ?? process.env.PILOTO_CLAUDE_BIN ?? "claude";
 
