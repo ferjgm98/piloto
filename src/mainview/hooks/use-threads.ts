@@ -1,5 +1,5 @@
 import { rpcRequest } from "@/lib/rpc-client";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import type {
   AgentBackendName,
   AgentStatus,
@@ -43,6 +43,10 @@ export function useThreads(scope: ThreadsScope): UseRPCQueryResult<ThreadDTO[]> 
     { sessionId: scope.sessionId, workspaceId: scope.workspaceId },
     [key],
   );
+  // refetch identity changes every render — stash it in a ref so the
+  // subscription callback stays stable and doesn't re-subscribe each frame.
+  const refetchRef = useRef(query.refetch);
+  refetchRef.current = query.refetch;
   useRPCSubscription<{
     threadId: string;
     workspaceId: string;
@@ -54,7 +58,7 @@ export function useThreads(scope: ThreadsScope): UseRPCQueryResult<ThreadDTO[]> 
     (payload) => {
       if (scope.sessionId && payload.sessionId !== scope.sessionId) return;
       if (scope.workspaceId && payload.workspaceId !== scope.workspaceId) return;
-      query.refetch();
+      refetchRef.current();
     },
     [key],
   );

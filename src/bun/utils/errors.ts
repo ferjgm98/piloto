@@ -62,3 +62,10 @@ export class ConfigurationError extends AppError {
     this.name = "ConfigurationError";
   }
 }
+
+export class InternalError extends AppError {
+  constructor(message: string) {
+    super(message, "INTERNAL");
+    this.name = "InternalError";
+  }
+}

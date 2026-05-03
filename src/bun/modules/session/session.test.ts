@@ -70,11 +70,23 @@ describe("session.service", () => {
     expect(() => createSession({ workspaceId: "nope", name: "x" })).toThrow(NotFoundError);
   });
 
-  test("listSessionsByWorkspace returns sessions ordered by updatedAt desc", async () => {
+  test("listSessionsByWorkspace returns sessions ordered by updatedAt desc", () => {
     const wsId = seedWorkspace();
     const a = createSession({ workspaceId: wsId, name: "A" });
-    await new Promise((r) => setTimeout(r, 5));
     const b = createSession({ workspaceId: wsId, name: "B" });
+
+    // Two createSession calls inside the same millisecond can produce equal
+    // timestamps; pin them deterministically so the desc-by-updatedAt sort
+    // has a unique winner regardless of clock resolution.
+    const db = getDb();
+    db.update(sessions)
+      .set({ updatedAt: "2026-05-02T00:00:00.000Z" })
+      .where(eq(sessions.id, a.id))
+      .run();
+    db.update(sessions)
+      .set({ updatedAt: "2026-05-02T00:00:01.000Z" })
+      .where(eq(sessions.id, b.id))
+      .run();
 
     const list = listSessionsByWorkspace(wsId);
     expect(list.map((s) => s.id)).toEqual([b.id, a.id]);

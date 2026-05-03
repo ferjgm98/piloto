@@ -11,6 +11,7 @@ import {
   AppError,
   ConfigurationError,
   GitError,
+  InternalError,
   NotFoundError,
   UncommittedChangesError,
   ValidationError,
@@ -31,6 +32,7 @@ function mapErrorCode(err: unknown): ErrorCode {
   if (err instanceof UncommittedChangesError) return Codes.UNCOMMITTED_CHANGES;
   if (err instanceof AgentBinaryNotFoundError) return Codes.AGENT_BINARY_NOT_FOUND;
   if (err instanceof ConfigurationError) return Codes.CONFIGURATION_ERROR;
+  if (err instanceof InternalError) return Codes.INTERNAL;
   return Codes.INTERNAL;
 }
 

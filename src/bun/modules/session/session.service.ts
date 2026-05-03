@@ -2,7 +2,7 @@ import { randomUUID } from "node:crypto";
 import { desc, eq } from "drizzle-orm";
 import { getDb } from "../../db/database";
 import { sessions, workspaces } from "../../db/schema";
-import { NotFoundError, ValidationError } from "../../utils/errors";
+import { InternalError, NotFoundError, ValidationError } from "../../utils/errors";
 import { createLogger } from "../../utils/logger";
 import { stopAllThreadsInSession } from "../thread/thread.service";
 import type { CreateSessionInput, RenameSessionInput, SessionRow } from "./session.types";
@@ -31,7 +31,7 @@ export function createSession(input: CreateSessionInput): SessionRow {
 
   log.info(`created session ${id} in workspace ${input.workspaceId}`);
   const row = db.select().from(sessions).where(eq(sessions.id, id)).get();
-  if (!row) throw new Error("Failed to read back inserted session");
+  if (!row) throw new InternalError("Failed to read back inserted session");
   return row;
 }
 
@@ -66,7 +66,7 @@ export function renameSession(input: RenameSessionInput): SessionRow {
     .run();
 
   const row = db.select().from(sessions).where(eq(sessions.id, input.id)).get();
-  if (!row) throw new Error("Failed to read back renamed session");
+  if (!row) throw new InternalError("Failed to read back renamed session");
   return row;
 }
 

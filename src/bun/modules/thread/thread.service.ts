@@ -4,7 +4,7 @@ import { asc, desc, eq, inArray, sql } from "drizzle-orm";
 import type { AgentBackendName, AgentStatus, AgentUpdateDTO } from "shared/rpc";
 import { getDb } from "../../db/database";
 import { activeWorktrees, sessions, threadRepos, threads, workspaceRepos } from "../../db/schema";
-import { NotFoundError, ValidationError } from "../../utils/errors";
+import { InternalError, NotFoundError, ValidationError } from "../../utils/errors";
 import { createLogger } from "../../utils/logger";
 import { createClaudeBackend } from "./backends/claude.backend";
 import { createCodexBackend } from "./backends/codex.backend";
@@ -497,7 +497,7 @@ export function updateThreadSettings(input: UpdateThreadInput): ThreadRow {
     .run();
 
   const updated = db.select().from(threads).where(eq(threads.id, input.threadId)).get();
-  if (!updated) throw new Error("Failed to read back updated thread");
+  if (!updated) throw new InternalError("Failed to read back updated thread");
   return updated;
 }
 

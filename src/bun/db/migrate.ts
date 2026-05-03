@@ -143,6 +143,11 @@ const migrations: MigrationMeta[] = [
     // without the agent_session_id column (SQLite rename-trick — pre-prod, no users,
     // so existing data is dropped intentionally per ADR 0004).
     sql: [
+      // FKs OFF for the whole migration: dropping agent_sessions while
+      // active_worktrees.agent_session_id still references it (migration 4)
+      // would otherwise raise FOREIGN KEY constraint failed under SQLite's
+      // implicit DELETE on DROP TABLE. We rebuild active_worktrees below.
+      "PRAGMA foreign_keys=OFF;",
       "DROP INDEX IF EXISTS `agent_sessions_running_per_worktree_idx`;",
       "DROP TABLE IF EXISTS `agent_sessions`;",
       `CREATE TABLE \`sessions\` (
@@ -168,7 +173,6 @@ const migrations: MigrationMeta[] = [
 	\`updated_at\` text DEFAULT (datetime('now')) NOT NULL,
 	FOREIGN KEY (\`session_id\`) REFERENCES \`sessions\`(\`id\`) ON UPDATE no action ON DELETE cascade
 );`,
-      "PRAGMA foreign_keys=OFF;",
       `CREATE TABLE \`__new_active_worktrees\` (
 	\`id\` text PRIMARY KEY NOT NULL,
 	\`repo_id\` text NOT NULL,
