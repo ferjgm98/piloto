@@ -327,7 +327,13 @@ export type MainRPC = {
     messages: {
       worktreeStatusChanged: { worktreeId: string; status: WorktreeStatus };
       threadOutput: { threadId: string; chunk: AgentUpdateDTO };
-      threadStatusChange: { threadId: string; status: AgentStatus; error?: string };
+      threadStatusChange: {
+        threadId: string;
+        workspaceId: string;
+        sessionId: string;
+        status: AgentStatus;
+        error?: string;
+      };
     };
   }>;
 };

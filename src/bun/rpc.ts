@@ -38,8 +38,8 @@ export function createRPC() {
     rpc.send.threadOutput({ threadId, chunk });
   });
 
-  setThreadStatusNotifier(({ threadId, status, error }) => {
-    rpc.send.threadStatusChange({ threadId, status, error });
+  setThreadStatusNotifier(({ threadId, workspaceId, sessionId, status, error }) => {
+    rpc.send.threadStatusChange({ threadId, workspaceId, sessionId, status, error });
   });
 
   return rpc;

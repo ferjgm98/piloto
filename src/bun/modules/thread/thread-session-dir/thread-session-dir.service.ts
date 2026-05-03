@@ -19,9 +19,14 @@ export async function createThreadSessionDir(
 ): Promise<string> {
   const dir = getThreadSessionDirPath(threadId);
   await mkdir(dir, { recursive: true });
-  for (const binding of bindings) {
-    const linkPath = join(dir, binding.alias);
-    await symlink(binding.worktreePath, linkPath);
+  try {
+    for (const binding of bindings) {
+      const linkPath = join(dir, binding.alias);
+      await symlink(binding.worktreePath, linkPath);
+    }
+  } catch (err) {
+    await rm(dir, { recursive: true, force: true }).catch(() => {});
+    throw err;
   }
   return dir;
 }

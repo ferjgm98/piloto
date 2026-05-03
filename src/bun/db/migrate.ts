@@ -194,7 +194,10 @@ const migrations: MigrationMeta[] = [
 	FOREIGN KEY (\`worktree_id\`) REFERENCES \`active_worktrees\`(\`id\`) ON UPDATE no action ON DELETE cascade
 );`,
       "CREATE UNIQUE INDEX `thread_repos_thread_alias_idx` ON `thread_repos`(`thread_id`,`alias`);",
-      "CREATE UNIQUE INDEX `thread_repos_worktree_active_idx` ON `thread_repos`(`worktree_id`);",
+      // Non-unique: thread_repos rows survive past thread stop for history,
+      // so a global UNIQUE on worktree_id would block legitimate reuse. The
+      // service layer enforces "at most one running thread per worktree".
+      "CREATE INDEX `thread_repos_worktree_idx` ON `thread_repos`(`worktree_id`);",
     ],
     bps: true,
     folderMillis: 1778000000000,

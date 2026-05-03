@@ -42,9 +42,17 @@ export function useThreads(scope: ThreadsScope): UseRPCQueryResult<ThreadDTO[]> 
     { sessionId: scope.sessionId, workspaceId: scope.workspaceId },
     [key],
   );
-  useRPCSubscription<{ threadId: string; status: AgentStatus; error?: string }>(
+  useRPCSubscription<{
+    threadId: string;
+    workspaceId: string;
+    sessionId: string;
+    status: AgentStatus;
+    error?: string;
+  }>(
     "threadStatusChange",
-    () => {
+    (payload) => {
+      if (scope.sessionId && payload.sessionId !== scope.sessionId) return;
+      if (scope.workspaceId && payload.workspaceId !== scope.workspaceId) return;
       query.refetch();
     },
     [key],
@@ -98,13 +106,17 @@ export function useThreadOutput(threadId: string | null): AgentUpdateDTO[] {
   return chunks;
 }
 
+export interface ThreadStatusChangePayload {
+  threadId: string;
+  workspaceId: string;
+  sessionId: string;
+  status: AgentStatus;
+  error?: string;
+}
+
 export function useThreadStatusChange(
-  handler: (payload: { threadId: string; status: AgentStatus; error?: string }) => void,
+  handler: (payload: ThreadStatusChangePayload) => void,
   deps: unknown[] = [],
 ): void {
-  useRPCSubscription<{ threadId: string; status: AgentStatus; error?: string }>(
-    "threadStatusChange",
-    handler,
-    deps,
-  );
+  useRPCSubscription<ThreadStatusChangePayload>("threadStatusChange", handler, deps);
 }

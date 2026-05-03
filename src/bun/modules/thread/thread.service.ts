@@ -42,6 +42,7 @@ export function setThreadStatusNotifier(listener: ThreadStatusListener | null): 
 interface RegistryEntry {
   backend: ThreadBackend | null;
   workspaceId: string;
+  sessionId: string;
   worktreeIds: string[];
   promptsSent: number;
   stopping: boolean;
@@ -78,6 +79,19 @@ function findRunningThreadForWorktree(worktreeId: string): string | null {
   return null;
 }
 
+function lookupThreadScope(threadId: string): { workspaceId: string; sessionId: string } | null {
+  const entry = registry.get(threadId);
+  if (entry) return { workspaceId: entry.workspaceId, sessionId: entry.sessionId };
+  const db = getDb();
+  const row = db
+    .select({ sessionId: threads.sessionId, workspaceId: sessions.workspaceId })
+    .from(threads)
+    .innerJoin(sessions, eq(sessions.id, threads.sessionId))
+    .where(eq(threads.id, threadId))
+    .get();
+  return row ?? null;
+}
+
 function updateThreadStatus(threadId: string, status: AgentStatus, errorMessage?: string): void {
   const db = getDb();
   db.update(threads)
@@ -88,7 +102,24 @@ function updateThreadStatus(threadId: string, status: AgentStatus, errorMessage?
     })
     .where(eq(threads.id, threadId))
     .run();
-  statusListener?.({ threadId, status, error: errorMessage });
+  const scope = lookupThreadScope(threadId);
+  if (scope) {
+    statusListener?.({ threadId, ...scope, status, error: errorMessage });
+  }
+}
+
+function assertSafeAlias(alias: string): void {
+  if (
+    alias === "." ||
+    alias === ".." ||
+    alias.includes("/") ||
+    alias.includes("\\") ||
+    alias.includes("\0")
+  ) {
+    throw new ValidationError(
+      `Alias '${alias}' is invalid: must be a single path segment without separators`,
+    );
+  }
 }
 
 function defaultAliasFor(repoId: string): string {
@@ -139,6 +170,7 @@ function resolveBindings(workspaceId: string, bindings: ThreadBindingInput[]): R
     if (!alias) {
       throw new ValidationError(`Alias cannot be empty for repo ${b.repoId}`);
     }
+    assertSafeAlias(alias);
     if (seenAlias.has(alias)) {
       throw new ValidationError(`Alias '${alias}' is duplicated within bindings`);
     }
@@ -210,41 +242,47 @@ export async function startThread(input: StartThreadInput): Promise<{ threadId: 
   registry.set(threadId, {
     backend: null,
     workspaceId: session.workspaceId,
+    sessionId: input.sessionId,
     worktreeIds: resolved.map((b) => b.worktreeId),
     promptsSent: 0,
     stopping: false,
   });
 
   const now = new Date().toISOString();
-  db.transaction((tx) => {
-    tx.insert(threads)
-      .values({
-        id: threadId,
-        sessionId: input.sessionId,
-        backend: input.backend,
-        model: null,
-        status: "running",
-        prompt: input.prompt ?? null,
-        errorMessage: null,
-        reasoningLevel: null,
-        fastMode: null,
-        planMode: null,
-        createdAt: now,
-        updatedAt: now,
-      })
-      .run();
-    for (const b of resolved) {
-      tx.insert(threadRepos)
+  try {
+    db.transaction((tx) => {
+      tx.insert(threads)
         .values({
-          id: randomUUID(),
-          threadId,
-          repoId: b.repoId,
-          worktreeId: b.worktreeId,
-          alias: b.alias,
+          id: threadId,
+          sessionId: input.sessionId,
+          backend: input.backend,
+          model: null,
+          status: "running",
+          prompt: input.prompt ?? null,
+          errorMessage: null,
+          reasoningLevel: null,
+          fastMode: null,
+          planMode: null,
+          createdAt: now,
+          updatedAt: now,
         })
         .run();
-    }
-  });
+      for (const b of resolved) {
+        tx.insert(threadRepos)
+          .values({
+            id: randomUUID(),
+            threadId,
+            repoId: b.repoId,
+            worktreeId: b.worktreeId,
+            alias: b.alias,
+          })
+          .run();
+      }
+    });
+  } catch (err) {
+    registry.delete(threadId);
+    throw err;
+  }
 
   let workingDir: string;
   try {
@@ -280,7 +318,12 @@ export async function startThread(input: StartThreadInput): Promise<{ threadId: 
     entry.backend = backend;
     if (input.prompt && input.prompt.length > 0) entry.promptsSent += 1;
   }
-  statusListener?.({ threadId, status: "running" });
+  statusListener?.({
+    threadId,
+    workspaceId: session.workspaceId,
+    sessionId: input.sessionId,
+    status: "running",
+  });
 
   return { threadId };
 }
@@ -335,6 +378,18 @@ export async function stopAllThreadsGlobal(): Promise<{ stopped: number }> {
   return { stopped: stopped.length };
 }
 
+export async function stopAllThreadsInSession(sessionId: string): Promise<{ stopped: number }> {
+  const db = getDb();
+  const rows = db
+    .select({ id: threads.id })
+    .from(threads)
+    .where(eq(threads.sessionId, sessionId))
+    .all();
+  const ids = new Set(rows.map((r) => r.id));
+  const { stopped } = await _stopAllInRegistry((_e, threadId) => ids.has(threadId));
+  return { stopped: stopped.length };
+}
+
 export async function sendPrompt(threadId: string, prompt: string): Promise<{ success: boolean }> {
   const entry = registry.get(threadId);
   if (!entry) throw new NotFoundError("Thread", threadId);
@@ -343,6 +398,11 @@ export async function sendPrompt(threadId: string, prompt: string): Promise<{ su
   }
   await entry.backend.sendPrompt(prompt);
   entry.promptsSent += 1;
+  const db = getDb();
+  db.update(threads)
+    .set({ prompt, updatedAt: new Date().toISOString() })
+    .where(eq(threads.id, threadId))
+    .run();
   return { success: true };
 }
 

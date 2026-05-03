@@ -97,7 +97,7 @@ describe("session.service", () => {
     expect(() => renameSession({ id: session.id, name: "  " })).toThrow(ValidationError);
   });
 
-  test("deleteSession cascades to threads and thread_repos", () => {
+  test("deleteSession cascades to threads and thread_repos", async () => {
     const db = getDb();
     const wsId = seedWorkspace();
     const session = createSession({ workspaceId: wsId, name: "Cascade" });
@@ -143,14 +143,14 @@ describe("session.service", () => {
       .values({ id: trId, threadId, repoId, worktreeId: wtId, alias: "repo" })
       .run();
 
-    deleteSession(session.id);
+    await deleteSession(session.id);
 
     expect(db.select().from(sessions).where(eq(sessions.id, session.id)).get()).toBeUndefined();
     expect(db.select().from(threads).where(eq(threads.id, threadId)).get()).toBeUndefined();
     expect(db.select().from(threadRepos).where(eq(threadRepos.id, trId)).get()).toBeUndefined();
   });
 
-  test("deleteSession throws NotFoundError when missing", () => {
-    expect(() => deleteSession("missing-id")).toThrow(NotFoundError);
+  test("deleteSession throws NotFoundError when missing", async () => {
+    await expect(deleteSession("missing-id")).rejects.toThrow(NotFoundError);
   });
 });

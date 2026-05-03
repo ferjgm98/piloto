@@ -33,6 +33,8 @@ export interface StartThreadInput {
 
 export type ThreadStatusChange = {
   threadId: string;
+  workspaceId: string;
+  sessionId: string;
   status: AgentStatus;
   error?: string;
 };

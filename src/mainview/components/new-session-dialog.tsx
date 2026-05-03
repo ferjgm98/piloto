@@ -1,4 +1,4 @@
-import { useCreateSession, useStartThread, useWorkspaceWorktrees } from "@/hooks";
+import { useCreateSession, useDeleteSession, useStartThread, useWorkspaceWorktrees } from "@/hooks";
 import { useState } from "react";
 import type { AgentBackendName } from "shared/rpc";
 import { Button } from "./ui/button";
@@ -26,8 +26,13 @@ export function NewSessionDialog({
   onCreated,
 }: NewSessionDialogProps) {
   const { data: worktrees, loading: worktreesLoading } = useWorkspaceWorktrees(workspaceId);
-  const { mutate: createSession, loading: creatingSession } = useCreateSession();
+  const {
+    mutate: createSession,
+    loading: creatingSession,
+    error: createError,
+  } = useCreateSession();
   const { mutate: startThread, loading: starting, error: startError } = useStartThread();
+  const { mutate: deleteSession } = useDeleteSession();
 
   const [name, setName] = useState("");
   const [backend, setBackend] = useState<AgentBackendName>("claude");
@@ -46,19 +51,30 @@ export function NewSessionDialog({
     const session = await createSession({ workspaceId, name: sessionName });
     if (!session) return;
 
-    const result = await startThread({
-      sessionId: session.id,
-      backend,
-      bindings: [{ repoId: wt.repoId, worktreeId: wt.id }],
-      prompt: prompt.trim() || undefined,
-    });
-    if (result?.threadId) {
-      onCreated(result.threadId);
-      setName("");
-      setPrompt("");
-      setWorktreeId("");
-      onOpenChange(false);
+    let result: { threadId: string } | undefined;
+    try {
+      result = await startThread({
+        sessionId: session.id,
+        backend,
+        bindings: [{ repoId: wt.repoId, worktreeId: wt.id }],
+        prompt: prompt.trim() || undefined,
+      });
+    } catch {
+      // useStartThread already surfaces the error via startError.
     }
+
+    if (!result?.threadId) {
+      // Roll back the orphan session so the user can retry without leaking
+      // empty sessions invisible to the threads-only sidebar.
+      await deleteSession({ id: session.id }).catch(() => {});
+      return;
+    }
+
+    onCreated(result.threadId);
+    setName("");
+    setPrompt("");
+    setWorktreeId("");
+    onOpenChange(false);
   };
 
   const canSubmit = name.trim().length > 0 && worktreeId.length > 0 && !busy;
@@ -163,13 +179,13 @@ export function NewSessionDialog({
             />
           </div>
 
-          {startError && (
+          {(createError || startError) && (
             <div
               role="alert"
               className="rounded-md border border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive"
             >
-              <span className="font-mono font-semibold">{startError.code}</span>:{" "}
-              {startError.message}
+              <span className="font-mono font-semibold">{(createError ?? startError)?.code}</span>:{" "}
+              {(createError ?? startError)?.message}
             </div>
           )}
 

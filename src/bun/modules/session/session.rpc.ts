@@ -33,7 +33,7 @@ export const sessionHandlers = {
       return toSessionDTO(sessionService.renameSession({ id, name }));
     },
     deleteSession: async ({ id }: { id: string }): Promise<undefined> => {
-      sessionService.deleteSession(id);
+      await sessionService.deleteSession(id);
       return undefined;
     },
   },

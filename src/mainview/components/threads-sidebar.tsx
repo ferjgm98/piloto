@@ -38,7 +38,7 @@ function previewPrompt(prompt: string | null): string {
 
 export function ThreadsSidebar({ workspaceId, activeThreadId, onSelect }: ThreadsSidebarProps) {
   const { data: threads, loading, error, refetch } = useThreads({ workspaceId });
-  const { mutate: stopAll, loading: stoppingAll } = useStopAllThreads();
+  const { mutate: stopAll, loading: stoppingAll, error: stopAllError } = useStopAllThreads();
   const [dialogOpen, setDialogOpen] = useState(false);
 
   const runningCount = threads?.filter((t) => t.status === "running").length ?? 0;
@@ -47,8 +47,8 @@ export function ThreadsSidebar({ workspaceId, activeThreadId, onSelect }: Thread
   const handleStopAll = async () => {
     if (!canStopAll) return;
     if (!globalThis.confirm(`Stop ${runningCount} running thread(s)?`)) return;
-    await stopAll({ workspaceId });
-    refetch();
+    const result = await stopAll({ workspaceId });
+    if (result) refetch();
   };
 
   return (
@@ -70,6 +70,12 @@ export function ThreadsSidebar({ workspaceId, activeThreadId, onSelect }: Thread
           {stoppingAll ? "Stopping…" : "Stop all"}
         </Button>
       </header>
+
+      {stopAllError && (
+        <div className="shrink-0 border-b border-destructive/50 bg-destructive/10 px-3 py-2 text-xs text-destructive">
+          Stop all failed — {stopAllError.code}: {stopAllError.message}
+        </div>
+      )}
 
       <div className="shrink-0 border-b border-border p-3">
         <Button type="button" size="sm" className="w-full" onClick={() => setDialogOpen(true)}>

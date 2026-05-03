@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
+import { index, integer, sqliteTable, text, uniqueIndex } from "drizzle-orm/sqlite-core";
 
 export const workspaces = sqliteTable("workspaces", {
   id: text("id").primaryKey(),
@@ -76,7 +76,11 @@ export const threadRepos = sqliteTable(
   },
   (t) => [
     uniqueIndex("thread_repos_thread_alias_idx").on(t.threadId, t.alias),
-    uniqueIndex("thread_repos_worktree_active_idx").on(t.worktreeId),
+    // Non-unique: rows persist for stopped threads as history. Per-worktree
+    // active-thread uniqueness is enforced at the service layer
+    // (findRunningThreadForWorktree + isWorktreeBoundToActiveThread).
+    // SQLite partial indexes can't reference threads.status across tables.
+    index("thread_repos_worktree_idx").on(t.worktreeId),
   ],
 );
 

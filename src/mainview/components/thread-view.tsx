@@ -39,7 +39,7 @@ export function ThreadView({ threadId }: { threadId: string }) {
   const { data: thread, error: threadError, refetch } = useThread(threadId);
   const chunks = useThreadOutput(threadId);
   const { mutate: sendPrompt, loading: sending, error: sendError } = useSendThreadPrompt();
-  const { mutate: stopThread, loading: stopping } = useStopThread();
+  const { mutate: stopThread, loading: stopping, error: stopError } = useStopThread();
   const [draft, setDraft] = useState("");
   const logRef = useRef<HTMLPreElement>(null);
 
@@ -69,8 +69,8 @@ export function ThreadView({ threadId }: { threadId: string }) {
 
   const handleStop = async () => {
     if (!canStop) return;
-    await stopThread({ threadId });
-    refetch();
+    const result = await stopThread({ threadId });
+    if (result?.success) refetch();
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
@@ -106,6 +106,12 @@ export function ThreadView({ threadId }: { threadId: string }) {
       {thread?.errorMessage && (
         <div className="shrink-0 border-b border-destructive/50 bg-destructive/10 px-4 py-2 text-xs text-destructive">
           {thread.errorMessage}
+        </div>
+      )}
+
+      {stopError && (
+        <div className="shrink-0 border-b border-destructive/50 bg-destructive/10 px-4 py-2 text-xs text-destructive">
+          Stop failed — {stopError.code}: {stopError.message}
         </div>
       )}
 

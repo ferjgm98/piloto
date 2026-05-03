@@ -4,6 +4,7 @@ import { getDb } from "../../db/database";
 import { sessions, workspaces } from "../../db/schema";
 import { NotFoundError, ValidationError } from "../../utils/errors";
 import { createLogger } from "../../utils/logger";
+import { stopAllThreadsInSession } from "../thread/thread.service";
 import type { CreateSessionInput, RenameSessionInput, SessionRow } from "./session.types";
 
 const log = createLogger("session");
@@ -69,10 +70,14 @@ export function renameSession(input: RenameSessionInput): SessionRow {
   return row;
 }
 
-export function deleteSession(id: string): void {
+export async function deleteSession(id: string): Promise<void> {
   const db = getDb();
   const row = db.select().from(sessions).where(eq(sessions.id, id)).get();
   if (!row) throw new NotFoundError("Session", id);
+  // Stop running threads first; otherwise their bin processes orphan and the
+  // cascaded thread_repos rows disappear, leaving worktrees registered as
+  // free while the backend still holds them.
+  await stopAllThreadsInSession(id);
   db.delete(sessions).where(eq(sessions.id, id)).run();
   log.info(`deleted session ${id}`);
 }
