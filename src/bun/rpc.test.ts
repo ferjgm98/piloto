@@ -32,6 +32,7 @@ const expectedRequestKeys = {
   stopThread: true,
   stopAllThreads: true,
   sendPrompt: true,
+  getThreadOutput: true,
   listTerminals: true,
   createTerminal: true,
   listMcpServers: true,

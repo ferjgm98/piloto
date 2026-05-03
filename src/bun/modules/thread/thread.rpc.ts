@@ -1,4 +1,4 @@
-import type { ThreadDTO, ThreadRepoDTO } from "shared/rpc";
+import type { AgentUpdateDTO, ThreadDTO, ThreadRepoDTO } from "shared/rpc";
 import * as threadService from "./thread.service";
 import type { StartThreadInput, ThreadRepoRow, ThreadRow } from "./thread.types";
 
@@ -72,6 +72,9 @@ export const threadHandlers = {
       prompt: string;
     }): Promise<{ success: boolean }> => {
       return threadService.sendPrompt(threadId, prompt);
+    },
+    getThreadOutput: async ({ threadId }: { threadId: string }): Promise<AgentUpdateDTO[]> => {
+      return threadService.getThreadOutput(threadId);
     },
   },
   messages: {},

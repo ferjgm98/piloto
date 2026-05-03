@@ -281,6 +281,10 @@ export type MainRPC = {
         params: { threadId: string; prompt: string };
         response: { success: boolean };
       };
+      getThreadOutput: {
+        params: { threadId: string };
+        response: AgentUpdateDTO[];
+      };
 
       // Terminal (stub)
       listTerminals: {

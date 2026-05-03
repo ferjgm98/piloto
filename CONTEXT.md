@@ -77,9 +77,9 @@ Computed on demand by reading the filesystem; not stored as the source of
 truth. **Avoid:** conflating with "active worktree".
 
 **Active worktree** — a tracked worktree row in the `active_worktrees`
-table. The DB tracks these because they need cross-repo coordination,
-status, and agent binding; raw worktrees on disk that nothing tracks are
-not "active".
+table. The DB tracks these because they need cross-repo coordination and
+status; thread bindings live in `thread_repos`. Raw worktrees on disk
+that nothing tracks are not "active".
 
 **Feature** (or **feature name**) — string identifying a cross-repo
 task; multiple worktrees across repos share one feature name when they're
@@ -97,9 +97,9 @@ the ignore predicate behind a small interface (`startWatching`,
 `src/bun/modules/worktree/status-watcher/`. Sole emitter of live
 `Worktree status` updates; rationale + tradeoffs in ADR 0001.
 
-**Pre-remove check** — refusal to remove a worktree when it has a running
-agent or uncommitted changes. Inspired by worktrunk; in
-`worktree.service.ts`.
+**Pre-remove check** — refusal to remove a worktree when it is bound to a
+running thread (`isWorktreeBoundToActiveThread`) or has uncommitted
+changes. Inspired by worktrunk; in `worktree.service.ts`.
 
 **Port hashing** — deterministic port assignment per worktree branch so
 parallel dev servers don't collide. Worktrunk pattern, ported into
@@ -107,16 +107,37 @@ TypeScript per the Architecture doc.
 
 ---
 
-## Agents
+## Sessions, threads, agents
 
-**Agent session** — one running agent instance (Claude Code or Codex CLI),
-persisted in `agent_sessions`. Has `status: 'idle' | 'running' | 'stopped'
-| 'error'`, a `worktreeId` binding, and a `backend` discriminator.
+**Session** — a named grouping of threads within a workspace. Pure
+container with `id`, `workspaceId`, `name`. Persisted in `sessions`. Owns
+no agent state; deleting a session cascades to its threads (and stops any
+that are running). See ADR 0004.
 
-**Agent backend** — the implementation behind a session. Two ship today:
+**Thread** — one running (or historical) agent process, persisted in
+`threads`. Holds the per-conversation state: `backend`, `model`, `prompt`,
+`status: 'idle' | 'running' | 'stopped' | 'error'`, plus the per-thread
+overrides (`reasoningLevel`, `fastMode`, `planMode`). Backend is frozen
+after the first prompt; the model variant within that backend is
+hot-swappable. Replaces the old `agent_sessions` concept.
+
+**Thread repo binding** — a `thread_repos` row pinning a `(threadId,
+repoId, worktreeId)` triple with an `alias`. The alias is the
+single-segment subdirectory under `~/.piloto/threads/<threadId>/` where the
+worktree is symlinked. Per-worktree active-thread uniqueness is enforced
+at the service layer (`findRunningThreadForWorktree` +
+`isWorktreeBoundToActiveThread`), not by a unique index — bindings persist
+for stopped threads as history.
+
+**Thread session dir** — the per-thread working directory at
+`~/.piloto/threads/<threadId>/`. The bin process runs with this as its
+cwd; each binding is a symlink `<alias>/` → worktree path. Submodule:
+`src/bun/modules/thread/thread-session-dir/`.
+
+**Agent backend** — the implementation behind a thread. Two ship today:
 `claude` (via `stream-json`) and `codex` (via `app-server`). Files:
-`src/bun/modules/agent/backends/<name>.backend.ts`. Implement the
-`AgentBackend` interface in `agent.types.ts`.
+`src/bun/modules/thread/backends/<name>.backend.ts`. Implement the
+`ThreadBackend` interface in `thread.types.ts`.
 
 **Native protocol** — the per-vendor stdio contract Piloto drives directly:
 `claude -p --output-format stream-json` for Claude, `codex app-server`
@@ -129,20 +150,21 @@ Codex. **Avoid** describing the existing backends as "ACP-based" — that
 was the pre-2026-04-19 plan and the codebase has been pivoted off it. See
 ADR 0002.
 
-**Registry** — the in-memory `Map<sessionId, RegistryEntry>` in
-`agent.service.ts`. Single source of truth for "is session X currently
-running in this process".
+**Registry** — the in-memory `Map<threadId, RegistryEntry>` in
+`thread.service.ts`. Single source of truth for "is thread X currently
+running in this process". Capped at `MAX_CONCURRENT_THREADS = 5`. Pre-
+reserved before the DB transaction; rolled back on insert failure.
 
 **AgentUpdateDTO** — the wire format for streamed agent output, in
 `shared/rpc.ts`. Discriminated union of `message`, `thought`, `tool_call`,
-`tool_call_update`, `plan`. Pushed via the `agentOutput` channel.
+`tool_call_update`, `plan`. Pushed via the `threadOutput` channel.
 
-**agentOutput** / **agentStatusChange** — the two push-message channels
-on the RPC contract for agent events. Output chunks and status transitions
-respectively.
+**threadOutput** / **threadStatusChange** — the two push-message channels
+for thread events. `threadStatusChange` carries `workspaceId` and
+`sessionId` so subscribers can scope-filter without an extra round-trip.
 
 **JSON-RPC stdio** — the generic transport implementation in
-`src/bun/modules/agent/backends/jsonrpc-stdio.ts` shared by Codex's
+`src/bun/modules/thread/backends/jsonrpc-stdio.ts` shared by Codex's
 `app-server` integration.
 
 ---

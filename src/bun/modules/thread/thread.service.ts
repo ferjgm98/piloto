@@ -50,6 +50,23 @@ interface RegistryEntry {
 
 const registry = new Map<string, RegistryEntry>();
 
+// Per-thread ring buffer of streamed updates so a freshly-mounted view (or a
+// view re-mounted after switching threads) can hydrate the log instead of
+// starting empty. Capped to bound memory; oldest chunks are dropped.
+const OUTPUT_BUFFER_LIMIT = 1000;
+const outputBuffers = new Map<string, AgentUpdateDTO[]>();
+
+function appendToOutputBuffer(threadId: string, chunk: AgentUpdateDTO): void {
+  const buf = outputBuffers.get(threadId) ?? [];
+  buf.push(chunk);
+  if (buf.length > OUTPUT_BUFFER_LIMIT) buf.splice(0, buf.length - OUTPUT_BUFFER_LIMIT);
+  outputBuffers.set(threadId, buf);
+}
+
+export function getThreadOutput(threadId: string): AgentUpdateDTO[] {
+  return outputBuffers.get(threadId)?.slice() ?? [];
+}
+
 type BackendFactory = (backend: AgentBackendName, threadId: string) => ThreadBackend;
 
 let backendFactory: BackendFactory | null = null;
@@ -60,6 +77,7 @@ export function setBackendFactoryForTests(factory: BackendFactory | null): void 
 
 export function _resetRegistryForTests(): void {
   registry.clear();
+  outputBuffers.clear();
 }
 
 function isBackendName(v: string): v is AgentBackendName {
@@ -301,6 +319,7 @@ export async function startThread(input: StartThreadInput): Promise<{ threadId: 
   try {
     backend = instantiateBackend(input.backend, threadId);
     backend.onUpdate((update) => {
+      appendToOutputBuffer(threadId, update);
       updateListener?.({ threadId, chunk: update });
     });
     await backend.start({ workingDir, prompt: input.prompt ?? "" });

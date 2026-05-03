@@ -15,6 +15,9 @@ interface WatcherEntry {
   path: string;
   fsWatcher: FSWatcher;
   timeoutId: ReturnType<typeof setTimeout> | null;
+  // Bumped whenever the entry is removed; lets in-flight refreshes detect
+  // that they belong to a stopped/superseded watcher and skip emitting.
+  generation: number;
 }
 
 function defaultShouldIgnore(worktreePath: string, eventPath: string): boolean {
@@ -50,10 +53,12 @@ export function createStatusWatcher(deps: StatusWatcherDeps): StatusWatcher {
     }
   }
 
-  function refreshAndEmit(worktreeId: string, path: string): void {
+  function refreshAndEmit(worktreeId: string, path: string, generation: number): void {
     void deps
       .computeStatus(path)
       .then((status) => {
+        const current = entries.get(worktreeId);
+        if (!current || current.generation !== generation) return;
         emit({ worktreeId, status });
       })
       .catch((err) => {
@@ -66,9 +71,10 @@ export function createStatusWatcher(deps: StatusWatcherDeps): StatusWatcher {
     const entry = entries.get(worktreeId);
     if (!entry) return;
     if (entry.timeoutId !== null) clearTimeout(entry.timeoutId);
+    const generation = entry.generation;
     entry.timeoutId = setTimeout(() => {
       entry.timeoutId = null;
-      refreshAndEmit(worktreeId, entry.path);
+      refreshAndEmit(worktreeId, entry.path, generation);
     }, debounceMs);
   }
 
@@ -76,6 +82,7 @@ export function createStatusWatcher(deps: StatusWatcherDeps): StatusWatcher {
     const entry = entries.get(worktreeId);
     if (!entry) return;
     entries.delete(worktreeId);
+    entry.generation += 1;
     if (entry.timeoutId !== null) {
       clearTimeout(entry.timeoutId);
       entry.timeoutId = null;
@@ -100,6 +107,7 @@ export function createStatusWatcher(deps: StatusWatcherDeps): StatusWatcher {
         path: resolvedPath,
         fsWatcher,
         timeoutId: null,
+        generation: 0,
       });
     },
 

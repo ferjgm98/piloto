@@ -1,3 +1,4 @@
+import { rpcRequest } from "@/lib/rpc-client";
 import { useCallback, useEffect, useState } from "react";
 import type {
   AgentBackendName,
@@ -86,9 +87,23 @@ export function useSendThreadPrompt(): UseRPCMutationResult<{ success: boolean }
 export function useThreadOutput(threadId: string | null): AgentUpdateDTO[] {
   const [chunks, setChunks] = useState<AgentUpdateDTO[]>([]);
 
-  // biome-ignore lint/correctness/useExhaustiveDependencies: reset chunks when thread changes
   useEffect(() => {
+    if (!threadId) {
+      setChunks([]);
+      return;
+    }
+    let cancelled = false;
     setChunks([]);
+    void rpcRequest<AgentUpdateDTO[]>("getThreadOutput", { threadId })
+      .then((initial) => {
+        if (!cancelled) setChunks(initial);
+      })
+      .catch(() => {
+        // Buffer hydration is best-effort; live subscription still fills the log.
+      });
+    return () => {
+      cancelled = true;
+    };
   }, [threadId]);
 
   const onOutput = useCallback(
